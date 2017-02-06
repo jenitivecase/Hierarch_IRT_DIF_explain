@@ -12,7 +12,7 @@ library(coda)
 library(mirt)
 
 #number of people
-N_people <- c(1000, 2000, 5000)
+n_people <- 2000
 #number of items
 n_items <- 100
 #number of items with DIF
@@ -20,11 +20,11 @@ n_DIF <- 5
 #number of reps
 nreps <- 1
 #rho is the amount of DIF explained by the second-order factors
-rho <- c(0.2, 0.3, 0.4, 0.5, 0.6)
+rho <- c(0.2, 0.4, 0.6)
 #P_REF is the proportion of people in the reference group
-P_REF <- c(0.5, 0.6, 0.7, 0.8, 0.9)
+P_REF <- c(0.5, 0.7, 0.9)
 
-conditions <- expand.grid(N_people, rho, P_REF)
+conditions <- expand.grid(n_people, rho, P_REF)
 
 date <- format.Date(Sys.Date(), "%Y%m%d")
 
@@ -46,15 +46,39 @@ responseset_test <- person_sim(ability_test[1,], item_test)
 #get responses for a set of people to a set of items
 dataset_test <- one_dataset(ability_test, item_test)
 
+#get values for the DIF predictor
+DIFpredict <- DIF_predictor(item_test, rho = 0.4)
+
+#set up grouping variable
+group <- ability_test[,2]
+
 ### DONE TO HERE ###
 
 #do the analysis for one set of responses
-analysis_test <- one_analysis(dataset = dataset_test[,1], groups = ability_test[,2])
+model_specs <- paste0("F1 = 1-", n_items)
 
+analysis_test <- one_analysis(dataset = dataset_test, model = model_specs, group = ability_test[,2])
 
+params <- c("a1", "d")
 
 
 #ANALYSIS####
+
+#V1 is become "DIFpredict"
+b.dat <- list("n_people","n_items","x","group","DIFpredict")
+b.par <- list("a", "theta", "b", "D", "beta0", "beta1", "var", "prec", "R2")
+OUT <- bugs(data=b.dat,inits=NULL,param=b.par, 
+            model.file="BUGScode.txt",n.chains=2, 
+            n.iter=1000, n.burn=500, n.thin=1,debug=TRUE)
+
+
+#turn intercepts into thresholds, save as DIF estimate
+est_D_HGLM[k,,iRHO,iPROP] <- -OUT$mean$b[,3]/OUT$mean$b[,2]
+est_coef[k,3:4,iRHO,iPROP] <- -OUT$mean$a[1:2]
+est_R2[k,2,iRHO,iPROP] <- OUT$mean$R2
+
+
+#old MIRT analysis
 for(i in 1:num_sim){
   mod <- one_analysis(one_dataset(person_param, item_param), specs) 
   results[[i]] <- vector("list", 7)

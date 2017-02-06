@@ -58,15 +58,36 @@ one_dataset <- function(person_param, item_param){
   for(i in 1:nrow(person_param)){
     responses[i,] <- person_sim(person_param[i,], item_param)
   }
+  colnames(responses) <- paste0("V", 1:nrow(item_param))
   return(responses)
+}
+
+#### PREPARATION ####
+#get DIF predictor
+DIF_predictor <- function(item_param, rho){
+  mean_DIF <- mean(item_param[,"dif_param"])
+  sd_DIF <- sd(item_param[,"dif_param"])
+  zscores <- (item_param[,"dif_param"] - mean_DIF)/sd_DIF
+  
+  e1 <- rnorm(nrow(item_param),0,sqrt(1-rho^2))
+  
+  DIF_predict <- sqrt(rho^2)*zscores + e1
+  return(DIF_predict)
 }
 
 #### ANALYSIS ####
 
+#this won't work - forget mirt, it's time to move all the way to openBUGS
 #do the analysis for one set of responses
-one_analysis <- function(dataset, groups){
-  sumscores <- rowSums(dataset)
-  sumZscores <- (sumscores-mean(sumscores))/sd(sumscores)
-  mod <- glm(dataset ~ sumscores + groups,family="binomial")
+one_analysis <- function(dataset, group, model_specs){
+  mod <- mirt::multipleGroup(dataset, model_specs, group = as.character(group),
+                             invariance = c(colnames(dataset[,1:5]), "free_means"),
+                             technical = list(NCYCLES = 1500))
   return(mod)
+}
+
+one_DIF <- function(analysis_results, params){
+  DIF_results <- mirt::DIF(analysis_results, which.par = params, 
+                           technical = list(NCYCLES = 1500))
+  return(DIF_results)
 }

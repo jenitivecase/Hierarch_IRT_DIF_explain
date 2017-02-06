@@ -65,8 +65,8 @@ for (iRHO in 1:3) {
       true_b[k,,iRHO,iPROP] <- b
       true_D[k,,iRHO,iPROP] <- D
       
-      #setting the true values for mean DIF, SD of DIF, and the params to go into the l/ogistic regression
-      #but what if the true mean of DIF isn't actually this based on the estimated data
+      #setting the true values for mean DIF, SD of DIF, and the params to go into the logistic regression
+      #but what if the true mean of DIF isn't actually this based on the simulated data
       true_mean_D <- 0.95*0 + 0.05*1
       true_SD_D <- sqrt(0.95*0.01 + 0.05*0.01 + 0.95*0.05*(0-1)^2)
       true_slope <- rho[iRHO]*(true_SD_D/1)

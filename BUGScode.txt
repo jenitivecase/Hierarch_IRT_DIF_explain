@@ -1,0 +1,36 @@
+model {
+
+	for (i in 1:n_people) {
+		for (j in 1:n_items) {
+			x[i,j] ~ dbern(P[i,j])
+			logit(P[i,j]) <- a[j]*(theta[i]-b[j] + D[j]*group[i])
+		}
+	}	
+
+
+	for (j in 1:n_items) {
+		a[j] ~ dlnorm(0,1)
+		b[j] ~ dnorm(0,1)
+		D[j] ~ dnorm(mu[j],prec)
+
+		mu[j] <- beta0 + beta1*DIFpredict[j]
+
+		ss.err[j] <- pow((D[j]-mu[j]),2)
+		ss.reg[j] <- pow((mu[j]-mean(D[])),2)
+
+	}
+
+	for(i in 1:n_people){
+		theta[i] ~ dnorm(0,1)
+	}
+	
+	beta0 ~ dnorm(0,1)
+	beta1 ~ dnorm(0,1)
+	var ~ dunif(0,100)
+	prec <- 1/var
+
+	SSE <- sum(ss.err[])
+	SSR <- sum(ss.reg[])
+	R2 <- SSR/(SSR+SSE)
+
+}
