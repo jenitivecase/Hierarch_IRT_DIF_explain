@@ -4,6 +4,7 @@ if(Sys.info()["user"] == "jbrussow"){
   setwd("C:/Users/Jen/Dropbox/REMS/11 Comps/")
 }
 
+options(scipen = 999)
 library("R2OpenBUGS")
 library("coda")
 
@@ -42,45 +43,78 @@ item_sim <- function(n_items, n_DIF, b_mean, b_sd, a_mean, a_sd,
   return(item_param)
 }
 
-item
+item_test <- item_sim(n_items, n_DIF, b_mean = 0, b_sd = 1, a_mean = 1, a_sd = .5, 
+         nodif_mean = 0, nodif_sd = 0.1, dif_mean = 1, dif_sd = 0.1)
 
 #simulate a set of people's ability scores
+ability_sim <- function(N_people, P_REF, ref_theta_mean, ref_theta_sd, 
+                        focal_theta_mean, focal_theta_sd){
+  ability_scores <- matrix(NA, nrow = N_people, ncol = 2)
+  colnames(ability_scores) <- c("theta", "group")
+  ref_cutoff <- nrow(ability_scores)*P_REF
+  for(i in 1:ref_cutoff){
+    ability_scores[i, 1] <- rnorm(1, ref_theta_mean, ref_theta_sd)
+  }
+  for(i in (ref_cutoff+1):nrow(ability_scores)){
+    ability_scores[i, 1] <- rnorm(1, focal_theta_mean, focal_theta_sd)
+  }
+  ability_scores[1:ref_cutoff, 2] <- 0
+  ability_scores[(ref_cutoff+1):nrow(ability_scores), 2] <- 1
+  return(ability_scores)
+}
+
+ability_test <- ability_sim(1000, P_REF = .8, ref_theta_mean = 0, ref_theta_sd = 1,
+                            focal_theta_mean = -0.5, focal_theta_sd = 1)
 
 #get the responses for a single item
-response_sim <- function(person_vec, item_vec, q_vec){
-  item_vec <- item_vec[1:4]
-  guts <- -a[j]*(T[i]-(b[j]+D[j]*G[i]))
+response_sim <- function(person_vec, item_vec){
+  guts <- item_vec["a_param"]*(person_vec["theta"]-
+                                  (item_vec["b_param"]+item_vec["dif_param"]*person_vec["group"]))
   prob <- exp(guts)/(1+exp(guts))
   ifelse(runif(1, 0, 1) <= prob, return(1), return(0)) 
 }
 
+response_test <- response_sim(ability_test[1,], item_test[1,])
+
 #get responses for a single person to a set of items
-person_sim <- function(person_vec, item_param = item_param, qmat = qmat){
+person_sim <- function(person_vec, item_param = item_param){
   responses_vec <- matrix(NA, nrow=nrow(item_param))
   for(i in 1:nrow(item_param)){
-    responses_vec[i] <- response_sim(person_vec, item_param[i,], qmat[i,])
+    responses_vec[i] <- response_sim(person_vec, item_param[i,])
   }
   return(responses_vec)
 }
 
+responseset_test <- person_sim(ability_test[1,], item_test)
+
 #get responses for a set of people to a set of items
-one_dataset <- function(person_param, item_param = item_param, qmat = qmat){
+one_dataset <- function(person_param, item_param){
   responses <- matrix(NA, nrow = nrow(person_param), ncol = nrow(item_param))
   for(i in 1:nrow(person_param)){
-    responses[i,] <- person_sim(person_param[i,], item_param, qmat)
+    responses[i,] <- person_sim(person_param[i,], item_param)
   }
   return(responses)
 }
 
-#do the analysis for one dataset of responses
-one_analysis <- function(dataset = responses, specs = specs){
-  mod <- mirt(data=dataset, model=specs, itemtype='2PL', method = "QMCEM")
+dataset_test <- one_dataset(ability_test, item_test)
+
+#do the analysis for one item's set of responses
+one_analysis <- function(dataset, groups){
+  sumscores <- rowSums(responses)
+  sumZscores <- (sumscores-mean(sumscores))/sd(sumscores)
+  mod <- glm(dataset ~ sumscores + groups,family="binomial")
   return(mod)
 }
 
+analysis_test <- one_analysis(dataset = dataset_test[,1], groups = ability_test[,2])
+
+
+### DONE TO HERE ###
+
+
 #ANALYSIS####
 for(i in 1:num_sim){
-  mod <- one_analysis(one_dataset(person_param, item_param, qmat), specs) 
+  mod <- one_analysis(one_dataset(person_param, item_param), specs) 
   results[[i]] <- vector("list", 7)
   results[[i]][[1]] <- extract.mirt(mod, "converged")
   if(extract.mirt(mod, "converged") == TRUE){
