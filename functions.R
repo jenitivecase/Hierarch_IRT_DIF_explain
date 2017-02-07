@@ -77,13 +77,17 @@ DIF_predictor <- function(item_param, rho){
 
 #### ANALYSIS ####
 
-#this won't work - forget mirt, it's time to move all the way to openBUGS
 #do the analysis for one set of responses
-one_analysis <- function(dataset, group, model_specs){
-  mod <- mirt::multipleGroup(dataset, model_specs, group = as.character(group),
-                             invariance = c(colnames(dataset[,1:5]), "free_means"),
-                             technical = list(NCYCLES = 1500))
-  return(mod)
+
+one_analysis <- function(x, n_iter = 1000, n_burn = 300, b_dat = b.dat, 
+                         b_par = b.par, model_file = "BUGScode.txt"){
+  vars <- c(unlist(b_dat))
+  mget(vars, envir = globalenv())
+  OUT <- bugs(data = b_dat, inits = NULL, param = b_par, 
+              model.file = model_file, n.chains = 2, 
+              n.iter = n_iter, n.burn = n_burn, n.thin = 1, debug = TRUE)
+  
+  return(OUT)
 }
 
 one_DIF <- function(analysis_results, params){

@@ -34,7 +34,7 @@ item_test <- item_sim(n_items, n_DIF, b_mean = 0, b_sd = 1, a_mean = 1, a_sd = .
          nodif_mean = 0, nodif_sd = 0.1, dif_mean = 1, dif_sd = 0.1)
 
 #simulate a set of people's ability scores
-ability_test <- ability_sim(1000, P_REF = .8, ref_theta_mean = 0, ref_theta_sd = 1,
+ability_test <- ability_sim(n_people, P_REF = .8, ref_theta_mean = 0, ref_theta_sd = 1,
                             focal_theta_mean = -0.5, focal_theta_sd = 1)
 
 #get the responses for a single item
@@ -52,14 +52,14 @@ DIFpredict <- DIF_predictor(item_test, rho = 0.4)
 #set up grouping variable
 group <- ability_test[,2]
 
+b.dat <- list("n_people", "n_items", "x", "group", "DIFpredict")
+b.par <- list("a", "theta", "b", "D", "beta0", "beta1", "var", "prec", "R2")
+
 ### DONE TO HERE ###
 
 #do the analysis for one set of responses
-model_specs <- paste0("F1 = 1-", n_items)
 
-analysis_test <- one_analysis(dataset = dataset_test, model = model_specs, group = ability_test[,2])
-
-params <- c("a1", "d")
+analysis_test <- one_analysis(x=dataset_test)
 
 
 #ANALYSIS####
