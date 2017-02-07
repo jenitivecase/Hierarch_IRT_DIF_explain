@@ -2,7 +2,7 @@ model {
 
 	for (i in 1:n_people) {
 		for (j in 1:n_items) {
-			x[i,j] ~ dbern(P[i,j])
+			dataset[i,j] ~ dbern(P[i,j])
 			logit(P[i,j]) <- a[j]*(theta[i]-b[j] + D[j]*group[i])
 		}
 	}	

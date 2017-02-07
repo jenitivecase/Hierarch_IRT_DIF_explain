@@ -52,14 +52,15 @@ DIFpredict <- DIF_predictor(item_test, rho = 0.4)
 #set up grouping variable
 group <- ability_test[,2]
 
-b.dat <- list("n_people", "n_items", "x", "group", "DIFpredict")
+dataset <- dataset_test
+b.dat <- list("n_people", "n_items", "dataset", "group", "DIFpredict")
 b.par <- list("a", "theta", "b", "D", "beta0", "beta1", "var", "prec", "R2")
 
 ### DONE TO HERE ###
 
 #do the analysis for one set of responses
 
-analysis_test <- one_analysis(x=dataset_test)
+analysis_test <- one_analysis(x = dataset_test)
 
 
 #ANALYSIS####
