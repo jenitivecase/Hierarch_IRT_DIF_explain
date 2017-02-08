@@ -9,10 +9,9 @@ source("functions.R")
 options(scipen = 999)
 library(R2OpenBUGS)
 library(coda)
-library(mirt)
 
 #number of people
-n_people <- 2000
+n_people <- 1000
 #number of items
 n_items <- 100
 #number of items with DIF
@@ -20,7 +19,7 @@ n_DIF <- 5
 #number of reps
 nreps <- 1
 #rho is the amount of DIF explained by the second-order factors
-rho <- c(0.2, 0.4, 0.6)
+rho <- c(0.4, 0.6, 0.8)
 #P_REF is the proportion of people in the reference group
 P_REF <- c(0.5, 0.7, 0.9)
 
@@ -51,8 +50,8 @@ DIFpredict <- DIF_predictor(item_test, rho = 0.4)
 
 #set up grouping variable
 group <- ability_test[,2]
-
 dataset <- dataset_test
+
 b.dat <- list("n_people", "n_items", "dataset", "group", "DIFpredict")
 b.par <- list("a", "theta", "b", "D", "beta0", "beta1", "var", "prec", "R2")
 
@@ -64,35 +63,82 @@ analysis_test <- one_analysis(x = dataset_test)
 
 
 #ANALYSIS####
+# 
+# b.dat <- list("n_people","n_items","dataset","group","DIFpredict")
+# b.par <- list("a", "theta", "b", "D", "beta0", "beta1", "var", "prec", "R2")
+# 
+# dataset <- dataset_test
+# OUT <- bugs(data=b.dat,inits=NULL,param=b.par, 
+#             model.file="BUGScode.txt",n.chains=2, 
+#             n.iter=1000, n.burn=500, n.thin=1,debug=TRUE)
 
-#V1 is become "DIFpredict"
-b.dat <- list("n_people","n_items","x","group","DIFpredict")
-b.par <- list("a", "theta", "b", "D", "beta0", "beta1", "var", "prec", "R2")
-OUT <- bugs(data=b.dat,inits=NULL,param=b.par, 
-            model.file="BUGScode.txt",n.chains=2, 
-            n.iter=1000, n.burn=500, n.thin=1,debug=TRUE)
+#### STAN TEST ####
 
+library(rstan)
+
+
+stancode <- "
+data {
+  int<lower=0> n_people;
+  int<lower=0> n_items;
+  int dataset[n_people, n_items];
+//  vector[n_people] group;
+//  vector[n_items] DIFpredict;
+}
+
+parameters {
+  real a[n_items];
+  real b[n_items];
+  real theta[n_people];
+//  vector[n_items] D;
+//  vector[n_items] beta0;
+//  vector[n_items] beta1;
+//  real sigma2;
+//  real prec;
+//  real R2;
+}
+model {
+  for (i in 1:n_people) {
+  	for (j in 1:n_items) {
+//      dataset[i,j] ~ bernoulli_logit(a[j]*(theta[i]-b[j] + D[j]*group[i]));
+      dataset[i,j] ~ bernoulli_logit(a[j]*(theta[i]-b[j]));
+    }
+  }	
+  
+  for (j in 1:n_items) {
+    a[j] ~ lognormal(0,1);
+    b[j] ~ normal(0,1);
+//    D[j] ~ dnorm(mu[j],prec);
+  
+//    mu[j] <- beta0 + beta1*DIFpredict[j];
+  
+//    ss.err[j] <- pow((D[j]-mu[j]),2);
+//    ss.reg[j] <- pow((mu[j]-mean(D[])),2);
+  
+  }
+  
+  for(i in 1:n_people){
+    theta[i] ~ normal(0,1);
+  }
+  
+//  beta0 ~ dnorm(0,1);
+//  beta1 ~ dnorm(0,1);
+//  sigma2 ~ dunif(0,100);
+//  prec <- 1/sigma2;
+  
+//  SSE <- sum(ss.err[]);
+//  SSR <- sum(ss.reg[]);
+//  R2 <- SSR/(SSR+SSE);
+}
+"
+
+test <- stan(model_code = stancode, model_name = "stan_test", data = b.dat,
+             iter = 1000, warmup = 300, chains = 2, verbose = TRUE)
 
 #turn intercepts into thresholds, save as DIF estimate
 est_D_HGLM[k,,iRHO,iPROP] <- -OUT$mean$b[,3]/OUT$mean$b[,2]
 est_coef[k,3:4,iRHO,iPROP] <- -OUT$mean$a[1:2]
 est_R2[k,2,iRHO,iPROP] <- OUT$mean$R2
 
-
-#old MIRT analysis
-for(i in 1:num_sim){
-  mod <- one_analysis(one_dataset(person_param, item_param), specs) 
-  results[[i]] <- vector("list", 7)
-  results[[i]][[1]] <- extract.mirt(mod, "converged")
-  if(extract.mirt(mod, "converged") == TRUE){
-    results[[i]][[2]] <- extract.mirt(mod, "logLik")
-    results[[i]][[3]] <- extract.mirt(mod, "AIC")
-    results[[i]][[4]] <- extract.mirt(mod, "BIC")
-    results[[i]][[5]] <- coef(mod, printSE = TRUE, simplify = TRUE)$items
-    person_scores_SE <- fscores(mod, QMC = TRUE, full.scores.SE = TRUE)
-    results[[i]][[6]] <- empirical_rxx(person_scores_SE)
-    results[[i]][[7]] <- M2(mod, QMC = TRUE)
-  }
-}
 
 saveRDS(results, paste0(date, "_simulation_output.rds"))

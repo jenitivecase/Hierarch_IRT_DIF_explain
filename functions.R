@@ -60,7 +60,7 @@ one_dataset <- function(person_param, item_param){
   for(i in 1:nrow(person_param)){
     responses[i,] <- person_sim(person_param[i,], item_param)
   }
-  colnames(responses) <- paste0("V", 1:nrow(item_param))
+  #colnames(responses) <- paste0("V", 1:nrow(item_param))
   return(responses)
 }
 
