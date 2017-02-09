@@ -53,39 +53,26 @@ DIFpredict <- DIF_predictor(item_test, rho = 0.4)
 
 #set up grouping variable
 group <- ability_test[,2]
-
-
+#set up data to go into model
 b.dat <- list("n_people", "n_items", "dataset", "group", "DIFpredict")
-b.par <- list("a", "theta", "b", "D", "beta0", "beta1", "var", "prec", "R2")
 
-### DONE TO HERE ###
-
-#do the analysis for one set of responses
-time1 <- Sys.time()
-analysis_test <- one_analysis(x = dataset_test, n_iter = 1000, n_burn = 300,
-                              debug = FALSE)
-BUGS_time <- Sys.time() - time1
-print(BUGS_time)
-
-#### ANALYSIS ####
-# 
-# b.dat <- list("n_people","n_items","dataset","group","DIFpredict")
-# b.par <- list("a", "theta", "b", "D", "beta0", "beta1", "var", "prec", "R2")
-# 
-# dataset <- dataset_test
-# OUT <- bugs(data=b.dat,inits=NULL,param=b.par, 
-#             model.file="BUGScode.txt",n.chains=2, 
-#             n.iter=1000, n.burn=500, n.thin=1,debug=TRUE)
-
-#### STAN TEST ####
+#load stan model scripts
 source("stan_scripts.R")
 
-#test of full model
-time1 <- Sys.time()
-test <- stan(model_code = stancode, model_name = "stan_test", data = b.dat,
+#precompile stan code for repeated use
+precomp <- stanc(model_code = stancode)
+precomp_model <- stan_model(stanc_ret = precomp)
+
+#do the analysis for one set of responses
+analysis_test <- one_analysis(x = dataset_test, n_iter = 1000, n_burn = 300,
+                              debug = FALSE)
+
+#### STAN TEST ####
+
+
+
+test <- sampling(precomp_model, model_name = "stan_test", data = b.dat,
              iter = 1000, warmup = 300, chains = 2, verbose = FALSE, cores = 2)
-Stan_time <- Sys.time() - time1
-print(Stan_time)
 
 params_summary <- summary(test, pars = c("a", "b", "D"),
                           probs = c(0.025, 0.25, 0.75, 0.975))$summary
@@ -97,62 +84,6 @@ delta <- colMeans(params$delta)
 mu <- mean(params$mu)
 H <- mean(params$H)
 
-
-#testing stan with long-format data
-
-#prep for reformatting
-dataset <- as.data.frame(dataset)
-names(dataset) <- paste0("Item", 1:ncol(dataset))
-dataset$respondentid <- c(1:nrow(dataset))
-
-#move to long format
-dataset_long <- gather(dataset, key = respondentid, value = response)
-names(dataset_long)[2] <- "itemid"
-
-#joining group & DIFpredict
-group <- as.data.frame(group)
-group$respondentid <- c(1:nrow(group))
-
-dataset_long <- left_join(dataset_long, group, by = "respondentid")
-
-# DIFpredict <- as.data.frame(DIFpredict)
-# DIFpredict$itemid <- c(paste0("Item", 1:nrow(DIFpredict)))
-
-# dataset_long <- left_join(dataset_long, DIFpredict, by = "itemid")
-# dataset_long$itemid <- as.numeric(gsub("Item", "", dataset_long$itemid))
-
-respondentid <- dataset_long$respondentid
-itemid <- dataset_long$itemid
-response <- dataset_long$response
-group <- dataset_long$group
-# DIFpredict <- dataset_long$DIFpredict
-
-n_observations <- nrow(dataset_long)
-
-b.dat_long <- list("n_people", "n_items", "n_observations", "respondentid", 
-                   "itemid", "response", "group", "DIFpredict")
-
-#precompile the model script so it doesn't have to recompile each time
-precomp <- stanc(model_code = stancode_long)
-precomp_model <- stan_model(stanc_ret = precomp)
-
-time1 <- Sys.time()
-test <- sampling(precomp_model, data = b.dat_long,
-             iter = 1000, warmup = 300, chains = 2, verbose = FALSE, cores = 2)
-Stan_time_long <- Sys.time() - time1
-print(Stan_time_long)
-
-
-
-
-
-
-
-
-#turn intercepts into thresholds, save as DIF estimate
-est_D_HGLM[k,,iRHO,iPROP] <- -OUT$mean$b[,3]/OUT$mean$b[,2]
-est_coef[k,3:4,iRHO,iPROP] <- -OUT$mean$a[1:2]
-est_R2[k,2,iRHO,iPROP] <- OUT$mean$R2
 
 
 saveRDS(results, paste0(date, "_simulation_output.rds"))
