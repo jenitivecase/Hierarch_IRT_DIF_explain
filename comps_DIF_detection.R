@@ -78,63 +78,80 @@ print(BUGS_time)
 
 library(rstan)
 
-stancode <- "
+stancode_2PL <- "
 data {
   int<lower=0> n_people;
   int<lower=0> n_items;
   int dataset[n_people, n_items];
-//  vector[n_people] group;
-//  vector[n_items] DIFpredict;
 }
 
 parameters {
   real<lower=0> a[n_items];
   real b[n_items];
   real theta[n_people];
-//  vector[n_items] D;
-//  vector[n_items] beta0;
-//  vector[n_items] beta1;
-//  real sigma2;
-//  real prec;
-//  real R2;
 }
 model {
   for (i in 1:n_people) {
   	for (j in 1:n_items) {
-//      dataset[i,j] ~ bernoulli_logit(a[j]*(theta[i]-b[j] + D[j]*group[i]));
       dataset[i,j] ~ bernoulli_logit(a[j]*(theta[i]-b[j]));
     }
   }	
   
   a ~ lognormal(0,1);
   b ~ normal(0,1);
-//  for (j in 1:n_items) {
-//    a[j] ~ lognormal(0,1);
-//    b[j] ~ normal(0,1);
-//    D[j] ~ dnorm(mu[j],prec);
-  
-//    mu[j] <- beta0 + beta1*DIFpredict[j];
-  
-//    ss.err[j] <- pow((D[j]-mu[j]),2);
-//    ss.reg[j] <- pow((mu[j]-mean(D[])),2);
-  
-//  }
-  
   theta ~ normal(0,1);
-//  for(i in 1:n_people){
-//    theta[i] ~ normal(0,1);
-//  }
-  
-//  beta0 ~ dnorm(0,1);
-//  beta1 ~ dnorm(0,1);
-//  sigma2 ~ dunif(0,100);
-//  prec <- 1/sigma2;
-  
-//  SSE <- sum(ss.err[]);
-//  SSR <- sum(ss.reg[]);
-//  R2 <- SSR/(SSR+SSE);
 }
 "
+
+stancode <- "
+data {
+  int<lower=0> n_people;
+  int<lower=0> n_items;
+  int dataset[n_people, n_items];
+  int<lower=0, upper=1> group[n_people];
+  real DIFpredict[n_items];
+}
+
+parameters {
+  real<lower=0> a[n_items];
+  real b[n_items];
+  real theta[n_people];
+  real D[n_items];
+  real beta0[n_items];
+  real beta1[n_items];
+  real sigma2;
+  real prec;
+  real R2;
+}
+model {
+  for (i in 1:n_people) {
+    for (j in 1:n_items) {
+      dataset[i,j] ~ bernoulli_logit(a[j]*(theta[i]-b[j] + D[j]*group[i]));
+    }
+  }	
+
+  a ~ lognormal(0,1);
+  b ~ normal(0,1);
+  theta ~ normal(0,1);
+
+  for (j in 1:n_items) {
+    D[j] ~ dnorm(mu[j],prec);
+    mu[j] <- beta0 + beta1*DIFpredict[j];
+    ss.err[j] <- pow((D[j]-mu[j]),2);
+    ss.reg[j] <- pow((mu[j]-mean(D[])),2);
+  }
+
+  beta0 ~ dnorm(0,1);
+  beta1 ~ dnorm(0,1);
+  sigma2 ~ dunif(0,100);
+  prec <- 1/sigma2;
+
+  SSE <- sum(ss.err[]);
+  SSR <- sum(ss.reg[]);
+  R2 <- SSR/(SSR+SSE);
+}
+"
+
 time1 <- Sys.time()
 test <- stan(model_code = stancode, model_name = "stan_test", data = b.dat,
              iter = 1000, warmup = 300, chains = 2, verbose = FALSE, cores = 2)
