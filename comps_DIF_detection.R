@@ -61,7 +61,7 @@ b.par <- list("a", "theta", "b", "D", "beta0", "beta1", "var", "prec", "R2")
 time1 <- Sys.time()
 analysis_test <- one_analysis(x = dataset_test, n_iter = 1000, n_burn = 300,
                               debug = FALSE)
-BUGS_time <- Sys.time - time1
+BUGS_time <- Sys.time() - time1
 print(BUGS_time)
 
 #ANALYSIS####
@@ -117,12 +117,30 @@ parameters {
   real b[n_items];
   real theta[n_people];
   real D[n_items];
-  real beta0[n_items];
-  real beta1[n_items];
+  real beta0;
+  real beta1;
   real sigma2;
-  real prec;
-  real R2;
 }
+
+transformed parameters {
+  real mu[n_items];
+  real ss_err[n_items];
+  real ss_reg[n_items];
+  real SSE;
+  real SSR;
+  real R2;
+
+  for (j in 1:n_items) {
+    mu[j] = beta0 + beta1*DIFpredict[j];
+    ss_err[j] = pow((D[j]-mu[j]),2);
+    ss_reg[j] = pow((mu[j]-mean(D[])),2);
+  }
+
+  SSE = sum(ss_err[]);
+  SSR = sum(ss_reg[]);
+  R2 = SSR/(SSR+SSE);
+}
+
 model {
   for (i in 1:n_people) {
     for (j in 1:n_items) {
@@ -133,29 +151,18 @@ model {
   a ~ lognormal(0,1);
   b ~ normal(0,1);
   theta ~ normal(0,1);
+  D ~ normal(mu, sigma2);
 
-  for (j in 1:n_items) {
-    D[j] ~ dnorm(mu[j],prec);
-    mu[j] <- beta0 + beta1*DIFpredict[j];
-    ss.err[j] <- pow((D[j]-mu[j]),2);
-    ss.reg[j] <- pow((mu[j]-mean(D[])),2);
-  }
-
-  beta0 ~ dnorm(0,1);
-  beta1 ~ dnorm(0,1);
-  sigma2 ~ dunif(0,100);
-  prec <- 1/sigma2;
-
-  SSE <- sum(ss.err[]);
-  SSR <- sum(ss.reg[]);
-  R2 <- SSR/(SSR+SSE);
+  beta0 ~ normal(0,1);
+  beta1 ~ normal(0,1);
+  sigma2 ~ uniform(0,100);
 }
 "
 
 time1 <- Sys.time()
 test <- stan(model_code = stancode, model_name = "stan_test", data = b.dat,
              iter = 1000, warmup = 300, chains = 2, verbose = FALSE, cores = 2)
-Stan_time <- Sys.time - time1
+Stan_time <- Sys.time() - time1
 print(Stan_time)
 
 
