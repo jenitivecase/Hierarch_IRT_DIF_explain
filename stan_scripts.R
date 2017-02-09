@@ -64,7 +64,7 @@ data {
   int<lower=0, upper=n_items> itemid[n_observations];
   int<lower=0, upper=1> response[n_observations];
   int<lower=0, upper=1> group[n_observations];
-  real DIFpredict[n_observations];
+  real DIFpredict[n_items];
 }
 
 parameters {
