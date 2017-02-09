@@ -43,14 +43,14 @@ response_test <- response_sim(ability_test[1,], item_test[1,])
 responseset_test <- person_sim(ability_test[1,], item_test)
 
 #get responses for a set of people to a set of items
-dataset_test <- one_dataset(ability_test, item_test)
+dataset <- one_dataset(ability_test, item_test)
 
 #get values for the DIF predictor
 DIFpredict <- DIF_predictor(item_test, rho = 0.4)
 
 #set up grouping variable
 group <- ability_test[,2]
-dataset <- dataset_test
+
 
 b.dat <- list("n_people", "n_items", "dataset", "group", "DIFpredict")
 b.par <- list("a", "theta", "b", "D", "beta0", "beta1", "var", "prec", "R2")
@@ -78,94 +78,66 @@ print(BUGS_time)
 
 library(rstan)
 
-stancode_2PL <- "
-data {
-  int<lower=0> n_people;
-  int<lower=0> n_items;
-  int dataset[n_people, n_items];
-}
+source("stan_scripts.R")
 
-parameters {
-  real<lower=0> a[n_items];
-  real b[n_items];
-  real theta[n_people];
-}
-model {
-  for (i in 1:n_people) {
-  	for (j in 1:n_items) {
-      dataset[i,j] ~ bernoulli_logit(a[j]*(theta[i]-b[j]));
-    }
-  }	
-  
-  a ~ lognormal(0,1);
-  b ~ normal(0,1);
-  theta ~ normal(0,1);
-}
-"
-
-stancode <- "
-data {
-  int<lower=0> n_people;
-  int<lower=0> n_items;
-  int dataset[n_people, n_items];
-  int<lower=0, upper=1> group[n_people];
-  real DIFpredict[n_items];
-}
-
-parameters {
-  real<lower=0> a[n_items];
-  real b[n_items];
-  real theta[n_people];
-  real D[n_items];
-  real beta0;
-  real beta1;
-  real sigma2;
-}
-
-transformed parameters {
-  real mu[n_items];
-  real ss_err[n_items];
-  real ss_reg[n_items];
-  real SSE;
-  real SSR;
-  real R2;
-
-  for (j in 1:n_items) {
-    mu[j] = beta0 + beta1*DIFpredict[j];
-    ss_err[j] = pow((D[j]-mu[j]),2);
-    ss_reg[j] = pow((mu[j]-mean(D[])),2);
-  }
-
-  SSE = sum(ss_err[]);
-  SSR = sum(ss_reg[]);
-  R2 = SSR/(SSR+SSE);
-}
-
-model {
-  for (i in 1:n_people) {
-    for (j in 1:n_items) {
-      dataset[i,j] ~ bernoulli_logit(a[j]*(theta[i]-b[j] + D[j]*group[i]));
-    }
-  }	
-
-  a ~ lognormal(0,1);
-  b ~ normal(0,1);
-  theta ~ normal(0,1);
-  D ~ normal(mu, sigma2);
-
-  beta0 ~ normal(0,1);
-  beta1 ~ normal(0,1);
-  sigma2 ~ uniform(0,100);
-}
-"
-
+#test of full model
 time1 <- Sys.time()
 test <- stan(model_code = stancode, model_name = "stan_test", data = b.dat,
              iter = 1000, warmup = 300, chains = 2, verbose = FALSE, cores = 2)
 Stan_time <- Sys.time() - time1
 print(Stan_time)
 
+params_summary <- summary(test, pars = c("a", "b", "D"),
+                          probs = c(0.025, 0.25, 0.75, 0.975))$summary
 
+params <- extract(test, pars = c("a", "b", "D"))
+
+alpha <- colMeans(params$a)
+delta <- colMeans(params$delta)
+mu <- mean(params$mu)
+H <- mean(params$H)
+
+
+#testing stan with long-format data
+
+#prep for reformatting
+dataset <- as.data.frame(dataset)
+names(dataset) <- paste0("Item", 1:ncol(dataset))
+dataset$respondentid <- c(1:nrow(dataset))
+
+#move to long format
+dataset_long <- gather(dataset, key = respondentid, value = response)
+names(dataset_long)[2] <- "itemid"
+
+#joining group & DIFpredict
+group <- as.data.frame(group)
+group$respondentid <- c(1:nrow(group))
+
+dataset_long <- left_join(dataset_long, group, by = "respondentid")
+
+DIFpredict <- as.data.frame(DIFpredict)
+DIFpredict$itemid <- c(paste0("Item", 1:nrow(DIFpredict)))
+
+dataset_long <- left_join(dataset_long, DIFpredict, by = "itemid")
+dataset_long$itemid <- as.numeric(gsub("Item", "", dataset_long$itemid))
+
+respondentid <- dataset_long$respondentid
+itemid <- dataset_long$itemid
+response <- dataset_long$response
+group <- dataset_long$group
+DIFpredict <- dataset_long$DIFpredict
+
+n_observations <- nrow(dataset_long)
+
+b.dat_long <- list("n_people", "n_items", "n_observations", "respondentid", 
+                   "itemid", "response", "group", "DIFpredict")
+
+
+time1 <- Sys.time()
+test <- stan(model_code = stancode_long, model_name = "stan_test", data = b.dat_long,
+             iter = 1000, warmup = 300, chains = 2, verbose = FALSE, cores = 2)
+Stan_time_long <- Sys.time() - time1
+print(Stan_time_long)
 
 #turn intercepts into thresholds, save as DIF estimate
 est_D_HGLM[k,,iRHO,iPROP] <- -OUT$mean$b[,3]/OUT$mean$b[,2]
