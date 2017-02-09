@@ -80,13 +80,14 @@ DIF_predictor <- function(item_param, rho){
 #### ANALYSIS ####
 
 #do the analysis for one set of responses
-one_analysis <- function(x, n_iter = 1000, n_burn = 300, b_dat = b.dat, 
-                         b_par = b.par, model_file = "BUGScode.txt"){
+one_analysis <- function(x, n_iter = 2000, n_burn = 1000, b_dat = b.dat, 
+                         b_par = b.par, model_file = "BUGScode.txt", 
+                         debug = FALSE){
   vars <- c(unlist(b_dat))
   mget(vars, envir = globalenv())
   OUT <- bugs(data = b_dat, inits = NULL, parameters.to.save = b_par, 
               model.file = model_file, n.chains = 2, 
-              n.iter = n_iter, n.burn = n_burn, n.thin = 1, debug = TRUE)
+              n.iter = n_iter, n.burn = n_burn, n.thin = 1, debug = debug)
   
   return(OUT)
 }

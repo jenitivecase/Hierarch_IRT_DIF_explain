@@ -58,9 +58,11 @@ b.par <- list("a", "theta", "b", "D", "beta0", "beta1", "var", "prec", "R2")
 ### DONE TO HERE ###
 
 #do the analysis for one set of responses
-
-analysis_test <- one_analysis(x = dataset_test)
-
+time1 <- Sys.time()
+analysis_test <- one_analysis(x = dataset_test, n_iter = 1000, n_burn = 300,
+                              debug = FALSE)
+BUGS_time <- Sys.time - time1
+print(BUGS_time)
 
 #ANALYSIS####
 # 
@@ -76,7 +78,6 @@ analysis_test <- one_analysis(x = dataset_test)
 
 library(rstan)
 
-
 stancode <- "
 data {
   int<lower=0> n_people;
@@ -87,7 +88,7 @@ data {
 }
 
 parameters {
-  real a[n_items];
+  real<lower=0> a[n_items];
   real b[n_items];
   real theta[n_people];
 //  vector[n_items] D;
@@ -105,9 +106,11 @@ model {
     }
   }	
   
-  for (j in 1:n_items) {
-    a[j] ~ lognormal(0,1);
-    b[j] ~ normal(0,1);
+  a ~ lognormal(0,1);
+  b ~ normal(0,1);
+//  for (j in 1:n_items) {
+//    a[j] ~ lognormal(0,1);
+//    b[j] ~ normal(0,1);
 //    D[j] ~ dnorm(mu[j],prec);
   
 //    mu[j] <- beta0 + beta1*DIFpredict[j];
@@ -115,11 +118,12 @@ model {
 //    ss.err[j] <- pow((D[j]-mu[j]),2);
 //    ss.reg[j] <- pow((mu[j]-mean(D[])),2);
   
-  }
+//  }
   
-  for(i in 1:n_people){
-    theta[i] ~ normal(0,1);
-  }
+  theta ~ normal(0,1);
+//  for(i in 1:n_people){
+//    theta[i] ~ normal(0,1);
+//  }
   
 //  beta0 ~ dnorm(0,1);
 //  beta1 ~ dnorm(0,1);
@@ -131,9 +135,13 @@ model {
 //  R2 <- SSR/(SSR+SSE);
 }
 "
-
+time1 <- Sys.time()
 test <- stan(model_code = stancode, model_name = "stan_test", data = b.dat,
-             iter = 1000, warmup = 300, chains = 2, verbose = TRUE)
+             iter = 1000, warmup = 300, chains = 2, verbose = FALSE, cores = 2)
+Stan_time <- Sys.time - time1
+print(Stan_time)
+
+
 
 #turn intercepts into thresholds, save as DIF estimate
 est_D_HGLM[k,,iRHO,iPROP] <- -OUT$mean$b[,3]/OUT$mean$b[,2]
