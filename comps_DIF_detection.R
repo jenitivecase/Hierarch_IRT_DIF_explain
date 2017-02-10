@@ -64,16 +64,19 @@ precomp <- stanc(model_code = stancode)
 precomp_model <- stan_model(stanc_ret = precomp)
 
 #do the analysis for one set of responses
-analysis_test <- one_analysis(x = dataset_test, n_iter = 1000, n_burn = 300,
-                              debug = FALSE)
+analysis_test <- one_analysis(x = precomp_model, n_iter = 1000, n_burn = 300,
+                              debug = FALSE, n_cores = 1)
 
-#### STAN TEST ####
+
+
 
 
 
 test <- sampling(precomp_model, model_name = "stan_test", data = b.dat,
              iter = 1000, warmup = 300, chains = 2, verbose = FALSE, cores = 2)
 
+
+#output formatting code from Jake
 params_summary <- summary(test, pars = c("a", "b", "D"),
                           probs = c(0.025, 0.25, 0.75, 0.975))$summary
 

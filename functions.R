@@ -80,22 +80,22 @@ DIF_predictor <- function(item_param, rho){
 #### ANALYSIS ####
 
 #do the analysis for one set of responses
-one_analysis <- function(x, n_iter = 2000, n_burn = 1000, b_dat = b.dat, 
-                         b_par = b.par, model_file = "BUGScode.txt", 
-                         debug = FALSE){
-  vars <- c(unlist(b_dat))
-  mget(vars, envir = globalenv())
-  OUT <- bugs(data = b_dat, inits = NULL, parameters.to.save = b_par, 
-              model.file = model_file, n.chains = 2, 
-              n.iter = n_iter, n.burn = n_burn, n.thin = 1, debug = debug)
-  
+one_analysis <- function(x, n_iter = 2000, n_burn = 1000, n_chains = 2, 
+                         modelname = "stan_model", b_dat = b.dat, 
+                         n_cores = 1, debug = FALSE){
+  if(class(x) == "stanmodel"){
+    OUT <- sampling(x, data = b.dat,
+                    iter = n_iter, warmup = n_burn, chains = n_chains, 
+                    verbose = debug, cores = n_cores)
+  } else if(class(x) == "character"){
+    OUT <- stan(x, model_name = modelname, data = b.dat,
+                    iter = n_iter, warmup = n_burn, chains = n_chains, 
+                    verbose = debug, cores = n_cores)
+  } else {
+    stop("Please specify a pre-compiled Stan model or a character variable 
+         containing a model specification in the Stan modeling language")
+  }
   return(OUT)
 }
 
 
-##IGNORE THIS!
-one_DIF <- function(analysis_results, params){
-  DIF_results <- mirt::DIF(analysis_results, which.par = params, 
-                           technical = list(NCYCLES = 1500))
-  return(DIF_results)
-}
