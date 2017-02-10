@@ -82,7 +82,7 @@ DIF_predictor <- function(item_param, rho){
 #do the analysis for one set of responses
 one_analysis <- function(x, n_iter = 2000, n_burn = 1000, n_chains = 2, 
                          modelname = "stan_model", b_dat = b.dat, 
-                         n_cores = 1, debug = FALSE){
+                         n_cores = 2, debug = FALSE){
   if(class(x) == "stanmodel"){
     OUT <- sampling(x, data = b.dat,
                     iter = n_iter, warmup = n_burn, chains = n_chains, 

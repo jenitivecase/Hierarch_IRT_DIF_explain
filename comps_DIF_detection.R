@@ -7,11 +7,16 @@ if(Sys.info()["user"] == "jbrussow"){
 source("functions.R")
 
 options(scipen = 999)
-library(R2OpenBUGS)
-library(coda)
-library(tidyr)
-library(dplyr)
-library(rstan)
+
+needed_packages <- c("coda", "tidyr", "dplyr", "rstan", "rstudioapi")
+for(i in 1:length(needed_packages)){
+  if(!require(needed_packages[i])){
+    install.packages(needed_packages[i])
+    library(needed_packages[i])
+  } else {
+    library(needed_packages[i])
+  }
+}
 
 #number of people
 n_people <- 1000
@@ -65,7 +70,7 @@ precomp_model <- stan_model(stanc_ret = precomp)
 
 #do the analysis for one set of responses
 analysis_test <- one_analysis(x = precomp_model, n_iter = 1000, n_burn = 300,
-                              debug = FALSE, n_cores = 1)
+                              debug = FALSE, n_cores = 2)
 
 
 
