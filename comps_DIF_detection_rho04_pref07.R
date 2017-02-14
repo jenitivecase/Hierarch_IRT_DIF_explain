@@ -30,9 +30,9 @@ n_DIF <- 5
 #number of reps
 nreps <- 100
 #rho is the amount of DIF explained by the second-order factors
-rho <- c(0.4, 0.6, 0.8)
+rho <- 0.4
 #P_REF is the proportion of people in the reference group
-P_REF <- c(0.5, 0.7, 0.9)
+P_REF <- 0.7
 
 #### data save setup ####
 true_params <- vector("list", nreps)
