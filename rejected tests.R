@@ -1,3 +1,26 @@
+#### FUNCTION TESTS ####
+#simulate a set of items
+item_test <- item_sim(n_items, n_DIF, b_mean = 0, b_sd = 1, a_mean = 1, a_sd = .5, 
+                      nodif_mean = 0, nodif_sd = 0.1, dif_mean = 1, dif_sd = 0.1)
+
+#simulate a set of people's ability scores
+ability_test <- ability_sim(n_people, P_REF = .8, ref_theta_mean = 0, ref_theta_sd = 1,
+                            focal_theta_mean = -0.5, focal_theta_sd = 1)
+
+# #get the responses for a single item
+# response_test <- response_sim(ability_test[1,], item_test[1,])
+# 
+# #get responses for a single person to a set of items
+# responseset_test <- person_sim(ability_test[1,], item_test)
+
+#get responses for a set of people to a set of items
+dataset <- one_dataset(ability_test, item_test)
+
+#get values for the DIF predictor
+DIFpredict <- DIF_predictor(item_test, rho = 0.4)
+
+
+
 #### BUGS CODE ####
 #analysis function with BUGS
 one_analysis <- function(x, n_iter = 2000, n_burn = 1000, b_dat = b.dat, 
