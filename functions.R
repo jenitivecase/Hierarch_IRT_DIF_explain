@@ -73,7 +73,8 @@ DIF_predictor <- function(item_param, rho){
   
   e1 <- rnorm(nrow(item_param),0,sqrt(1-rho^2))
   
-  DIF_predict <- sqrt(rho^2)*zscores + e1
+  DIF_predict <- rho*zscores + e1
+  # DIF_predict <- sqrt(rho^2)*zscores + e1
   return(DIF_predict)
 }
 

@@ -30,15 +30,15 @@ n_DIF <- 5
 #number of reps
 nreps <- 100
 #rho is the amount of DIF explained by the second-order factors
-rho <- c(0.4, 0.6, 0.8)
+rho <- 0.4
 #P_REF is the proportion of people in the reference group
-P_REF <- c(0.5, 0.7, 0.9)
-
-conditions <- expand.grid(n_people, rho, P_REF)
+P_REF <- 0.5
 
 #### data save setup ####
 true_params <- vector("list", nreps)
-output <- vector("list", nreps)
+result_objs <- vector("list", nreps)
+raw_est_params <- vector("list", nreps)
+est_params <- vector("list", nreps)
 
 #### STAN SETUP ####
 #load stan model scripts
@@ -57,23 +57,20 @@ for(i in 1:nreps){
   true_item_params <- item_sim(n_items, n_DIF, b_mean = 0, b_sd = 1, a_mean = 1, a_sd = .5, 
            nodif_mean = 0, nodif_sd = 0.1, dif_mean = 1, dif_sd = 0.1)
   
-  true_params[[i]][[1]] <- true_item_params
-  
   #simulate a set of people's ability scores
   true_ability <- ability_sim(n_people, P_REF = P_REF, ref_theta_mean = 0, ref_theta_sd = 1,
                               focal_theta_mean = -0.5, focal_theta_sd = 1)
   
-  true_params[[i]][[2]] <- true_ability
-  
   #get responses for a set of people to a set of items
   dataset <- one_dataset(true_ability, true_item_params)
-  
-  true_params[[i]][[3]] <- dataset
   
   #get values for the DIF predictor
   DIFpredict <- DIF_predictor(true_item_params, rho = rho)
   
-  true_params[[i]][[4]] <- DIFpredict
+  #save the true parameters
+  true_params[[i]] <- list(true_item_params, true_ability, dataset, DIFpredict)
+  names(true_params[[i]]) <- c("true_item_params", "true_ability", "dataset", 
+                               "DIFpredict")
   
   #set up grouping variable
   group <- true_ability[,2]
@@ -82,19 +79,36 @@ for(i in 1:nreps){
   analysis <- one_analysis(x = precomp_model, n_iter = 1000, n_burn = 300,
                                 debug = FALSE, n_cores = 2)
   
+  #save the analysis object
+  result_objs[[i]] <- analysis
   
   #### OUTPUT ####
   #output formatting code from Jake
-  params_summary <- summary(analysis, pars = c("a", "b", "D"),
+  params_summary <- summary(analysis, pars = c("a", "b", "D", "beta1", "mu", 
+                                               "sigma2", "R2", "theta"),
                             probs = c(0.025, 0.25, 0.75, 0.975))$summary
   
-  params <- extract(analysis, pars = c("a", "b", "D"))
+  #save the "raw" estimated parameters (actually a summary object)
+  raw_est_params[[i]] <- params_summary
   
-  alpha <- colMeans(params$a)
-  delta <- colMeans(params$delta)
-  mu <- mean(params$mu)
-  H <- mean(params$H)
+  params <- extract(analysis, pars = c("a", "b", "D", "beta1", "mu", "sigma2", 
+                                       "R2", "theta"))
   
-}  
+  alphas <- as.data.frame(colMeans(params$a))
+  betas <- as.data.frame(colMeans(params$b))
+  DIF_coef <- as.data.frame(colMeans(params$D))
+  beta1 <- mean(params$beta1)
+  mu <- as.data.frame(colMeans(params$mu))
+  sigma2 <- mean(params$sigma2)
+  R2 <- as.data.frame(mean(params$R2))
+  theta <- as.data.frame(rowMeans(params$theta))
   
-saveRDS(results, paste0(date, "_simulation_output.rds"))
+  #save the means of estimated parameters
+  est_params[[i]] <- list(alphas, betas, DIF_coef, beta1, 
+                          mu, sigma2, R2, theta)
+  names(est_params[[i]]) <- c("alphas", "betas", "DIF_coef", 
+                              "beta1", "mu", "sigma2", "R2", "theta")
+  
+}
+
+#write all the good stuff out to disk

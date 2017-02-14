@@ -3,5 +3,5 @@
 .RData
 .Ruserdata
 *.doc*
-.gitignore
 *output*
+*/
