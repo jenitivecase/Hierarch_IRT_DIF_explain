@@ -1,8 +1,8 @@
 #### SETUP ####
 if(Sys.info()["user"] == "jbrussow"){
-  setwd("C:/Users/jbrussow/Dropbox/REMS/11 Comps/")
+  setwd("C:/Users/jbrussow/Dropbox/REMS/11 Comps/Simulation")
 } else if (Sys.info()["user"] == "Jen"){
-  setwd("C:/Users/Jen/Dropbox/REMS/11 Comps/")
+  setwd("C:/Users/Jen/Dropbox/REMS/11 Comps/Simulation")
 }
 
 source("functions.R")
@@ -37,8 +37,8 @@ P_REF <- 0.5
 #### data save setup ####
 true_params <- vector("list", nreps)
 result_objs <- vector("list", nreps)
-raw_est_params <- vector("list", nreps)
-est_params <- vector("list", nreps)
+est_param_summary <- vector("list", nreps)
+est_param_means <- vector("list", nreps)
 
 #### STAN SETUP ####
 #load stan model scripts
@@ -89,10 +89,12 @@ for(i in 1:nreps){
                             probs = c(0.025, 0.25, 0.75, 0.975))$summary
   
   #save the "raw" estimated parameters (actually a summary object)
-  raw_est_params[[i]] <- params_summary
+  est_param_summary[[i]] <- params_summary
   
   params <- extract(analysis, pars = c("a", "b", "D", "beta1", "mu", "sigma2", 
                                        "R2", "theta"))
+  
+  param_test <- extract(analysis)
   
   alphas <- as.data.frame(colMeans(params$a))
   betas <- as.data.frame(colMeans(params$b))
@@ -104,11 +106,25 @@ for(i in 1:nreps){
   theta <- as.data.frame(rowMeans(params$theta))
   
   #save the means of estimated parameters
-  est_params[[i]] <- list(alphas, betas, DIF_coef, beta1, 
+  est_param_means[[i]] <- list(alphas, betas, DIF_coef, beta1, 
                           mu, sigma2, R2, theta)
-  names(est_params[[i]]) <- c("alphas", "betas", "DIF_coef", 
+  names(est_param_means[[i]]) <- c("alphas", "betas", "DIF_coef", 
                               "beta1", "mu", "sigma2", "R2", "theta")
   
 }
 
 #write all the good stuff out to disk
+folder_name <- paste0(date, "_simulation-results")
+file_tag <- paste0(nreps, "reps_", 
+                     gsub(".", "-", as.character(rho), fixed = TRUE), "rho_", 
+                     gsub(".", "-", as.character(P_REF), fixed = TRUE), "PREF")
+
+if(!dir.exists(paste0(getwd(), "/", folder_name))){
+  dir.create(paste0(getwd(), "/", folder_name))
+}
+setwd(paste0(getwd(), "/", folder_name))
+
+saveRDS(true_params, paste0("true_params_", file_tag, ".rds"))
+saveRDS(result_objs, paste0("result_objs_", file_tag, ".rds"))
+saveRDS(est_param_summary, paste0("est_param_summary_", file_tag, ".rds"))
+saveRDS(est_param_means, paste0("est_param_means_", file_tag, ".rds"))
