@@ -94,8 +94,6 @@ for(i in 1:nreps){
   params <- extract(analysis, pars = c("a", "b", "D", "beta1", "mu", "sigma2", 
                                        "R2", "theta"))
   
-  param_test <- extract(analysis)
-  
   alphas <- as.data.frame(colMeans(params$a))
   betas <- as.data.frame(colMeans(params$b))
   DIF_coef <- as.data.frame(colMeans(params$D))
