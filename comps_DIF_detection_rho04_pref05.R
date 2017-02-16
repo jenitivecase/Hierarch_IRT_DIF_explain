@@ -54,7 +54,7 @@ b.dat <- list("n_people", "n_items", "dataset", "group", "DIFpredict")
 for(i in 1:nreps){
   #### SIMULATION ####
   #simulate a set of items
-  true_item_params <- item_sim(n_items, n_DIF, b_mean = 0, b_sd = 1, a_mean = 1, a_sd = .5, 
+  true_item_params <- item_sim(n_items, n_DIF, b_mean = 0, b_sd = 1, a_min = 0.5, a_max = 3, 
            nodif_mean = 0, nodif_sd = 0.1, dif_mean = 1, dif_sd = 0.1)
   
   #simulate a set of people's ability scores

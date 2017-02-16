@@ -15,6 +15,8 @@ parameters {
   real beta0;
   real beta1;
   real<lower=0> sigma2;
+  real foc_mean;
+  real foc_var;
 }
 
 transformed parameters {
@@ -46,11 +48,17 @@ model {
   a ~ lognormal(0,1);
   b ~ normal(0,1);
 
-###specify N(0,1) for reference group, then estimate mean, var for reference group...
-
-  theta ~ normal(0,1);
-  D ~ normal(mu, sigma2);
+// specify N(0,1) for reference group, then estimate mean, var for reference group...
+  for(i in 1:(sum(group))){
+    theta ~ normal(0,1);
+  }
+  for(i in (sum(group)+1):n_people){
+    theta ~ normal(foc_mean, foc_var);
+  }
   
+  D ~ normal(mu, sigma2);
+  foc_mean ~ uniform(-10, 10);
+  foc_var ~ uniform(0, 100);
   beta0 ~ normal(0,1);
   beta1 ~ normal(0,1);
   sigma2 ~ uniform(0,100);
@@ -106,7 +114,6 @@ model {
   
   for(i in 1:n_observations){
     eta[i] = a[itemid[i]]*(theta[respondentid[i]] - b[itemid[i]] + D[itemid[i]] * group[i]);
-  }
 
   response ~ bernoulli_logit(eta);
   
