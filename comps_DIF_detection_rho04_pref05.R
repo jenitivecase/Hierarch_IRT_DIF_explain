@@ -100,7 +100,7 @@ for(i in 1:nreps){
   beta1 <- mean(params$beta1)
   mu <- as.data.frame(colMeans(params$mu))
   sigma2 <- mean(params$sigma2)
-  R2 <- as.data.frame(mean(params$R2))
+  R2 <- mean(params$R2)
   theta <- as.data.frame(rowMeans(params$theta))
   
   #save the means of estimated parameters

@@ -39,12 +39,15 @@ transformed parameters {
 model {
   for (i in 1:n_people) {
     for (j in 1:n_items) {
-      dataset[i,j] ~ bernoulli_logit(a[j]*(theta[i]-b[j] + D[j]*group[i]));
+      dataset[i,j] ~ bernoulli_logit(a[j]*(theta[i] - (b[j] + D[j]*group[i])));
     }
   }	
   
   a ~ lognormal(0,1);
   b ~ normal(0,1);
+
+###specify N(0,1) for reference group, then estimate mean, var for reference group...
+
   theta ~ normal(0,1);
   D ~ normal(mu, sigma2);
   
@@ -53,6 +56,7 @@ model {
   sigma2 ~ uniform(0,100);
 }
 "
+
 
 
 stancode_long <- "

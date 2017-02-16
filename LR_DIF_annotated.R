@@ -74,9 +74,9 @@ for (iRHO in 1:3) {
       
       #zD is the z-score of the amount of DIF
       zD <- (D-mean(D))/sd(D)
-      #e1 is presumably the amount of error??
+      #e1 is generating random error normally distributed with the SD being rho^2
       e1 <- rnorm(n,0,sqrt(1-rho[iRHO]^2))
-      #V1 is maybe the amount of variance?
+      #V1 is the DIF predictor??
       V1 <- sqrt(rho[iRHO]^2)*zD + e1
       
       #Generate people
@@ -120,7 +120,7 @@ for (iRHO in 1:3) {
         #estimated DIF for this item and replication is the group coeffiecient/the total score condition coefficient
         est_D_reg[k,j,iRHO,iPROP] <- -coef(log_DIF_2)[3]/coef(log_DIF_2)[2]
       }
-      #linear model to predict the amount of estimated DIF from the variance?? what is happening
+      #linear model to predict the amount of estimated DIF from V1?
       reg1 <- lm(est_D_reg[k,,iRHO,iPROP] ~ V1 )
       #saving the estimated coefficients from the model
       est_coef[k,1:2,iRHO,iPROP] <- coef(reg1)[1:2]
