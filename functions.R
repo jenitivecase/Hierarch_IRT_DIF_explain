@@ -102,3 +102,12 @@ one_analysis <- function(x, n_iter = 2000, n_burn = 1000, n_chains = 2,
 }
 
 
+one_analysis_BUGS <- function(x, n_iter = 1000, n_burn = 300, b_dat = b.dat, 
+                         b_par = b.par, model_file = "BUGScode.txt"){
+  vars <- c(unlist(b_dat))
+  mget(vars, envir = globalenv())
+  OUT <- R2OpenBUGS::bugs(data = b_dat, inits = NULL, parameters.to.save = b_par,
+              model.file = model_file, n.chains = 2,
+              n.iter = n_iter, n.burn = n_burn, n.thin = 1, debug = TRUE)
+  return(OUT)
+}

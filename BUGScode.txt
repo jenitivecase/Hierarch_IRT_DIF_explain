@@ -3,7 +3,7 @@ model {
 	for (i in 1:n_people) {
 		for (j in 1:n_items) {
 			dataset[i,j] ~ dbern(P[i,j])
-			logit(P[i,j]) <- a[j]*(theta[i]-b[j] + D[j]*group[i])
+			logit(P[i,j]) <- a[j]*(theta[i]-(b[j] + D[j]*group[i]))
 		}
 	}	
 
@@ -20,10 +20,15 @@ model {
 
 	}
 
-	for(i in 1:n_people){
+	for(i in 1:n_ref){
 		theta[i] ~ dnorm(0,1)
 	}
+	for(i in n_ref_1:n_people){
+		theta[i] ~ dnorm(foc_mean, foc_var)
+	}
 	
+	foc_mean ~ dunif(-10, 10)
+	foc_var ~ dunif(0, 100)
 	beta0 ~ dnorm(0,1)
 	beta1 ~ dnorm(0,1)
 	var ~ dunif(0,100)

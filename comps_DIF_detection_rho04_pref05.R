@@ -48,8 +48,14 @@ source("stan_scripts.R")
 precomp <- stanc(model_code = stancode)
 precomp_model <- stan_model(stanc_ret = precomp)
 
+n_ref <- sum(group)
+n_ref_1 <- sum(group)+1
+
 #set up data to go into model
-b.dat <- list("n_people", "n_items", "dataset", "group", "DIFpredict")
+b.dat <- list("n_people", "n_items", "dataset", "group", "DIFpredict", "n_ref", 
+              "n_ref_1")
+b.par <- list("a", "theta", "b", "D", "beta0", "beta1", "var", "prec", "R2", 
+              "foc_mean", "foc_var")
 
 for(i in 1:nreps){
   #### SIMULATION ####
@@ -76,9 +82,10 @@ for(i in 1:nreps){
   group <- true_ability[,2]
   
   #do the analysis for one set of responses
-  analysis <- one_analysis(x = precomp_model, n_iter = 2000, n_burn = 1000,
-                                debug = FALSE, n_cores = 2)
+  # analysis <- one_analysis(x = precomp_model, n_iter = 2000, n_burn = 1000,
+  #                               debug = FALSE, n_cores = 2)
   
+  analysis <- one_analysis_BUGS(dataset, n_iter = 5000, n_burn = 1000)
   #save the analysis object
   result_objs[[i]] <- analysis
   
