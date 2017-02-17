@@ -16,7 +16,7 @@ parameters {
   real beta1;
   real<lower=0> sigma2;
   real foc_mean;
-  real foc_var;
+  real<lower=0> foc_var;
 }
 
 transformed parameters {

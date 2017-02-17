@@ -28,7 +28,7 @@ n_items <- 100
 #number of items with DIF
 n_DIF <- 5
 #number of reps
-nreps <- 100
+nreps <- 1
 #rho is the amount of DIF explained by the second-order factors
 rho <- 0.4
 #P_REF is the proportion of people in the reference group
@@ -76,7 +76,7 @@ for(i in 1:nreps){
   group <- true_ability[,2]
   
   #do the analysis for one set of responses
-  analysis <- one_analysis(x = precomp_model, n_iter = 1000, n_burn = 300,
+  analysis <- one_analysis(x = precomp_model, n_iter = 2000, n_burn = 1000,
                                 debug = FALSE, n_cores = 2)
   
   #save the analysis object
@@ -85,29 +85,33 @@ for(i in 1:nreps){
   #### OUTPUT ####
   #output formatting code from Jake
   params_summary <- summary(analysis, pars = c("a", "b", "D", "beta1", "mu", 
-                                               "sigma2", "R2", "theta"),
+                                               "sigma2", "R2", "theta",
+                                               "foc_mean", "foc_var"),
                             probs = c(0.025, 0.25, 0.75, 0.975))$summary
   
   #save the "raw" estimated parameters (actually a summary object)
   est_param_summary[[i]] <- params_summary
   
   params <- extract(analysis, pars = c("a", "b", "D", "beta1", "mu", "sigma2", 
-                                       "R2", "theta"))
+                                       "R2", "theta", "foc_mean", "foc_var"))
   
-  alphas <- as.data.frame(colMeans(params$a))
-  betas <- as.data.frame(colMeans(params$b))
-  DIF_coef <- as.data.frame(colMeans(params$D))
+  alphas <- as.matrix(colMeans(params$a))
+  betas <- as.matrix(colMeans(params$b))
+  DIF_coef <- as.matrix(colMeans(params$D))
   beta1 <- mean(params$beta1)
-  mu <- as.data.frame(colMeans(params$mu))
+  mu <- as.matrix(colMeans(params$mu))
   sigma2 <- mean(params$sigma2)
   R2 <- mean(params$R2)
-  theta <- as.data.frame(rowMeans(params$theta))
+  theta <- as.matrix(rowMeans(params$theta))
+  foc_mean <- mean(params$foc_mean)
+  foc_var <- mean(params$foc_var)
   
   #save the means of estimated parameters
   est_param_means[[i]] <- list(alphas, betas, DIF_coef, beta1, 
-                          mu, sigma2, R2, theta)
+                          mu, sigma2, R2, theta, foc_mean, foc_var)
   names(est_param_means[[i]]) <- c("alphas", "betas", "DIF_coef", 
-                              "beta1", "mu", "sigma2", "R2", "theta")
+                              "beta1", "mu", "sigma2", "R2", "theta", 
+                              "foc_mean", "foc_var")
   
 }
 
