@@ -60,7 +60,7 @@ model {
   
   D ~ normal(mu, sigma2);
   foc_mean ~ uniform(-10, 10);
-  foc_var ~ uniform(0, 100);
+//  foc_var ~ uniform(0, 100);
   beta0 ~ normal(0,1);
   beta1 ~ normal(0,1);
   sigma2 ~ uniform(0,100);
