@@ -24,11 +24,11 @@ model {
 		theta[i] ~ dnorm(0,1)
 	}
 	for(i in n_ref_1:n_people){
-		theta[i] ~ dnorm(foc_mean, foc_var)
+		theta[i] ~ dnorm(foc_mean, 1)
 	}
 	
 	foc_mean ~ dunif(-10, 10)
-	foc_var ~ dunif(0, 100)
+#	foc_var ~ dunif(0, 100)
 	beta0 ~ dnorm(0,1)
 	beta1 ~ dnorm(0,1)
 	var ~ dunif(0,100)

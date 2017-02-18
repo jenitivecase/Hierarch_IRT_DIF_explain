@@ -48,9 +48,6 @@ source("stan_scripts.R")
 precomp <- stanc(model_code = stancode)
 precomp_model <- stan_model(stanc_ret = precomp)
 
-n_ref <- sum(group)
-n_ref_1 <- sum(group)+1
-
 #set up data to go into model
 b.dat <- list("n_people", "n_items", "dataset", "group", "DIFpredict", "n_ref", 
               "n_ref_1")
@@ -80,12 +77,15 @@ for(i in 1:nreps){
   
   #set up grouping variable
   group <- true_ability[,2]
+  n_ref <- sum(group)
+  n_ref_1 <- sum(group)+1
   
   #do the analysis for one set of responses
   # analysis <- one_analysis(x = precomp_model, n_iter = 2000, n_burn = 1000,
   #                               debug = FALSE, n_cores = 2)
   
   analysis <- one_analysis_BUGS(dataset, n_iter = 5000, n_burn = 1000)
+
   #save the analysis object
   result_objs[[i]] <- analysis
   
@@ -93,14 +93,14 @@ for(i in 1:nreps){
   #output formatting code from Jake
   params_summary <- summary(analysis, pars = c("a", "b", "D", "beta1", "mu", 
                                                "sigma2", "R2", "theta",
-                                               "foc_mean", "foc_var"),
+                                               "foc_mean"),
                             probs = c(0.025, 0.25, 0.75, 0.975))$summary
   
   #save the "raw" estimated parameters (actually a summary object)
   est_param_summary[[i]] <- params_summary
   
   params <- extract(analysis, pars = c("a", "b", "D", "beta1", "mu", "sigma2", 
-                                       "R2", "theta", "foc_mean", "foc_var"))
+                                       "R2", "theta", "foc_mean"))
   
   alphas <- as.matrix(colMeans(params$a))
   betas <- as.matrix(colMeans(params$b))
@@ -111,7 +111,6 @@ for(i in 1:nreps){
   R2 <- mean(params$R2)
   theta <- as.matrix(rowMeans(params$theta))
   foc_mean <- mean(params$foc_mean)
-  foc_var <- mean(params$foc_var)
   
   #save the means of estimated parameters
   est_param_means[[i]] <- list(alphas, betas, DIF_coef, beta1, 

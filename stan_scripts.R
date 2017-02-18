@@ -2,6 +2,8 @@ stancode <- "
 data {
   int<lower=0> n_people;
   int<lower=0> n_items;
+  int<lower=0> n_ref;
+  int<lower=0> n_ref_1;
   int dataset[n_people, n_items];
   int<lower=0, upper=1> group[n_people];
   real DIFpredict[n_items];
@@ -16,7 +18,7 @@ parameters {
   real beta1;
   real<lower=0> sigma2;
   real foc_mean;
-  real<lower=0> foc_var;
+//  real<lower=0> foc_var;
 }
 
 transformed parameters {
@@ -49,11 +51,11 @@ model {
   b ~ normal(0,1);
 
 // specify N(0,1) for reference group, then estimate mean, var for reference group...
-  for(i in 1:(sum(group))){
+  for(i in 1:n_ref){
     theta ~ normal(0,1);
   }
-  for(i in (sum(group)+1):n_people){
-    theta ~ normal(foc_mean, foc_var);
+  for(i in n_ref_1:n_people){
+    theta ~ normal(foc_mean, 1);
   }
   
   D ~ normal(mu, sigma2);
