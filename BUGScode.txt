@@ -28,7 +28,6 @@ model {
 	}
 	
 	foc_mean ~ dunif(-10, 10)
-#	foc_var ~ dunif(0, 100)
 	beta0 ~ dnorm(0,1)
 	beta1 ~ dnorm(0,1)
 	var ~ dunif(0,100)

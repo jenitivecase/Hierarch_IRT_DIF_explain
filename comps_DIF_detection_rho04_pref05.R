@@ -52,7 +52,7 @@ precomp_model <- stan_model(stanc_ret = precomp)
 b.dat <- list("n_people", "n_items", "dataset", "group", "DIFpredict", "n_ref", 
               "n_ref_1")
 b.par <- list("a", "theta", "b", "D", "beta0", "beta1", "var", "prec", "R2", 
-              "foc_mean", "foc_var")
+              "foc_mean")
 
 for(i in 1:nreps){
   #### SIMULATION ####
@@ -114,10 +114,10 @@ for(i in 1:nreps){
   
   #save the means of estimated parameters
   est_param_means[[i]] <- list(alphas, betas, DIF_coef, beta1, 
-                          mu, sigma2, R2, theta, foc_mean, foc_var)
+                          mu, sigma2, R2, theta, foc_mean)
   names(est_param_means[[i]]) <- c("alphas", "betas", "DIF_coef", 
                               "beta1", "mu", "sigma2", "R2", "theta", 
-                              "foc_mean", "foc_var")
+                              "foc_mean")
   
 }
 

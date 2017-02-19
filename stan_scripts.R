@@ -79,6 +79,8 @@ data {
   int<lower=0, upper=1> response[n_observations];
   int<lower=0, upper=1> group[n_observations];
   real DIFpredict[n_items];
+  int n_ref;
+  int n_ref_1;
 }
 
 parameters {
@@ -89,6 +91,7 @@ parameters {
   real beta0;
   real beta1;
   real<lower=0> sigma2;
+  real foc_mean;
 }
 
 transformed parameters {
@@ -115,15 +118,18 @@ model {
   vector[n_observations] eta;
   
   for(i in 1:n_observations){
-    eta[i] = a[itemid[i]]*(theta[respondentid[i]] - b[itemid[i]] + D[itemid[i]] * group[i]);
+    eta[i] = a[itemid[i]]*(theta[respondentid[i]] - (b[itemid[i]] + D[itemid[i]] * group[i]));
+  }
 
   response ~ bernoulli_logit(eta);
   
   a ~ lognormal(0,1);
   b ~ normal(0,1);
-  theta ~ normal(0,1);
+  theta[1:n_ref] ~ normal(0,1);
+  theta[n_ref_1:n_people] ~ normal(foc_mean, 1);
   D ~ normal(mu, sigma2);
   
+  foc_mean ~ uniform(-10, 10);
   beta0 ~ normal(0,1);
   beta1 ~ normal(0,1);
   sigma2 ~ uniform(0,100);
