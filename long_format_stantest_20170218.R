@@ -1,8 +1,11 @@
 #### SETUP ####
+work_dir <- "C:/Users/jbrussow/Dropbox/REMS/11 Comps/Simulation"
+
+
 if(Sys.info()["user"] == "jbrussow"){
-  setwd("C:/Users/jbrussow/Dropbox/REMS/11 Comps/Simulation")
+  setwd(work_dir)
 } else if (Sys.info()["user"] == "Jen"){
-  setwd("C:/Users/Jen/Dropbox/REMS/11 Comps/Simulation")
+  setwd(grepl("jbrussow", "Jen", work_dir))
 }
 
 source("functions.R")
@@ -146,10 +149,10 @@ file_tag <- paste0(nreps, "reps_",
                    gsub(".", "-", as.character(rho), fixed = TRUE), "rho_", 
                    gsub(".", "-", as.character(P_REF), fixed = TRUE), "PREF")
 
-if(!dir.exists(paste0(getwd(), "/", folder_name))){
-  dir.create(paste0(getwd(), "/", folder_name))
+if(!dir.exists(paste0(work_dir, "/", folder_name))){
+  dir.create(paste0(work_dir, "/", folder_name))
 }
-setwd(paste0(getwd(), "/", folder_name))
+setwd(paste0(work_dir, "/", folder_name))
 
 saveRDS(true_params, paste0("true_params_", file_tag, ".rds"))
 saveRDS(result_objs, paste0("result_objs_", file_tag, ".rds"))
