@@ -1,3 +1,5 @@
+#### WIDE FORMAT CODE ------------------------------------------------------####
+
 stancode <- "
 data {
   int<lower=0> n_people;
@@ -69,6 +71,8 @@ model {
 
 
 
+#### LONG FORMAT CODE ------------------------------------------------------####
+
 stancode_long <- "
 data {
   int<lower=0> n_people;
@@ -114,7 +118,6 @@ transformed parameters {
 }
 
 model {
-  
   vector[n_observations] eta;
   
   for(i in 1:n_observations){
@@ -137,6 +140,8 @@ model {
 "
 
 
+
+#### TEST: 2PL Model -------------------------------------------------------####
 
 stancode_2PL <- "
 data {
