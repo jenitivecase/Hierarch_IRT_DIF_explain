@@ -111,7 +111,7 @@ precomp <- stanc(model_code = stancode_long)
 precomp_model <- stan_model(stanc_ret = precomp)
 
 analysis <- sampling(precomp_model, data = b.dat_long,
-                     iter = 1000, warmup = 300, chains = 2, verbose = FALSE, cores = 2)
+                     iter = 10000, warmup = 5000, chains = 2, verbose = FALSE, cores = 2)
 
 #save the analysis object
 result_objs[[i]] <- analysis
@@ -136,7 +136,7 @@ beta1 <- mean(params$beta1)
 mu <- as.matrix(colMeans(params$mu))
 sigma2 <- mean(params$sigma2)
 R2 <- mean(params$R2)
-theta <- as.matrix(rowMeans(params$theta))
+theta <- as.matrix(colMeans(params$theta))
 foc_mean <- mean(params$foc_mean)
 
 #save the means of estimated parameters
