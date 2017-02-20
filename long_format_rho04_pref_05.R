@@ -44,12 +44,24 @@ est_param_summary <- vector("list", nreps)
 est_param_means <- vector("list", nreps)
 correlations <- vector("list", nreps)
 
+#setup output folder for use later
+folder_name <- paste0(date, "_simulation-results")
+file_tag <- paste0(nreps, "reps_", 
+                   gsub(".", "-", as.character(rho), fixed = TRUE), "rho_", 
+                   gsub(".", "-", as.character(P_REF), fixed = TRUE), "PREF")
+
+if(!dir.exists(paste0(work_dir, "/", folder_name))){
+  dir.create(paste0(work_dir, "/", folder_name))
+}
+setwd(paste0(work_dir, "/", folder_name))
+
 #### STAN SETUP ####
 #load stan model scripts
 source("stan_scripts.R")
 
 b.dat_long <- list("n_people", "n_items", "n_observations", "respondentid", 
-                   "itemid", "response", "group", "DIFpredict", "n_ref", "n_ref_1")
+                   "itemid", "response", "group", "group_long",
+                   "DIFpredict", "n_ref", "n_ref_1")
 
 #analysis setup
 precomp <- stanc(model_code = stancode_long)
@@ -85,12 +97,12 @@ for(i in 1:nreps){
   dataset <- long_format(dataset, group)
   
   #pulling the individual parts back out
-  respondentid <- dataset_long$respondentid
-  itemid <- as.numeric(dataset_long$itemid)
-  response <- dataset_long$response
-  group <- dataset_long$group
+  respondentid <- dataset$respondentid
+  itemid <- as.numeric(dataset$itemid)
+  response <- dataset$response
+  group_long <- dataset$group
   
-  n_observations <- nrow(dataset_long)
+  n_observations <- nrow(dataset)
   
   #conducting the analysis
   analysis <- sampling(precomp_model, data = b.dat_long,
@@ -133,7 +145,7 @@ for(i in 1:nreps){
   b_corr <- cor(b_params, true_item_params[,"b_param"])
   D_corr <- cor(D_params, true_item_params[,"dif_param"])
   theta_corr <- cor(theta, true_ability[, 1])
-  foc_mean_diff <- mean(true_ability[n_ref_1:nrow(true_ability), 1])-foc_mean
+  foc_mean_diff <- -.5-foc_mean
   ref_mean_diff <- 0-mean(theta[1:n_ref])
   R2_diff <- (rho^2)-R2
   
@@ -141,20 +153,13 @@ for(i in 1:nreps){
                             foc_mean_diff, ref_mean_diff, R2_diff)
   names(correlations[[i]]) <- c("a_corr", "b_corr", "D_corr", "theta_corr",
                                 "foc_mean_diff", "ref_mean_diff", "R2_diff")
+  if(i %% 10 == 0){
+    #write all the good stuff out to disk
+    saveRDS(true_params, paste0("true_params_", file_tag, ".rds"))
+    saveRDS(result_objs, paste0("result_objs_", file_tag, ".rds"))
+    saveRDS(est_param_summary, paste0("est_param_summary_", file_tag, ".rds"))
+    saveRDS(est_param_means, paste0("est_param_means_", file_tag, ".rds"))
+    saveRDS(correlations, paste0("correlations_", file_tag, ".rds"))
+  }
 }
 
-#write all the good stuff out to disk
-folder_name <- paste0(date, "_simulation-results")
-file_tag <- paste0(nreps, "reps_", 
-                   gsub(".", "-", as.character(rho), fixed = TRUE), "rho_", 
-                   gsub(".", "-", as.character(P_REF), fixed = TRUE), "PREF")
-
-if(!dir.exists(paste0(work_dir, "/", folder_name))){
-  dir.create(paste0(work_dir, "/", folder_name))
-}
-setwd(paste0(work_dir, "/", folder_name))
-
-saveRDS(true_params, paste0("true_params_", file_tag, ".rds"))
-saveRDS(result_objs, paste0("result_objs_", file_tag, ".rds"))
-saveRDS(est_param_summary, paste0("est_param_summary_", file_tag, ".rds"))
-saveRDS(est_param_means, paste0("est_param_means_", file_tag, ".rds"))
