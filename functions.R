@@ -80,6 +80,29 @@ DIF_predictor <- function(item_param, rho){
   return(DIF_predict)
 }
 
+#### LONG FORMAT RESTRUCTURING ####
+long_format <- function(data = dataset, group_data = group){
+  #prep for reformatting
+  data <- as.data.frame(data)
+  names(data) <- paste0("Item", 1:ncol(data))
+  data$respondentid <- c(1:nrow(data))
+  
+  #move to long format
+  dataset_long <- gather(data, key = respondentid, value = response)
+  names(dataset_long)[2] <- "itemid"
+  
+  #joining group
+  group_data <- as.data.frame(group_data)
+  group_data$respondentid <- c(1:nrow(group_data))
+  dataset_long <- left_join(dataset_long, group_data, by = "respondentid")
+  
+  dataset_long$itemid <- gsub("Item", "", dataset_long$itemid)
+  
+  names(dataset_long) <- c("respondentid", "itemid", "response", "group")
+  
+  return(dataset_long)
+}
+
 #### ANALYSIS ####
 
 #do the analysis for one set of responses
@@ -111,3 +134,4 @@ one_analysis_BUGS <- function(x, n_iter = 1000, n_burn = 300, b_dat = b.dat,
               n.iter = n_iter, n.burn = n_burn, n.thin = 1, debug = TRUE)
   return(OUT)
 }
+
