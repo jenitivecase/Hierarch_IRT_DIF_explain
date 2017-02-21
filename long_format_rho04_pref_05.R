@@ -134,9 +134,9 @@ for(i in 1:nreps){
   foc_mean <- mean(params$foc_mean)
   
   #save the means of estimated parameters
-  est_param_means[[i]] <- list(a_params, b_params, DIF_coef, beta1, 
+  est_param_means[[i]] <- list(a_params, b_params, D_params, beta1, 
                                mu, sigma2, R2, theta, foc_mean)
-  names(est_param_means[[i]]) <- c("a_params", "b_params", "DIF_coef", 
+  names(est_param_means[[i]]) <- c("a_params", "b_params", "D_params", 
                                    "beta1", "mu", "sigma2", "R2", "theta", 
                                    "foc_mean")
   
@@ -153,13 +153,12 @@ for(i in 1:nreps){
                             foc_mean_diff, ref_mean_diff, R2_diff)
   names(correlations[[i]]) <- c("a_corr", "b_corr", "D_corr", "theta_corr",
                                 "foc_mean_diff", "ref_mean_diff", "R2_diff")
-  if(i %% 5 == 0){
-    #write all the good stuff out to disk
-    saveRDS(true_params, paste0("true_params_", file_tag, ".rds"))
-    saveRDS(result_objs, paste0("result_objs_", file_tag, ".rds"))
-    saveRDS(est_param_summary, paste0("est_param_summary_", file_tag, ".rds"))
-    saveRDS(est_param_means, paste0("est_param_means_", file_tag, ".rds"))
-    saveRDS(correlations, paste0("correlations_", file_tag, ".rds"))
-  }
+  
+  #write all the good stuff out to disk
+  saveRDS(true_params, paste0("true_params_", file_tag, ".rds"))
+  saveRDS(result_objs, paste0("result_objs_", file_tag, ".rds"))
+  saveRDS(est_param_summary, paste0("est_param_summary_", file_tag, ".rds"))
+  saveRDS(est_param_means, paste0("est_param_means_", file_tag, ".rds"))
+  saveRDS(correlations, paste0("correlations_", file_tag, ".rds"))
 }
 
