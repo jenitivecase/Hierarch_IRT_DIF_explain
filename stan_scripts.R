@@ -11,8 +11,6 @@ data {
   int<lower=0, upper=1> group_long[n_observations];
   vector[n_people] group;
   vector[n_items] DIFpredict;
-  int n_ref;
-  int n_ref_1;
 }
 
 parameters {

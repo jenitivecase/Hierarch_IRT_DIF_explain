@@ -43,7 +43,7 @@ source("stan_scripts.R")
 
 b.dat_long <- list("n_people", "n_items", "n_observations", "respondentid", 
                    "itemid", "response", "group", "group_long",
-                   "DIFpredict", "n_ref", "n_ref_1")
+                   "DIFpredict")
 
 #analysis setup
 precomp <- stanc(model_code = stancode_long)
@@ -91,8 +91,7 @@ for(i in 1:nreps){
   #set up grouping variable
   group <- true_ability[,2]
   n_ref <- sum(group)
-  n_ref_1 <- sum(group)+1
-  
+
   #restructuring the data to long format
   dataset <- long_format(dataset, group)
   
@@ -141,6 +140,7 @@ for(i in 1:nreps){
                                    "beta1", "mu", "sigma2", "R2", "theta", 
                                    "foc_mean")
   
+  #save the correlations & differences from the expected values
   a_corr <- cor(a_params, true_item_params[,"a_param"])
   b_corr <- cor(b_params, true_item_params[,"b_param"])
   D_corr <- cor(D_params, true_item_params[,"dif_param"])
