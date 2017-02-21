@@ -160,5 +160,9 @@ for(i in 1:nreps){
   saveRDS(est_param_summary, paste0("est_param_summary_", file_tag, ".rds"))
   saveRDS(est_param_means, paste0("est_param_means_", file_tag, ".rds"))
   saveRDS(correlations, paste0("correlations_", file_tag, ".rds"))
+  
+  print(paste0("Iteration ", i, " complete"))
+  print(paste0("Max R-hat value: ", max(params_summary[, "Rhat"])))
+  print(paste0("Mean R-hat value: ", mean(params_summary[, "Rhat"])))
 }
 
