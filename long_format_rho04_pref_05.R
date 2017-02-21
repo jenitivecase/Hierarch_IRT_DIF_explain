@@ -27,17 +27,29 @@ for(i in 1:length(needed_packages)){
 #number of people
 n_people <- 1000
 #number of items
-n_items <- 100
+n_items <- 40
 #number of items with DIF
-n_DIF <- 5
+n_DIF <- 2
 #number of reps
-nreps <- 100
+nreps <- 50
 #rho is the amount of DIF explained by the second-order factors
 rho <- 0.4
 #P_REF is the proportion of people in the reference group
 P_REF <- 0.5
 
-#### data save setup ####
+#### STAN SETUP ####
+#load stan model scripts
+source("stan_scripts.R")
+
+b.dat_long <- list("n_people", "n_items", "n_observations", "respondentid", 
+                   "itemid", "response", "group", "group_long",
+                   "DIFpredict", "n_ref", "n_ref_1")
+
+#analysis setup
+precomp <- stanc(model_code = stancode_long)
+precomp_model <- stan_model(stanc_ret = precomp)
+
+#### DATA SAVE SETUP ####
 true_params <- vector("list", nreps)
 result_objs <- vector("list", nreps)
 est_param_summary <- vector("list", nreps)
@@ -54,18 +66,6 @@ if(!dir.exists(paste0(work_dir, "/", folder_name))){
   dir.create(paste0(work_dir, "/", folder_name))
 }
 setwd(paste0(work_dir, "/", folder_name))
-
-#### STAN SETUP ####
-#load stan model scripts
-source("stan_scripts.R")
-
-b.dat_long <- list("n_people", "n_items", "n_observations", "respondentid", 
-                   "itemid", "response", "group", "group_long",
-                   "DIFpredict", "n_ref", "n_ref_1")
-
-#analysis setup
-precomp <- stanc(model_code = stancode_long)
-precomp_model <- stan_model(stanc_ret = precomp)
 
 for(i in 1:nreps){
   #### SIMULATION ####
