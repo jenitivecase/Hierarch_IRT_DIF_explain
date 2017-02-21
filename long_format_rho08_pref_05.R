@@ -33,7 +33,7 @@ n_DIF <- 5
 #number of reps
 nreps <- 100
 #rho is the amount of DIF explained by the second-order factors
-rho <- 0.4
+rho <- 0.8
 #P_REF is the proportion of people in the reference group
 P_REF <- 0.5
 
