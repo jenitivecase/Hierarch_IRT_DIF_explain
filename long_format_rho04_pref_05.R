@@ -105,7 +105,7 @@ for(i in 1:nreps){
   
   #conducting the analysis
   analysis <- sampling(precomp_model, data = b.dat_long,
-                       iter = 10000, warmup = 5000, chains = 2, verbose = FALSE, cores = 2)
+                       iter = 7500, warmup = 2500, chains = 2, verbose = FALSE, cores = 2)
   
   #save the analysis object
   result_objs[[i]] <- analysis
