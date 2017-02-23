@@ -1,12 +1,13 @@
 #### SETUP ####
-work_dir <- "C:/Users/jbrussow/Dropbox/REMS/11 Comps/Simulation"
+# work_dir <- "C:/Users/jbrussow/Dropbox/REMS/11 Comps/Simulation"
 
+work_dir <- getwd()
 
-if(Sys.info()["user"] == "jbrussow"){
-  setwd(work_dir)
-} else if (Sys.info()["user"] == "Jen"){
-  setwd(grepl("jbrussow", "Jen", work_dir))
-}
+# if(Sys.info()["user"] == "jbrussow"){
+#   setwd(work_dir)
+# } else if (Sys.info()["user"] == "Jen"){
+#   setwd(grepl("jbrussow", "Jen", work_dir))
+# }
 
 source("functions.R")
 date <- format.Date(Sys.Date(), "%Y%m%d")
@@ -105,7 +106,7 @@ for(i in 1:nreps){
   
   #conducting the analysis
   analysis <- sampling(precomp_model, data = b.dat_long,
-                       iter = 7500, warmup = 2500, chains = 2, verbose = FALSE, cores = 2)
+                       iter = 10000, warmup = 5000, chains = 2, verbose = FALSE, cores = 2)
   
   #save the analysis object
   result_objs[[i]] <- analysis
@@ -161,7 +162,7 @@ for(i in 1:nreps){
   saveRDS(est_param_means, paste0("est_param_means_", file_tag, ".rds"))
   saveRDS(correlations, paste0("correlations_", file_tag, ".rds"))
   
-  print(paste0("Iteration ", i, " complete"))
+  print(paste0("Replication ", i, " complete"))
   print(paste0("Max R-hat value: ", max(params_summary[, "Rhat"])))
   print(paste0("Mean R-hat value: ", mean(params_summary[, "Rhat"])))
 }
