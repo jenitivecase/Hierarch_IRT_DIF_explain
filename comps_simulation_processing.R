@@ -106,6 +106,13 @@ recovery$PREF <- gsub("-", ".", recovery$PREF)
 
 recovery
 
+#### GRAPHS ####
+scale_def <- function(data, column){
+  rounded <- c(round(max(data[, column]), digits = 1), round(min(data[, column]), digits = 1))
+  scale <- rounded[which.max(rounded)]
+  return(scale)
+}
+
 for(i in 1:length(conditions)){
   data <- as.data.frame(correlations_conditions[[paste0(conditions[i])]])
   rho <- grep("rho", unlist(strsplit(conditions[i], "_")), value = TRUE)
@@ -115,12 +122,13 @@ for(i in 1:length(conditions)){
   PREF <- grep("PREF", unlist(strsplit(conditions[i], "_")), value = TRUE)
   PREF <- gsub("PREF", "", PREF)
   PREF <- gsub("-", ".", PREF)
-  rounded <- c(round(max(data$R2_diff), digits = 1), round(min(data$R2_diff), digits = 1))
-  scale <- rounded[which.max(rounded)]
   
   #R2 difference
+  scale <- scale_def(data, "R2_diff")
+  increment <- (scale*2)/25
+  
   ggplot(data, aes(x = R2_diff)) + 
-    geom_histogram(binwidth = 0.05, alpha = 0.65, fill = "darkblue") + 
+    geom_histogram(binwidth = increment, alpha = 0.65, fill = "darkblue") + 
     scale_x_continuous(limits = c(-scale, scale)) +
     ggtitle(paste0("R-squared recovery for\nrho = ", rho, ", reference proportion = ", PREF)) + 
     labs(x = "Difference in R-squared", y = "Count") + 
@@ -128,8 +136,11 @@ for(i in 1:length(conditions)){
     geom_vline(xintercept = mean(data$R2_diff), color = "black")
   
   #focal mean difference
+  scale <- scale_def(data, "foc_mean_diff")
+  increment <- (scale*2)/25
+  
   ggplot(data, aes(x = foc_mean_diff)) + 
-    geom_histogram(binwidth = 0.05, alpha = 0.65, fill = "darkblue") + 
+    geom_histogram(binwidth = increment, alpha = 0.65, fill = "darkblue") + 
     scale_x_continuous(limits = c(-scale, scale)) +
     ggtitle(paste0("Focal group mean recovery for\nrho = ", rho, ", reference proportion = ", PREF)) + 
     labs(x = "Difference in focal group mean", y = "Count") + 
@@ -137,8 +148,11 @@ for(i in 1:length(conditions)){
     geom_vline(xintercept = mean(data$foc_mean_diff), color = "black")
   
   #reference mean difference
+  scale <- scale_def(data, "ref_mean_diff")
+  increment <- (scale*2)/25
+  
   ggplot(data, aes(x = ref_mean_diff)) + 
-    geom_histogram(binwidth = 0.05, alpha = 0.65, fill = "darkblue") + 
+    geom_histogram(binwidth = increment, alpha = 0.65, fill = "darkblue") + 
     scale_x_continuous(limits = c(-scale, scale)) +
     ggtitle(paste0("Reference group mean recovery for\nrho = ", rho, ", reference proportion = ", PREF)) + 
     labs(x = "Difference in reference group mean", y = "Count") + 
