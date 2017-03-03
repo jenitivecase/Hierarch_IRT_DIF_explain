@@ -20,21 +20,27 @@ correlation_get <- function(condition, file_list){
   return(output)
 }
 
-true_params_get <- function(condition, file_list){
+true_ability_get <- function(condition, file_list){
   output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
-  true_item_params <- lapply(output, function(x){
-    x <- x[which(grepl("true_item_params", names(x)))]
-  })
-  true_item_params <- lapply(true_item_params, unlist, recursive = FALSE)
   
   true_ability <- lapply(output, function(x){
     x <- x[which(grepl("true_ability", names(x)))]
   })
   true_ability <- lapply(true_ability, unlist, recursive = FALSE)
+  true_ability <- unlist(true_ability, recursive = FALSE)
   
-  output <- list("true_item_params" = true_item_params, 
-                 "true_ability" = true_ability)
-  return(output)
+  return(true_ability)
+}
+
+true_item_params_get <- function(condition, file_list){
+  output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
+  true_item_params <- lapply(output, function(x){
+    x <- x[which(grepl("true_item_params", names(x)))]
+  })
+  true_item_params <- lapply(true_item_params, unlist, recursive = FALSE)
+  true_item_params <- unlist(true_item_params, recursive = FALSE)
+  
+  return(true_item_params)
 }
 
 #### DATA RETRIEVAL ####
@@ -49,8 +55,8 @@ names(true_ability_params_conditions) <- conditions
 
 for(i in 1:length(conditions)){
   correlations_conditions[[i]] <- correlation_get(conditions[i], correlation_files)
-  true_item_params_conditions[[i]] <- true_params_get(conditions[i], true_param_files)$true_item_params
-  true_ability_params_conditions[[i]] <- true_params_get(conditions[i], true_param_files)$true_ability
+  true_item_params_conditions[[i]] <- true_item_params_get(conditions[i], true_param_files)
+  true_ability_params_conditions[[i]] <- true_ability_get(conditions[i], true_param_files)
 }
 
 #### FORMATTING ####
@@ -84,6 +90,7 @@ for(i in 1:length(conditions)){
   rounded <- c(round(max(data$R2_diff), digits = 1), round(min(data$R2_diff), digits = 1))
   scale <- rounded[which.max(rounded)]
   
+  #R2 difference
   ggplot(data, aes(x = R2_diff)) + 
     geom_histogram(binwidth = 0.05, alpha = 0.65, fill = "darkblue") + 
     scale_x_continuous(limits = c(-scale, scale)) +
@@ -91,6 +98,28 @@ for(i in 1:length(conditions)){
     labs(x = "Difference in R-squared", y = "Count") + 
     theme(plot.title = element_text(hjust = 0.5)) + 
     geom_vline(xintercept = mean(data$R2_diff), color = "black")
+  
+  #focal mean difference
+  ggplot(data, aes(x = foc_mean_diff)) + 
+    geom_histogram(binwidth = 0.05, alpha = 0.65, fill = "darkblue") + 
+    scale_x_continuous(limits = c(-scale, scale)) +
+    ggtitle(paste0("Focal group mean recovery for\nrho = ", rho, ", reference proportion = ", PREF)) + 
+    labs(x = "Difference in focal group mean", y = "Count") + 
+    theme(plot.title = element_text(hjust = 0.5)) + 
+    geom_vline(xintercept = mean(data$foc_mean_diff), color = "black")
+  
+  #reference mean difference
+  ggplot(data, aes(x = ref_mean_diff)) + 
+    geom_histogram(binwidth = 0.05, alpha = 0.65, fill = "darkblue") + 
+    scale_x_continuous(limits = c(-scale, scale)) +
+    ggtitle(paste0("Reference group mean recovery for\nrho = ", rho, ", reference proportion = ", PREF)) + 
+    labs(x = "Difference in reference group mean", y = "Count") + 
+    theme(plot.title = element_text(hjust = 0.5)) + 
+    geom_vline(xintercept = mean(data$ref_mean_diff), color = "black")
+
+  
+  true_theta <- true_ability_params_conditions[[i]] 
+  est_theta <- sd
 }
 
 
