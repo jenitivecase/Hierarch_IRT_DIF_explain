@@ -1,5 +1,16 @@
 #### SETUP ####
-setwd("E:/Comps simulation results 20170302/20170224_simulation-results")
+# setwd("E:/Comps simulation results 20170302/20170224_simulation-results")
+options(scipen = 999)
+date <- format.Date(Sys.Date(), "%Y%m%d")
+
+work_dir <- "C:/Users/jbrussow/Dropbox/REMS/11 Comps/Simulation/20170224_simulation-results"
+
+if(Sys.info()["user"] == "jbrussow"){
+  setwd(work_dir)
+} else if (Sys.info()["user"] == "Jen"){
+  setwd(grepl("jbrussow", "Jen", work_dir))
+}
+
 library(tidyr)
 library(dplyr)
 library(ggplot2)
@@ -20,33 +31,25 @@ correlation_get <- function(condition, file_list){
   return(output)
 }
 
-true_ability_get <- function(condition, file_list){
+param_get <- function(condition, file_list, param_name){
   output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
   
-  true_ability <- lapply(output, function(x){
-    x <- x[which(grepl("true_ability", names(x)))]
+  param <- lapply(output, function(x){
+    x <- x[which(grepl("param", names(x)))]
   })
-  true_ability <- lapply(true_ability, unlist, recursive = FALSE)
-  true_ability <- unlist(true_ability, recursive = FALSE)
+  param <- lapply(param, unlist, recursive = FALSE)
+  param <- unlist(param, recursive = FALSE)
   
-  return(true_ability)
-}
-
-true_item_params_get <- function(condition, file_list){
-  output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
-  true_item_params <- lapply(output, function(x){
-    x <- x[which(grepl("true_item_params", names(x)))]
-  })
-  true_item_params <- lapply(true_item_params, unlist, recursive = FALSE)
-  true_item_params <- unlist(true_item_params, recursive = FALSE)
-  
-  return(true_item_params)
+  return(param)
 }
 
 #### DATA RETRIEVAL ####
+
+#correlations
 correlations_conditions <- vector("list", length(conditions))
 names(correlations_conditions) <- conditions
 
+#true params
 true_item_params_conditions <- vector("list", length(conditions))
 names(true_item_params_conditions) <- conditions
 
@@ -55,9 +58,34 @@ names(true_ability_params_conditions) <- conditions
 
 for(i in 1:length(conditions)){
   correlations_conditions[[i]] <- correlation_get(conditions[i], correlation_files)
-  true_item_params_conditions[[i]] <- true_item_params_get(conditions[i], true_param_files)
-  true_ability_params_conditions[[i]] <- true_ability_get(conditions[i], true_param_files)
+  true_item_params_conditions[[i]] <- param_get(conditions[i], true_param_files, "true_item_params")
+  true_ability_params_conditions[[i]] <- param_get(conditions[i], true_param_files, "true_ability")
 }
+
+conditions_ability <- NULL
+for(i in 1:length(true_ability_params_conditions)){
+  conditions_ability <- c(conditions_ability, rep(names(true_ability_params_conditions[i]), 
+                       length(true_ability_params_conditions[[i]])))
+}
+conditions_item <- NULL
+
+for(i in 1:length(true_item_params_conditions)){
+  conditions_item <- c(conditions_item, rep(names(true_item_params_conditions[i]), 
+                                                  length(true_item_params_conditions[[i]])))
+}
+
+true_ability_params <- matrix(data = c(unlist(true_ability_params_conditions), 
+                                    conditions_ability),
+                           ncol = 2)
+
+true_item_params <- matrix(data = c(unlist(true_item_params_conditions), 
+                                    conditions_item),
+                                ncol = 2)
+
+#estimated params
+
+
+
 
 #### FORMATTING ####
 recovery <- data.frame(matrix(NA, nrow = length(conditions), ncol = ncol(correlations_conditions[[1]])))
