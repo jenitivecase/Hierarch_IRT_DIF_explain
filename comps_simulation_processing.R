@@ -95,7 +95,7 @@ for(i in 1:nrow(recovery)){
   recovery[i,] <- colMeans(correlations_conditions[[i]])
 }
 
-recovery$condition <- condition
+recovery$condition <- conditions
 recovery$rho <- grep("rho", unlist(strsplit(recovery$condition, "_")), value = TRUE)
 recovery$rho <- gsub("rho", "", recovery$rho)
 recovery$rho <- gsub("-", ".", recovery$rho)
@@ -104,7 +104,8 @@ recovery$PREF <- grep("PREF", unlist(strsplit(recovery$condition, "_")), value =
 recovery$PREF <- gsub("PREF", "", recovery$PREF)
 recovery$PREF <- gsub("-", ".", recovery$PREF)
 
-recovery
+recovery <- recovery[, c("rho", "PREF", "a_corr", "b_corr", "D_corr", 
+                         "theta_corr", "foc_mean_diff", "ref_mean_diff", "R2_diff")]
 
 #### GRAPHS ####
 scale_def <- function(list, column){
@@ -120,6 +121,8 @@ scale_def <- function(list, column){
 
 colors <- c("darkblue", "darkred", "darkgreen", "darkorange")
 
+
+### BIAS
 R2_histos <- vector("list", length(conditions))
 focmean_histos <- vector("list", length(conditions))
 refmean_histos <- vector("list", length(conditions))
@@ -136,43 +139,39 @@ for(i in 1:length(conditions)){
   
   #R2 difference
   xscale <- scale_def(correlations_conditions, "R2_diff")
-  increment <- (scale*2)/25
+  increment <- (xscale*2)/25
   
   R2_histos[[i]] <- ggplot(data, aes(x = R2_diff)) + 
     geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
     scale_x_continuous(limits = c(-xscale, xscale)) +
-    ggtitle(paste0("R-squared recovery for\nrho = ", rho, ", reference proportion = ", PREF)) + 
+    ggtitle(paste0("R-squared recovery bias for\nrho = ", rho, ", reference proportion = ", PREF)) + 
     labs(x = "Difference in R-squared", y = "Count") + 
     theme(plot.title = element_text(hjust = 0.5)) + 
     geom_vline(xintercept = mean(data$R2_diff), color = "black", linetype="dotted")
   
   #focal mean difference
-  scale <- scale_def(correlations_conditions, "foc_mean_diff")
-  increment <- (scale*2)/25
+  xscale <- scale_def(correlations_conditions, "foc_mean_diff")
+  increment <- (xscale*2)/25
   
   focmean_histos[[i]] <- ggplot(data, aes(x = foc_mean_diff)) + 
     geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
     scale_x_continuous(limits = c(-xscale, xscale)) +
-    ggtitle(paste0("Focal group mean recovery for\nrho = ", rho, ", reference proportion = ", PREF)) + 
+    ggtitle(paste0("Focal group mean recovery bias for\nrho = ", rho, ", reference proportion = ", PREF)) + 
     labs(x = "Difference in focal group mean", y = "Count") + 
     theme(plot.title = element_text(hjust = 0.5)) + 
     geom_vline(xintercept = mean(data$foc_mean_diff), color = "black", linetype="dotted")
   
   #reference mean difference
-  scale <- scale_def(correlations_conditions, "ref_mean_diff")
-  increment <- (scale*2)/25
+  xscale <- scale_def(correlations_conditions, "ref_mean_diff")
+  increment <- (xscale*2)/25
   
   refmean_histos[[i]] <- ggplot(data, aes(x = ref_mean_diff)) + 
     geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
     scale_x_continuous(limits = c(-xscale, xscale)) +
-    ggtitle(paste0("Reference group mean recovery for\nrho = ", rho, ", reference proportion = ", PREF)) + 
+    ggtitle(paste0("Reference group mean recovery bias for\nrho = ", rho, ", reference proportion = ", PREF)) + 
     labs(x = "Difference in reference group mean", y = "Count") + 
     theme(plot.title = element_text(hjust = 0.5)) + 
     geom_vline(xintercept = mean(data$ref_mean_diff), color = "black", linetype="dotted")
-
-  
-  true_theta <- true_ability_params_conditions[[i]] 
-  est_theta <- sd
 }
 
 source(paste0(getwd(), "/../multiplot_fun.R"))
@@ -180,4 +179,9 @@ multiplot(R2_histos[[1]], R2_histos[[2]], R2_histos[[3]], R2_histos[[4]], cols =
 
 multiplot(focmean_histos[[1]], focmean_histos[[2]], focmean_histos[[3]], focmean_histos[[4]], cols = 2)
 
-multiplot(R2_histos[[1]], R2_histos[[2]], R2_histos[[3]], R2_histos[[4]], cols = 2)
+multiplot(refmean_histos[[1]], refmean_histos[[2]], refmean_histos[[3]], refmean_histos[[4]], cols = 2)
+
+### CORRELATIONS
+{
+  
+}
