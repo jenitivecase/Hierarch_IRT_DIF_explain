@@ -107,11 +107,22 @@ recovery$PREF <- gsub("-", ".", recovery$PREF)
 recovery
 
 #### GRAPHS ####
-scale_def <- function(data, column){
-  rounded <- c(round(max(data[, column]), digits = 1), round(min(data[, column]), digits = 1))
-  scale <- rounded[which.max(rounded)]
+scale_def <- function(list, column){
+  scale <- NA
+  for(i in 1:length(list)){
+    rounded <- abs(c(round(max(list[[i]][, column]), digits = 1), 
+                     round(min(list[[i]][, column]), digits = 1)))
+    scale[i] <- rounded[which.max(rounded)]
+  }
+  scale <- scale[which.max(scale)]
   return(scale)
 }
+
+colors <- c("darkblue", "darkred", "darkgreen", "darkorange")
+
+R2_histos <- vector("list", length(conditions))
+focmean_histos <- vector("list", length(conditions))
+refmean_histos <- vector("list", length(conditions))
 
 for(i in 1:length(conditions)){
   data <- as.data.frame(correlations_conditions[[paste0(conditions[i])]])
@@ -124,45 +135,49 @@ for(i in 1:length(conditions)){
   PREF <- gsub("-", ".", PREF)
   
   #R2 difference
-  scale <- scale_def(data, "R2_diff")
+  xscale <- scale_def(correlations_conditions, "R2_diff")
   increment <- (scale*2)/25
   
-  ggplot(data, aes(x = R2_diff)) + 
-    geom_histogram(binwidth = increment, alpha = 0.65, fill = "darkblue") + 
-    scale_x_continuous(limits = c(-scale, scale)) +
+  R2_histos[[i]] <- ggplot(data, aes(x = R2_diff)) + 
+    geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
+    scale_x_continuous(limits = c(-xscale, xscale)) +
     ggtitle(paste0("R-squared recovery for\nrho = ", rho, ", reference proportion = ", PREF)) + 
     labs(x = "Difference in R-squared", y = "Count") + 
     theme(plot.title = element_text(hjust = 0.5)) + 
-    geom_vline(xintercept = mean(data$R2_diff), color = "black")
+    geom_vline(xintercept = mean(data$R2_diff), color = "black", linetype="dotted")
   
   #focal mean difference
-  scale <- scale_def(data, "foc_mean_diff")
+  scale <- scale_def(correlations_conditions, "foc_mean_diff")
   increment <- (scale*2)/25
   
-  ggplot(data, aes(x = foc_mean_diff)) + 
-    geom_histogram(binwidth = increment, alpha = 0.65, fill = "darkblue") + 
-    scale_x_continuous(limits = c(-scale, scale)) +
+  focmean_histos[[i]] <- ggplot(data, aes(x = foc_mean_diff)) + 
+    geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
+    scale_x_continuous(limits = c(-xscale, xscale)) +
     ggtitle(paste0("Focal group mean recovery for\nrho = ", rho, ", reference proportion = ", PREF)) + 
     labs(x = "Difference in focal group mean", y = "Count") + 
     theme(plot.title = element_text(hjust = 0.5)) + 
-    geom_vline(xintercept = mean(data$foc_mean_diff), color = "black")
+    geom_vline(xintercept = mean(data$foc_mean_diff), color = "black", linetype="dotted")
   
   #reference mean difference
-  scale <- scale_def(data, "ref_mean_diff")
+  scale <- scale_def(correlations_conditions, "ref_mean_diff")
   increment <- (scale*2)/25
   
-  ggplot(data, aes(x = ref_mean_diff)) + 
-    geom_histogram(binwidth = increment, alpha = 0.65, fill = "darkblue") + 
-    scale_x_continuous(limits = c(-scale, scale)) +
+  refmean_histos[[i]] <- ggplot(data, aes(x = ref_mean_diff)) + 
+    geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
+    scale_x_continuous(limits = c(-xscale, xscale)) +
     ggtitle(paste0("Reference group mean recovery for\nrho = ", rho, ", reference proportion = ", PREF)) + 
     labs(x = "Difference in reference group mean", y = "Count") + 
     theme(plot.title = element_text(hjust = 0.5)) + 
-    geom_vline(xintercept = mean(data$ref_mean_diff), color = "black")
+    geom_vline(xintercept = mean(data$ref_mean_diff), color = "black", linetype="dotted")
 
   
   true_theta <- true_ability_params_conditions[[i]] 
   est_theta <- sd
 }
 
+source(paste0(getwd(), "/../multiplot_fun.R"))
+multiplot(R2_histos[[1]], R2_histos[[2]], R2_histos[[3]], R2_histos[[4]], cols = 2)
 
+multiplot(focmean_histos[[1]], focmean_histos[[2]], focmean_histos[[3]], focmean_histos[[4]], cols = 2)
 
+multiplot(R2_histos[[1]], R2_histos[[2]], R2_histos[[3]], R2_histos[[4]], cols = 2)
