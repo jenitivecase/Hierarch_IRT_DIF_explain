@@ -52,7 +52,7 @@ precomp_model <- stan_model(stanc_ret = precomp)
 
 #### DATA SAVE SETUP ####
 true_params <- vector("list", nreps)
-result_objs <- vector("list", nreps)
+# result_objs <- vector("list", nreps)
 est_param_summary <- vector("list", nreps)
 est_param_means <- vector("list", nreps)
 correlations <- vector("list", nreps)
@@ -109,14 +109,14 @@ for(i in 1:nreps){
                        iter = 10000, warmup = 5000, chains = 2, verbose = FALSE, cores = 2)
   
   #save the analysis object
-  result_objs[[i]] <- analysis
+  # result_objs[[i]] <- analysis
   
   #### OUTPUT ####
   #pull out the summary of the estimated parameters
   params_summary <- summary(analysis, pars = c("a", "b", "D", "beta1", "mu", 
                                                "sigma2", "R2", "theta",
                                                "foc_mean"),
-                            probs = c(0.025, 0.25, 0.75, 0.975))$summary
+                            probs = c(0.025, 0.25, 0.5, 0.75, 0.975))$summary
   
   #save the summary of the estimated parameters
   est_param_summary[[i]] <- params_summary
@@ -157,7 +157,7 @@ for(i in 1:nreps){
   
   #write all the good stuff out to disk
   saveRDS(true_params, paste0("true_params_", file_tag, ".rds"))
-  saveRDS(result_objs, paste0("result_objs_", file_tag, ".rds"))
+  # saveRDS(result_objs, paste0("result_objs_", file_tag, ".rds"))
   saveRDS(est_param_summary, paste0("est_param_summary_", file_tag, ".rds"))
   saveRDS(est_param_means, paste0("est_param_means_", file_tag, ".rds"))
   saveRDS(correlations, paste0("correlations_", file_tag, ".rds"))

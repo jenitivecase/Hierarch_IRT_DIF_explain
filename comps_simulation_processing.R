@@ -43,6 +43,14 @@ param_get <- function(condition, file_list, param_name){
   return(param)
 }
 
+est_param_get <- function(condition, file_list, param_name){
+  output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
+  
+  param <- lapply(output, as.data.frame)
+  param <- bind_rows(param, .id = names(output))
+  return(param)
+}
+
 #### DATA RETRIEVAL ####
 
 #correlations
@@ -56,19 +64,30 @@ names(true_item_params_conditions) <- conditions
 true_ability_params_conditions <- vector("list", length(conditions))
 names(true_ability_params_conditions) <- conditions
 
+#est params
+est_item_params_conditions <- vector("list", length(conditions))
+names(est_item_params_conditions) <- conditions
+
+est_ability_params_conditions <- vector("list", length(conditions))
+names(est_ability_params_conditions) <- conditions
+
+
+
 for(i in 1:length(conditions)){
   correlations_conditions[[i]] <- correlation_get(conditions[i], correlation_files)
   true_item_params_conditions[[i]] <- param_get(conditions[i], true_param_files, "true_item_params")
   true_ability_params_conditions[[i]] <- param_get(conditions[i], true_param_files, "true_ability")
+  est_item_params_conditions[[i]] <- est_param_get(conditions[i], est_param_files, "est_item_params")
+  est_ability_params_conditions[[i]] <- est_param_get(conditions[i], est_param_files, "est_ability")
 }
 
+#getting it into long format
 conditions_ability <- NULL
 for(i in 1:length(true_ability_params_conditions)){
   conditions_ability <- c(conditions_ability, rep(names(true_ability_params_conditions[i]), 
                        length(true_ability_params_conditions[[i]])))
 }
 conditions_item <- NULL
-
 for(i in 1:length(true_item_params_conditions)){
   conditions_item <- c(conditions_item, rep(names(true_item_params_conditions[i]), 
                                                   length(true_item_params_conditions[[i]])))
