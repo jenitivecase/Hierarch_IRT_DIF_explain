@@ -3,12 +3,12 @@
 options(scipen = 999)
 date <- format.Date(Sys.Date(), "%Y%m%d")
 
-work_dir <- "C:/Users/jbrussow/Dropbox/REMS/11 Comps/Simulation/20170224_simulation-results"
+work_dir <- "C:/Users/jbrussow/Dropbox/REMS/11 Comps/Simulation/20170224_simulation-results/combined"
 
 if(Sys.info()["user"] == "jbrussow"){
   setwd(work_dir)
 } else if (Sys.info()["user"] == "Jen"){
-  setwd(grepl("jbrussow", "Jen", work_dir))
+  setwd(gsub("jbrussow", "Jen", work_dir))
 }
 
 library(tidyr)
@@ -16,12 +16,29 @@ library(dplyr)
 library(ggplot2)
 
 files <- list.files(getwd())
+files_df <- as.data.frame(list.files_df(getwd()))
+names(files_df) <- "filename"
+files_df$filename <- as.character(files_df$filename)
+files_df <- filter(files_df, filename != "combined")
+
+for(i in 1:nrow(files_df)){
+  info <-unlist(strsplit(as.character(
+    files_df[i, "filename"]), "_"))
+  len <- length(info)
+  condition <- paste0(c(info[(len-1):len]), collapse = "", sep = "_")
+  condition <- gsub("\\.rds\\_", "", condition)
+  type <- paste0(c(info[1:(len-3)]), collapse = "", sep = "_")
+  type <- gsub("\\_$", "", type)
+  files_df[i, "condition"] <- condition
+  files_df[i, "type"] <- type
+}
+
+conditions <- unique(files_df$condition)
+types <- unique(files_df$type)
 
 correlation_files <- files[which(grepl("correlations", files))]
 true_param_files <- files[which(grepl("true_params", files))]
 est_param_files <- files[which(grepl("est_param_summary", files))]
-
-conditions <- c("0-4rho_0-5PREF", "0-4rho_0-9PREF", "0-8rho_0-5PREF", "0-8rho_0-9PREF")
 
 #### FUNCTIONS ####
 correlation_get <- function(condition, file_list){
@@ -193,12 +210,15 @@ for(i in 1:length(conditions)){
     geom_vline(xintercept = mean(data$ref_mean_diff), color = "black", linetype="dotted")
 }
 
-source(paste0(getwd(), "/../multiplot_fun.R"))
+source(paste0(getwd(), "/../../multiplot_fun.R"))
+
+pdf("Bias_histograms.pdf", width = 10, height = 10)
 multiplot(R2_histos[[1]], R2_histos[[2]], R2_histos[[3]], R2_histos[[4]], cols = 2)
 
 multiplot(focmean_histos[[1]], focmean_histos[[2]], focmean_histos[[3]], focmean_histos[[4]], cols = 2)
 
 multiplot(refmean_histos[[1]], refmean_histos[[2]], refmean_histos[[3]], refmean_histos[[4]], cols = 2)
+dev.off()
 
 ### CORRELATIONS
 {

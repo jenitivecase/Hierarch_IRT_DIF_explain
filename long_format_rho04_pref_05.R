@@ -6,7 +6,7 @@ work_dir <- getwd()
 # if(Sys.info()["user"] == "jbrussow"){
 #   setwd(work_dir)
 # } else if (Sys.info()["user"] == "Jen"){
-#   setwd(grepl("jbrussow", "Jen", work_dir))
+#   setwd(gsub("jbrussow", "Jen", work_dir))
 # }
 
 source("functions.R")

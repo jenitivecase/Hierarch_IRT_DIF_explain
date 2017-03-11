@@ -9,7 +9,7 @@ work_dir <- "C:/Users/jbrussow/Dropbox/REMS/11 Comps/Simulation/20170224_simulat
 if(Sys.info()["user"] == "jbrussow"){
   setwd(work_dir)
 } else if (Sys.info()["user"] == "Jen"){
-  setwd(grepl("jbrussow", "Jen", work_dir))
+  setwd(gsub("jbrussow", "Jen", work_dir))
 }
 
 library(tidyr)
