@@ -119,6 +119,18 @@ true_item_params <- matrix(data = c(unlist(true_item_params_conditions),
                                 ncol = 2)
 
 #estimated params
+est_ability_means <- lapply(est_ability_params_conditions, function(x) x = x$mean)
+  
+est_ability_params <- matrix(data = c(unlist(est_ability_params_conditions), 
+                                       conditions_ability),
+                              ncol = 2)
+
+
+est_item_means <- lapply(est_item_params_conditions, function(x) x = x$mean)
+
+est_item_params <- matrix(data = c(unlist(est_item_params_conditions), 
+                                      conditions_item),
+                             ncol = 2)
 
 
 
@@ -140,7 +152,7 @@ recovery$PREF <- grep("PREF", unlist(strsplit(recovery$condition, "_")), value =
 recovery$PREF <- gsub("PREF", "", recovery$PREF)
 recovery$PREF <- gsub("-", ".", recovery$PREF)
 
-recovery <- recovery[, c("rho", "PREF", "a_corr", "b_corr", "D_corr", 
+recovery <- recovery[, c("rho", "PREF", "b_corr", "b_corr", "D_corr", 
                          "theta_corr", "foc_mean_diff", "ref_mean_diff", "R2_diff")]
 
 #### GRAPHS ####
@@ -152,6 +164,15 @@ scale_def <- function(list, column){
     scale[i] <- rounded[which.max(rounded)]
   }
   scale <- scale[which.max(scale)]
+  return(scale)
+}
+
+scale_def_corr <- function(list, column){
+  scale <- NA
+  for(i in 1:length(list)){
+    scale[i] <- (floor(((min(list[[i]][, column])) * 10)) / 10)
+  }
+  scale <- c(scale[which.min(scale)], 1)
   return(scale)
 }
 
@@ -221,6 +242,78 @@ multiplot(refmean_histos[[1]], refmean_histos[[2]], refmean_histos[[3]], refmean
 dev.off()
 
 ### CORRELATIONS
-{
+a_corr_graph <- vector("list", length(conditions))
+b_corr_graph <- vector("list", length(conditions))
+D_corr_graph <- vector("list", length(conditions))
+theta_corr_graph <- vector("list", length(conditions))
+
+for(i in 1:length(conditions)){
+  data <- as.data.frame(correlations_conditions[[paste0(conditions[i])]])
+  rho <- grep("rho", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  rho <- gsub("rho", "", rho)
+  rho <- gsub("-", ".", rho)
+  
+  PREF <- grep("PREF", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  PREF <- gsub("PREF", "", PREF)
+  PREF <- gsub("-", ".", PREF)
+  
+  #a_corr
+  xscale <- scale_def_corr(correlations_conditions, "a_corr")
+  increment <- (diff(xscale))/25
+  
+  a_corr_graph[[i]] <- ggplot(data, aes(x = a_corr)) + 
+    geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
+    scale_x_continuous(limits = xscale) +
+    ggtitle(paste0("A-parameter correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
+    labs(x = "A-parameter correlation", y = "Count") + 
+    theme(plot.title = element_text(hjust = 0.5)) + 
+    geom_vline(xintercept = mean(data$a_corr), color = "black", linetype="dotted")
+  
+  #b_corr
+  xscale <- scale_def_corr(correlations_conditions, "b_corr")
+  increment <- (diff(xscale))/25
+  
+  b_corr_graph[[i]] <- ggplot(data, aes(x = b_corr)) + 
+    geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
+    scale_x_continuous(limits = xscale) +
+    ggtitle(paste0("B-parameter correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
+    labs(x = "B-parameter correlation", y = "Count") + 
+    theme(plot.title = element_text(hjust = 0.5)) + 
+    geom_vline(xintercept = mean(data$b_corr), color = "black", linetype="dotted")
+  
+  #D_corr
+  xscale <- scale_def_corr(correlations_conditions, "D_corr")
+  increment <- (diff(xscale))/25
+  
+  D_corr_graph[[i]] <- ggplot(data, aes(x = D_corr)) + 
+    geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
+    scale_x_continuous(limits = xscale) +
+    ggtitle(paste0("D-parameter correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
+    labs(x = "D-parameter correlation", y = "Count") + 
+    theme(plot.title = element_text(hjust = 0.5)) + 
+    geom_vline(xintercept = mean(data$D_corr), color = "black", linetype="dotted")
+  
+  #theta_corr
+  xscale <- scale_def_corr(correlations_conditions, "theta_corr")
+  increment <- (diff(xscale))/25
+  
+  theta_corr_graph[[i]] <- ggplot(data, aes(x = theta_corr)) + 
+    geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
+    scale_x_continuous(limits = xscale) +
+    ggtitle(paste0("Theta correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
+    labs(x = "Theta correlation", y = "Count") + 
+    theme(plot.title = element_text(hjust = 0.5)) + 
+    geom_vline(xintercept = mean(data$theta_corr), color = "black", linetype="dotted")
   
 }
+
+pdf("corr_histograms.pdf", width = 10, height = 10)
+multiplot(a_corr_graph[[1]], a_corr_graph[[2]], a_corr_graph[[3]], a_corr_graph[[4]], cols = 2)
+
+multiplot(b_corr_graph[[1]], b_corr_graph[[2]], b_corr_graph[[3]], b_corr_graph[[4]], cols = 2)
+
+multiplot(D_corr_graph[[1]], D_corr_graph[[2]], D_corr_graph[[3]], D_corr_graph[[4]], cols = 2)
+
+multiplot(theta_corr_graph[[1]], theta_corr_graph[[2]], theta_corr_graph[[3]], theta_corr_graph[[4]], cols = 2)
+
+dev.off()
