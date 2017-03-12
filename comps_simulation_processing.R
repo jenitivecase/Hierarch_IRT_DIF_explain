@@ -16,10 +16,12 @@ library(dplyr)
 library(ggplot2)
 
 files <- list.files(getwd())
-files_df <- as.data.frame(list.files_df(getwd()))
+files_df <- as.data.frame(files)
 names(files_df) <- "filename"
 files_df$filename <- as.character(files_df$filename)
 files_df <- filter(files_df, filename != "combined")
+files_df <- as.data.frame(files_df[c(grep("pdf", files_df$filename, invert = TRUE)),])
+names(files_df) <- "filename"
 
 for(i in 1:nrow(files_df)){
   info <-unlist(strsplit(as.character(
@@ -39,6 +41,9 @@ types <- unique(files_df$type)
 correlation_files <- files[which(grepl("correlations", files))]
 true_param_files <- files[which(grepl("true_params", files))]
 est_param_files <- files[which(grepl("est_param_summary", files))]
+est_param_mean_files <- files[which(grepl("est_param_means", files))]
+
+params_summary_names <- readRDS("../../params_summary_names.rds")
 
 #### FUNCTIONS ####
 correlation_get <- function(condition, file_list){
@@ -68,6 +73,13 @@ est_param_get <- function(condition, file_list, param_name){
   return(param)
 }
 
+est_param_means_get <- function(condition, file_list, param_name){
+  output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
+  
+  param <- lapply(output, function(x) as.data.frame(x["a_params"]))
+  param <- bind_rows(param, .id = names(output))
+}
+
 #### DATA RETRIEVAL ####
 
 #correlations
@@ -82,20 +94,22 @@ true_ability_params_conditions <- vector("list", length(conditions))
 names(true_ability_params_conditions) <- conditions
 
 #est params
-est_item_params_conditions <- vector("list", length(conditions))
-names(est_item_params_conditions) <- conditions
+# est_item_params_conditions <- vector("list", length(conditions))
+# names(est_item_params_conditions) <- conditions
+# 
+# est_ability_params_conditions <- vector("list", length(conditions))
+# names(est_ability_params_conditions) <- conditions
 
-est_ability_params_conditions <- vector("list", length(conditions))
-names(est_ability_params_conditions) <- conditions
-
-
+est_a_params <- vector("list", length(conditions))
+names(est_a_params) <- conditions
 
 for(i in 1:length(conditions)){
   correlations_conditions[[i]] <- correlation_get(conditions[i], correlation_files)
   true_item_params_conditions[[i]] <- param_get(conditions[i], true_param_files, "true_item_params")
   true_ability_params_conditions[[i]] <- param_get(conditions[i], true_param_files, "true_ability")
-  est_item_params_conditions[[i]] <- est_param_get(conditions[i], est_param_files, "est_item_params")
-  est_ability_params_conditions[[i]] <- est_param_get(conditions[i], est_param_files, "est_ability")
+  # est_item_params_conditions[[i]] <- est_param_get(conditions[i], est_param_files, "est_item_params")
+  # est_ability_params_conditions[[i]] <- est_param_get(conditions[i], est_param_files, "est_ability")
+  est_a_params[[i]] <- est_param_means_get(conditions[i], est_param_mean_files, "a_param")
 }
 
 #getting it into long format
@@ -118,19 +132,18 @@ true_item_params <- matrix(data = c(unlist(true_item_params_conditions),
                                     conditions_item),
                                 ncol = 2)
 
-#estimated params
-est_ability_means <- lapply(est_ability_params_conditions, function(x) x = x$mean)
-  
-est_ability_params <- matrix(data = c(unlist(est_ability_params_conditions), 
-                                       conditions_ability),
-                              ncol = 2)
-
-
-est_item_means <- lapply(est_item_params_conditions, function(x) x = x$mean)
-
-est_item_params <- matrix(data = c(unlist(est_item_params_conditions), 
-                                      conditions_item),
-                             ncol = 2)
+#estimated params - need to fix
+# est_ability_means <- lapply(est_ability_params_conditions, function(x) x = x$mean)
+#   
+# est_ability_params <- matrix(data = c(unlist(est_ability_means), 
+#                                        conditions_ability),
+#                               ncol = 2)
+# 
+# est_item_means <- lapply(est_item_params_conditions, function(x) x = x$mean)
+# 
+# est_item_params <- matrix(data = c(unlist(est_item_means), 
+#                                       conditions_item),
+#                              ncol = 2)
 
 
 

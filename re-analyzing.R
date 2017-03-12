@@ -16,6 +16,7 @@ if(Sys.info()["user"] == "jbrussow"){
 library(tidyr)
 library(dplyr)
 library(ggplot2)
+library(rstan)
 
 files <- as.data.frame(list.files(getwd()))
 names(files) <- "filename"
@@ -41,25 +42,17 @@ types_conditions <- expand.grid(conditions, types)
 names(types_conditions) <- c("conditions", "types")
 types_conditions <- apply(types_conditions, 2, as.character)
 
-if(!dir.exists("combined")){dir.create("combined")}
+results_files <- files[which(grepl("result", files$filename)),]
 
-for(i in 1:nrow(types_conditions)){
-  condition_matches <- grep(types_conditions[i, "conditions"], files$filename)
-  type_matches <- grep(types_conditions[i, "types"], files$filename)
-  indices <- condition_matches[which(condition_matches %in% type_matches)]
-  set_files <- files[indices, "filename"]
+for(i in 1:nrow(results_files)){
+  output <- readRDS(results_files[i, "filename"])
+  output <- output[!sapply(output, is.null)] 
   
-  out <- NA
-  
-  for(j in 1:length(set_files)){
-    output <- readRDS(set_files[j])
-    output <- output[!sapply(output, is.null)] 
-    out <- append(out, output)
+  for(j in 1:length(output)){
+    params_summary <- summary(output[[j]], pars = c("a", "b", "D", "beta1", "mu", 
+                                                 "sigma2", "R2", "theta",
+                                                 "foc_mean"),
+                              probs = c(0.025, 0.25, 0.5, 0.75, 0.975))$summary  
   }
-  
-  out <- out[c(2:length(out))]
-  
-  fname <- paste0("combined_", types_conditions[i, "types"], "_", types_conditions[i, "conditions"], ".rds")
-  saveRDS(out, paste0("combined/", fname))
   
 }
