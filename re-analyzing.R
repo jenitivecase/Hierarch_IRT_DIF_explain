@@ -53,6 +53,7 @@ for(i in 1:nrow(results_files)){
   output <- readRDS(results_files[i, "filename"])
   output <- output[!sapply(output, is.null)] 
   
+  params_extraction <- vector("list", nreps)
   est_param_summary <- vector("list", length(output))
   # est_param_medians <- vector("list", length(output))
   
@@ -62,27 +63,29 @@ for(i in 1:nrow(results_files)){
                                                  "foc_mean"),
                               probs = c(0.025, 0.25, 0.5, 0.75, 0.975))$summary 
     
-    # est_param_summary[[j]] <- params_summary
-    # 
-    # params <- extract(output[[j]], pars = c("a", "b", "D", "beta1", "mu", "sigma2", 
-    #                                      "R2", "theta", "foc_mean"))
-    # 
-    # a_params <- as.matrix(colMedians(params$a))
-    # b_params <- as.matrix(colMedians(params$b))
-    # D_params <- as.matrix(colMedians(params$D))
-    # beta1 <- median(params$beta1)
-    # mu <- as.matrix(colMedians(params$mu))
-    # sigma2 <- median(params$sigma2)
-    # R2 <- median(params$R2)
-    # theta <- as.matrix(colMedians(params$theta))
-    # foc_mean <- median(params$foc_mean)
-    # 
-    # #save the medians of estimated parameters
-    # est_param_medians[[j]] <- list(a_params, b_params, D_params, beta1, 
-    #                              mu, sigma2, R2, theta, foc_mean)
-    # names(est_param_medians[[j]]) <- c("a_params", "b_params", "D_params", 
-    #                                  "beta1", "mu", "sigma2", "R2", "theta", 
-    #                                  "foc_mean")
+    est_param_summary[[j]] <- params_summary
+
+    params <- extract(output[[j]], pars = c("a", "b", "D", "beta1", "mu", "sigma2",
+                                         "R2", "theta", "foc_mean"))
+    
+    params_extraction[[i]] <- params
+
+    a_params <- as.matrix(colMedians(params$a))
+    b_params <- as.matrix(colMedians(params$b))
+    D_params <- as.matrix(colMedians(params$D))
+    beta1 <- median(params$beta1)
+    mu <- as.matrix(colMedians(params$mu))
+    sigma2 <- median(params$sigma2)
+    R2 <- median(params$R2)
+    theta <- as.matrix(colMedians(params$theta))
+    foc_mean <- median(params$foc_mean)
+
+    #save the medians of estimated parameters
+    est_param_medians[[j]] <- list(a_params, b_params, D_params, beta1,
+                                 mu, sigma2, R2, theta, foc_mean)
+    names(est_param_medians[[j]]) <- c("a_params", "b_params", "D_params",
+                                     "beta1", "mu", "sigma2", "R2", "theta",
+                                     "foc_mean")
     
   }
   
