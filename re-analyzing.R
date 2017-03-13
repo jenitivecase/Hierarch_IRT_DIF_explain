@@ -53,7 +53,7 @@ for(i in 1:nrow(results_files)){
   output <- readRDS(results_files[i, "filename"])
   output <- output[!sapply(output, is.null)] 
   
-  params_extraction <- vector("list", nreps)
+  params_extraction <- vector("list", length(output))
   est_param_summary <- vector("list", length(output))
   # est_param_medians <- vector("list", length(output))
   
