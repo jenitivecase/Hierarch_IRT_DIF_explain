@@ -56,6 +56,18 @@ correlation_get <- function(condition, file_list){
   return(output)
 }
 
+# param_get <- function(condition, file_list, param_name){
+#   output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
+#   
+#   param <- lapply(output, function(x){
+#     x <- x[which(grepl("param", names(x)))]
+#   })
+#   param <- lapply(param, unlist, recursive = FALSE)
+#   param <- unlist(param, recursive = FALSE)
+#   
+#   return(param)
+# }
+
 true_param_get <- function(condition, file_list, param_type, param_name){
   output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
   
@@ -99,21 +111,12 @@ names(correlations_conditions) <- conditions
 true_item_params <- vector("list", 3)
 names(true_item_params) <- c("a_param", "b_param", "dif_param")
 
-# true_ability_params_conditions <- vector("list", length(conditions))
-# names(true_ability_params_conditions) <- conditions
-# 
-# est_ability_params_conditions <- vector("list", length(conditions))
-# names(est_ability_params_conditions) <- conditions
-
 est_param_means <- vector("list", length(param_means_names))
 names(est_param_means) <- param_means_names
 
 for(i in 1:length(conditions)){
   correlations_conditions[[i]] <- correlation_get(conditions[i], correlation_files)
-  true_item_params_conditions[[i]] <- param_get(conditions[i], true_param_files, "true_item_params")
-  # est_item_params_conditions[[i]] <- est_param_get(conditions[i], est_param_files, "est_item_params")
-  # est_ability_params_conditions[[i]] <- est_param_get(conditions[i], est_param_files, "est_ability")
-  
+
   for(j in 1:length(est_param_means)){
    est_param_means[[j]][[i]] <- est_param_means_get(conditions[i], est_param_mean_files, names(est_param_means[j]))
   }
@@ -125,41 +128,9 @@ for(i in 1:length(conditions)){
   }
 }
 
-nreps <- length(true_ability_params_conditions[[1]])
+nreps <- nrow(correlations_conditions[[1]])
 
 #getting it into long format
-# conditions_ability <- NULL
-# for(i in 1:length(true_ability_params_conditions)){
-#   conditions_ability <- c(conditions_ability, rep(names(true_ability_params_conditions[i]), (nreps*100)))
-# }
-conditions_item <- NULL
-for(i in 1:length(true_item_params_conditions)){
-  conditions_item <- c(conditions_item, rep(names(true_item_params_conditions[i]), 
-                                            (nreps*(nrow(true_item_params_conditions[[1]][[1]])))))
-}
-
-
-# true_ability_params <- matrix(data = c(unlist(true_ability_params_conditions), 
-#                                     conditions_ability),
-#                            ncol = 2)
-# 
-# true_item_params <- matrix(data = c(unlist(true_item_params_conditions), 
-#                                     conditions_item),
-#                                 ncol = 2)
-# 
-#estimated params - need to fix
-# est_ability_means <- lapply(est_ability_params_conditions, function(x) x = x$mean)
-#   
-# est_ability_params <- matrix(data = c(unlist(est_ability_means), 
-#                                        conditions_ability),
-#                               ncol = 2)
-# 
-# est_item_means <- lapply(est_item_params_conditions, function(x) x = x$mean)
-# 
-# est_item_params <- matrix(data = c(unlist(est_item_means), 
-#                                       conditions_item),
-#                              ncol = 2)
-
 for(i in 1:length(est_param_means)){
   param_vec_length <- nrow(est_param_means[[i]][[1]])
   conditions_vec <- NULL
