@@ -59,12 +59,8 @@ correlation_get <- function(condition, file_list){
 param_get <- function(condition, file_list, param_name){
   output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
   
-  param <- lapply(output, function(x){
-    x <- x[which(grepl("param", names(x)))]
-  })
-  param <- lapply(param, unlist, recursive = FALSE)
-  param <- unlist(param, recursive = FALSE)
-  
+  param <- lapply(output, function(x) as.data.frame(x[param_name]))
+  param <- bind_rows(param, .id = names(output))
   return(param)
 }
 
@@ -121,19 +117,20 @@ for(i in 1:length(conditions)){
 nreps <- length(true_ability_params_conditions[[1]])
 
 #getting it into long format
-conditions_ability <- NULL
-for(i in 1:length(true_ability_params_conditions)){
-  conditions_ability <- c(conditions_ability, rep(names(true_ability_params_conditions[i]), nreps))
-}
+# conditions_ability <- NULL
+# for(i in 1:length(true_ability_params_conditions)){
+#   conditions_ability <- c(conditions_ability, rep(names(true_ability_params_conditions[i]), (nreps*100)))
+# }
 conditions_item <- NULL
 for(i in 1:length(true_item_params_conditions)){
-  conditions_item <- c(conditions_item, rep(names(true_item_params_conditions[i]), nreps))
+  conditions_item <- c(conditions_item, rep(names(true_item_params_conditions[i]), 
+                                            (nreps*(nrow(true_item_params_conditions[[1]][[1]])))))
 }
 
 
-true_ability_params <- matrix(data = c(unlist(true_ability_params_conditions), 
-                                    conditions_ability),
-                           ncol = 2)
+# true_ability_params <- matrix(data = c(unlist(true_ability_params_conditions), 
+#                                     conditions_ability),
+#                            ncol = 2)
 
 true_item_params <- matrix(data = c(unlist(true_item_params_conditions), 
                                     conditions_item),
@@ -367,14 +364,15 @@ for(i in 1:length(conditions)){
   data <- filter(data, V2 == conditions[i])
   data <- data.frame(lapply(data, as.character), stringsAsFactors=FALSE)
   data <- as.numeric(data[,1])
-  true_a_param <- rep(true_item_params_conditions[[1]][[1]][,"a_param"], nreps)
-  data <- cbind(data, true_a_param)
+  true_a_param <- true_item_params
+  data <- as.data.frame(cbind(data, true_a_param))
+  names(data) <- c("est_param", "true_param")
   ##STOPPING HERE FOR NOW
   xscale <- scale_def_corr(correlations_conditions, "a_corr")
   increment <- (diff(xscale))/25
   
-  a_corr_scatter[[i]] <- ggplot(data, aes(x = a_corr)) + 
-    geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
+  a_corr_scatter[[i]] <- ggplot(data[1:40,], aes(x = true_param, y = est_param)) + 
+    geom_point(alpha = 0.65, fill = colors[i]) + 
     scale_x_continuous(limits = xscale) +
     ggtitle(paste0("A-parameter correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
     labs(x = "A-parameter correlation", y = "Count") + 
