@@ -55,7 +55,7 @@ for(i in 1:nrow(results_files)){
   
   params_extraction <- vector("list", length(output))
   est_param_summary <- vector("list", length(output))
-  # est_param_medians <- vector("list", length(output))
+  est_param_medians <- vector("list", length(output))
   
   for(j in 1:length(output)){
     params_summary <- summary(output[[j]], pars = c("a", "b", "D", "beta1", "mu", 
@@ -91,8 +91,10 @@ for(i in 1:nrow(results_files)){
   
   saveRDS(est_param_summary, paste0("newest_param_summary_", 
                                     results_files[i, "file_tag"], ".rds"))
-  # saveRDS(est_param_medians, paste0("est_param_medians_", 
-  #                                   results_files[i, "file_tag"], ".rds"))
+  saveRDS(est_param_medians, paste0("est_param_medians_",
+                                    results_files[i, "file_tag"], ".rds"))
+  saveRDS(params_extraction, paste0("params_extraction_",
+                                    results_files[i, "file_tag"], ".rds"))
   
   rm(output)
   gc()
