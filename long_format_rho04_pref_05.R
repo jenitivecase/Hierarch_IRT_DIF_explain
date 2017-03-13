@@ -56,6 +56,7 @@ true_params <- vector("list", nreps)
 est_param_summary <- vector("list", nreps)
 est_param_means <- vector("list", nreps)
 correlations <- vector("list", nreps)
+params_extraction <- vector("list", nreps)
 
 #setup output folder for use later
 folder_name <- paste0(date, "_simulation-results")
@@ -125,6 +126,8 @@ for(i in 1:nreps){
   params <- extract(analysis, pars = c("a", "b", "D", "beta1", "mu", "sigma2", 
                                        "R2", "theta", "foc_mean"))
   
+  params_extraction[[i]] <- params
+  
   a_params <- as.matrix(colMeans(params$a))
   b_params <- as.matrix(colMeans(params$b))
   D_params <- as.matrix(colMeans(params$D))
@@ -192,11 +195,12 @@ for(i in 1:nreps){
   saveRDS(true_params, paste0("true_params_", file_tag, ".rds"))
   # saveRDS(result_objs, paste0("result_objs_", file_tag, ".rds"))
   saveRDS(est_param_summary, paste0("est_param_summary_", file_tag, ".rds"))
+  saveRDS(params_extraction, paste0("params_extraction_", file_tag, ".rds"))
   saveRDS(est_param_means, paste0("est_param_means_", file_tag, ".rds"))
-  saveRDS(est_param_means, paste0("est_param_medians_", file_tag, ".rds"))
+  saveRDS(est_param_medians, paste0("est_param_medians_", file_tag, ".rds"))
   saveRDS(correlations, paste0("correlations_", file_tag, ".rds"))
   saveRDS(median_correlations, paste0("median_correlations_", file_tag, ".rds"))
-  
+   
   print(paste0("Replication ", i, " complete"))
   print(paste0("Max R-hat value: ", max(params_summary[, "Rhat"])))
   print(paste0("Mean R-hat value: ", mean(params_summary[, "Rhat"])))
