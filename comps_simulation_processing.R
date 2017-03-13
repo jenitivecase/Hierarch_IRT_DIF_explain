@@ -97,7 +97,7 @@ names(correlations_conditions) <- conditions
 
 #true params
 true_item_params <- vector("list", 3)
-names(true_item_params) <- c("a_param", "b_param", "D_param")
+names(true_item_params) <- c("a_param", "b_param", "dif_param")
 
 # true_ability_params_conditions <- vector("list", length(conditions))
 # names(true_ability_params_conditions) <- conditions
@@ -108,11 +108,9 @@ names(true_item_params) <- c("a_param", "b_param", "D_param")
 est_param_means <- vector("list", length(param_means_names))
 names(est_param_means) <- param_means_names
 
-true_item_params
 for(i in 1:length(conditions)){
   correlations_conditions[[i]] <- correlation_get(conditions[i], correlation_files)
   true_item_params_conditions[[i]] <- param_get(conditions[i], true_param_files, "true_item_params")
-  true_ability_params_conditions[[i]] <- param_get(conditions[i], true_param_files, "true_ability")
   # est_item_params_conditions[[i]] <- est_param_get(conditions[i], est_param_files, "est_item_params")
   # est_ability_params_conditions[[i]] <- est_param_get(conditions[i], est_param_files, "est_ability")
   
@@ -123,7 +121,7 @@ for(i in 1:length(conditions)){
   for(j in 1:length(true_item_params)){
     true_item_params[[j]][[i]] <- true_param_get(conditions[i], true_param_files, 
                                                  param_type = "true_item_params",
-                                                 param_name = true_item_params[j])
+                                                 param_name = names(true_item_params[j]))
   }
 }
 
@@ -144,11 +142,11 @@ for(i in 1:length(true_item_params_conditions)){
 # true_ability_params <- matrix(data = c(unlist(true_ability_params_conditions), 
 #                                     conditions_ability),
 #                            ncol = 2)
-
-true_item_params <- matrix(data = c(unlist(true_item_params_conditions), 
-                                    conditions_item),
-                                ncol = 2)
-
+# 
+# true_item_params <- matrix(data = c(unlist(true_item_params_conditions), 
+#                                     conditions_item),
+#                                 ncol = 2)
+# 
 #estimated params - need to fix
 # est_ability_means <- lapply(est_ability_params_conditions, function(x) x = x$mean)
 #   
@@ -171,9 +169,18 @@ for(i in 1:length(est_param_means)){
   est_param_means[[i]] <- matrix(data = c(unlist(est_param_means[[i]]), conditions_vec), ncol = 2)
 }
 
+for(i in 1:length(true_item_params)){
+  param_vec_length <- nrow(true_item_params[[i]][[1]])
+  conditions_vec <- NULL
+  for(j in 1:length(conditions)){
+    conditions_vec <- c(conditions_vec, rep(conditions[j], param_vec_length))
+  }
+  true_item_params[[i]] <- matrix(data = c(unlist(true_item_params[[i]]), conditions_vec), ncol = 2)
+}
 
 
-#### FORMATTING ####
+
+#### RECOVERY DF FORMATTING ####
 recovery <- data.frame(matrix(NA, nrow = length(conditions), ncol = ncol(correlations_conditions[[1]])))
 
 names(recovery) <- colnames(correlations_conditions[[1]])
@@ -215,9 +222,9 @@ scale_def_corr <- function(list, column){
 }
 
 colors <- c("darkblue", "darkred", "darkgreen", "darkorange")
+source(paste0(getwd(), "/../../multiplot_fun.R"))
 
-
-### BIAS
+### BIAS ####
 R2_histos <- vector("list", length(conditions))
 focmean_histos <- vector("list", length(conditions))
 refmean_histos <- vector("list", length(conditions))
@@ -269,8 +276,6 @@ for(i in 1:length(conditions)){
     geom_vline(xintercept = mean(data$ref_mean_diff), color = "black", linetype="dotted")
 }
 
-source(paste0(getwd(), "/../../multiplot_fun.R"))
-
 pdf("Bias_histograms.pdf", width = 10, height = 10)
 multiplot(R2_histos[[1]], R2_histos[[2]], R2_histos[[3]], R2_histos[[4]], cols = 2)
 
@@ -279,7 +284,7 @@ multiplot(focmean_histos[[1]], focmean_histos[[2]], focmean_histos[[3]], focmean
 multiplot(refmean_histos[[1]], refmean_histos[[2]], refmean_histos[[3]], refmean_histos[[4]], cols = 2)
 dev.off()
 
-### CORRELATION HISTOGRAMS
+### CORRELATION HISTOGRAMS ####
 a_corr_histo <- vector("list", length(conditions))
 b_corr_histo <- vector("list", length(conditions))
 D_corr_histo <- vector("list", length(conditions))
@@ -357,7 +362,7 @@ multiplot(theta_corr_histo[[1]], theta_corr_histo[[2]], theta_corr_histo[[3]], t
 dev.off()
 
 
-### CORRELATION SCATTERPLOTS
+### CORRELATION SCATTERPLOTS ####
 a_corr_scatter <- vector("list", length(conditions))
 b_corr_scatter <- vector("list", length(conditions))
 D_corr_scatter <- vector("list", length(conditions))
@@ -377,67 +382,64 @@ for(i in 1:length(conditions)){
   data <- filter(data, V2 == conditions[i])
   data <- data.frame(lapply(data, as.character), stringsAsFactors=FALSE)
   data <- as.numeric(data[,1])
-  true_a_param <- true_item_params
-  data <- as.data.frame(cbind(data, true_a_param))
+  true_param <- as.data.frame(true_item_params[["a_param"]])
+  true_param <- filter(true_param, V2 == conditions[i])
+  true_param <- as.data.frame(lapply(true_param, as.character), stringsAsFactors=FALSE)
+  true_param <- as.numeric(true_param[,1])
+  data <- as.data.frame(cbind(data, true_param))
   names(data) <- c("est_param", "true_param")
-  ##STOPPING HERE FOR NOW
-  xscale <- scale_def_corr(correlations_conditions, "a_corr")
-  increment <- (diff(xscale))/25
   
-  a_corr_scatter[[i]] <- ggplot(data[1:40,], aes(x = true_param, y = est_param)) + 
-    geom_point(alpha = 0.65, fill = colors[i]) + 
-    scale_x_continuous(limits = xscale) +
+  a_corr_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) + 
+    geom_point(alpha = 0.65, color = colors[i]) + 
     ggtitle(paste0("A-parameter correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
-    labs(x = "A-parameter correlation", y = "Count") + 
-    theme(plot.title = element_text(hjust = 0.5)) + 
-    geom_vline(xintercept = mean(data$a_corr), color = "black", linetype="dotted")
+    labs(x = "True Parameter Value", y = "Estimated Parameter Value") + 
+    theme(plot.title = element_text(hjust = 0.5)) 
   
   #b_corr
-  xscale <- scale_def_corr(correlations_conditions, "b_corr")
-  increment <- (diff(xscale))/25
+  data <- as.data.frame(est_param_means[["b_params"]])
+  data <- filter(data, V2 == conditions[i])
+  data <- data.frame(lapply(data, as.character), stringsAsFactors=FALSE)
+  data <- as.numeric(data[,1])
+  true_param <- as.data.frame(true_item_params[["b_param"]])
+  true_param <- filter(true_param, V2 == conditions[i])
+  true_param <- as.data.frame(lapply(true_param, as.character), stringsAsFactors=FALSE)
+  true_param <- as.numeric(true_param[,1])
+  data <- as.data.frame(cbind(data, true_param))
+  names(data) <- c("est_param", "true_param")
   
-  b_corr_scatter[[i]] <- ggplot(data, aes(x = b_corr)) + 
-    geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
-    scale_x_continuous(limits = xscale) +
+  b_corr_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) + 
+    geom_point(alpha = 0.65, color = colors[i]) + 
     ggtitle(paste0("B-parameter correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
-    labs(x = "B-parameter correlation", y = "Count") + 
-    theme(plot.title = element_text(hjust = 0.5)) + 
-    geom_vline(xintercept = mean(data$b_corr), color = "black", linetype="dotted")
+    labs(x = "True Parameter Value", y = "Estimated Parameter Value") + 
+    theme(plot.title = element_text(hjust = 0.5)) 
   
   #D_corr
-  xscale <- scale_def_corr(correlations_conditions, "D_corr")
-  increment <- (diff(xscale))/25
+  data <- as.data.frame(est_param_means[["D_params"]])
+  data <- filter(data, V2 == conditions[i])
+  data <- data.frame(lapply(data, as.character), stringsAsFactors=FALSE)
+  data <- as.numeric(data[,1])
+  true_param <- as.data.frame(true_item_params[["dif_param"]])
+  true_param <- filter(true_param, V2 == conditions[i])
+  true_param <- as.data.frame(lapply(true_param, as.character), stringsAsFactors=FALSE)
+  true_param <- as.numeric(true_param[,1])
+  data <- as.data.frame(cbind(data, true_param))
+  names(data) <- c("est_param", "true_param")
   
-  D_corr_scatter[[i]] <- ggplot(data, aes(x = D_corr)) + 
-    geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
-    scale_x_continuous(limits = xscale) +
+  D_corr_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) + 
+    geom_point(alpha = 0.65, color = colors[i]) + 
     ggtitle(paste0("D-parameter correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
-    labs(x = "D-parameter correlation", y = "Count") + 
-    theme(plot.title = element_text(hjust = 0.5)) + 
-    geom_vline(xintercept = mean(data$D_corr), color = "black", linetype="dotted")
+    labs(x = "True Parameter Value", y = "Estimated Parameter Value") + 
+    theme(plot.title = element_text(hjust = 0.5)) 
   
-  #theta_corr
-  xscale <- scale_def_corr(correlations_conditions, "theta_corr")
-  increment <- (diff(xscale))/25
-  
-  theta_corr_scatter[[i]] <- ggplot(data, aes(x = theta_corr)) + 
-    geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
-    scale_x_continuous(limits = xscale) +
-    ggtitle(paste0("Theta correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
-    labs(x = "Theta correlation", y = "Count") + 
-    theme(plot.title = element_text(hjust = 0.5)) + 
-    geom_vline(xintercept = mean(data$theta_corr), color = "black", linetype="dotted")
   
 }
 
-pdf("corr_scattergrams.pdf", width = 10, height = 10)
+pdf("corr_scatterplots.pdf", width = 10, height = 10)
 multiplot(a_corr_scatter[[1]], a_corr_scatter[[2]], a_corr_scatter[[3]], a_corr_scatter[[4]], cols = 2)
 
 multiplot(b_corr_scatter[[1]], b_corr_scatter[[2]], b_corr_scatter[[3]], b_corr_scatter[[4]], cols = 2)
 
 multiplot(D_corr_scatter[[1]], D_corr_scatter[[2]], D_corr_scatter[[3]], D_corr_scatter[[4]], cols = 2)
-
-multiplot(theta_corr_scatter[[1]], theta_corr_scatter[[2]], theta_corr_scatter[[3]], theta_corr_scatter[[4]], cols = 2)
 
 dev.off()
 
