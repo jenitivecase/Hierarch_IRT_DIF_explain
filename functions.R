@@ -135,3 +135,77 @@ one_analysis_BUGS <- function(x, n_iter = 1000, n_burn = 300, b_dat = b.dat,
   return(OUT)
 }
 
+#### PROCESSING - DATA RETRIEVAL ####
+correlation_get <- function(condition, file_list){
+  output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
+  output <- lapply(output, unlist, recursive = FALSE)
+  output <- do.call(rbind, output)
+  return(output)
+}
+
+# param_get <- function(condition, file_list, param_name){
+#   output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
+#   
+#   param <- lapply(output, function(x){
+#     x <- x[which(grepl("param", names(x)))]
+#   })
+#   param <- lapply(param, unlist, recursive = FALSE)
+#   param <- unlist(param, recursive = FALSE)
+#   
+#   return(param)
+# }
+
+true_param_get <- function(condition, file_list, param_type, param_name){
+  output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
+  
+  param <- vector("list", length(output))
+  
+  for(i in 1:length(output)){
+    param[[i]] <- as.data.frame(output[[i]][param_type])
+  }
+  
+  for(i in 1:length(param)){
+    param[[i]] <- as.data.frame(param[[i]][grep(param_name, names(param[[i]]))])
+  }
+  
+  param <- bind_rows(param, .id = names(output))
+  return(param)
+}
+
+est_param_get <- function(condition, file_list, param_name){
+  output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
+  
+  param <- lapply(output, as.data.frame)
+  param <- bind_rows(param, .id = names(output))
+  return(param)
+}
+
+est_param_means_get <- function(condition, file_list, param_name){
+  output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
+  
+  param <- lapply(output, function(x) as.data.frame(x[param_name]))
+  param <- bind_rows(param, .id = names(output))
+  return(param)
+}
+
+#### GRAPHING ####
+scale_def <- function(list, column){
+  scale <- NA
+  for(i in 1:length(list)){
+    rounded <- abs(c(round(max(list[[i]][, column]), digits = 1), 
+                     round(min(list[[i]][, column]), digits = 1)))
+    scale[i] <- rounded[which.max(rounded)]
+  }
+  scale <- scale[which.max(scale)]
+  return(scale)
+}
+
+scale_def_corr <- function(list, column){
+  scale <- NA
+  for(i in 1:length(list)){
+    scale[i] <- (floor(((min(list[[i]][, column])) * 10)) / 10)
+  }
+  scale <- c(scale[which.min(scale)], 1)
+  return(scale)
+}
+

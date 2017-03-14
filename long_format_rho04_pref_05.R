@@ -150,9 +150,9 @@ for(i in 1:nreps){
   b_corr <- cor(b_params, true_item_params[,"b_param"])
   D_corr <- cor(D_params, true_item_params[,"dif_param"])
   theta_corr <- cor(theta, true_ability[, 1])
-  foc_mean_diff <- -.5-foc_mean
-  ref_mean_diff <- 0-mean(theta[1:n_ref])
-  R2_diff <- (rho^2)-R2
+  foc_mean_diff <- foc_mean-(-.5)
+  ref_mean_diff <- mean(theta[1:n_ref])-0
+  R2_diff <- R2-(rho^2)
   
   correlations[[i]] <- list(a_corr, b_corr, D_corr, theta_corr, 
                             foc_mean_diff, ref_mean_diff, R2_diff)

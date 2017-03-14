@@ -15,6 +15,8 @@ library(tidyr)
 library(dplyr)
 library(ggplot2)
 
+source("../../functions.R")
+
 files <- list.files(getwd())
 files_df <- as.data.frame(files)
 names(files_df) <- "filename"
@@ -47,59 +49,6 @@ est_param_mean_files <- files[which(grepl("est_param_means", files))]
 params_summary_names <- readRDS("../../params_summary_names.rds")
 param_means_names <- c("a_params", "b_params", "D_params", "beta1", "mu", 
                        "sigma2", "R2", "theta", "foc_mean")
-
-#### FUNCTIONS ####
-correlation_get <- function(condition, file_list){
-  output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
-  output <- lapply(output, unlist, recursive = FALSE)
-  output <- do.call(rbind, output)
-  return(output)
-}
-
-# param_get <- function(condition, file_list, param_name){
-#   output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
-#   
-#   param <- lapply(output, function(x){
-#     x <- x[which(grepl("param", names(x)))]
-#   })
-#   param <- lapply(param, unlist, recursive = FALSE)
-#   param <- unlist(param, recursive = FALSE)
-#   
-#   return(param)
-# }
-
-true_param_get <- function(condition, file_list, param_type, param_name){
-  output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
-  
-  param <- vector("list", length(output))
-  
-  for(i in 1:length(output)){
-    param[[i]] <- as.data.frame(output[[i]][param_type])
-  }
-  
-  for(i in 1:length(param)){
-    param[[i]] <- as.data.frame(param[[i]][grep(param_name, names(param[[i]]))])
-  }
-  
-  param <- bind_rows(param, .id = names(output))
-  return(param)
-}
-
-est_param_get <- function(condition, file_list, param_name){
-  output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
-  
-  param <- lapply(output, as.data.frame)
-  param <- bind_rows(param, .id = names(output))
-  return(param)
-}
-
-est_param_means_get <- function(condition, file_list, param_name){
-  output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
-  
-  param <- lapply(output, function(x) as.data.frame(x[param_name]))
-  param <- bind_rows(param, .id = names(output))
-  return(param)
-}
 
 #### DATA RETRIEVAL ####
 
@@ -149,8 +98,6 @@ for(i in 1:length(true_item_params)){
   true_item_params[[i]] <- matrix(data = c(unlist(true_item_params[[i]]), conditions_vec), ncol = 2)
 }
 
-
-
 #### RECOVERY DF FORMATTING ####
 recovery <- data.frame(matrix(NA, nrow = length(conditions), ncol = ncol(correlations_conditions[[1]])))
 
@@ -172,26 +119,6 @@ recovery <- recovery[, c("rho", "PREF", "b_corr", "b_corr", "D_corr",
                          "theta_corr", "foc_mean_diff", "ref_mean_diff", "R2_diff")]
 
 #### GRAPHS ####
-scale_def <- function(list, column){
-  scale <- NA
-  for(i in 1:length(list)){
-    rounded <- abs(c(round(max(list[[i]][, column]), digits = 1), 
-                     round(min(list[[i]][, column]), digits = 1)))
-    scale[i] <- rounded[which.max(rounded)]
-  }
-  scale <- scale[which.max(scale)]
-  return(scale)
-}
-
-scale_def_corr <- function(list, column){
-  scale <- NA
-  for(i in 1:length(list)){
-    scale[i] <- (floor(((min(list[[i]][, column])) * 10)) / 10)
-  }
-  scale <- c(scale[which.min(scale)], 1)
-  return(scale)
-}
-
 colors <- c("darkblue", "darkred", "darkgreen", "darkorange")
 source(paste0(getwd(), "/../../multiplot_fun.R"))
 
