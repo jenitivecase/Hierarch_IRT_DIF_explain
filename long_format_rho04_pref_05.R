@@ -13,7 +13,7 @@ source("functions.R")
 date <- format.Date(Sys.Date(), "%Y%m%d")
 options(scipen = 999)
 
-needed_packages <- c("tidyr", "dplyr", "rstan", "rstudioapi")
+needed_packages <- c("tidyr", "dplyr", "rstan", "rstudioapi", "robustbase")
 for(i in 1:length(needed_packages)){
   package <- needed_packages[i]
   if(!require(paste(package), character.only = TRUE)){
@@ -55,7 +55,9 @@ true_params <- vector("list", nreps)
 # result_objs <- vector("list", nreps)
 est_param_summary <- vector("list", nreps)
 est_param_means <- vector("list", nreps)
+est_param_medians <- vector("list", nreps)
 correlations <- vector("list", nreps)
+median_correlations <- vector("list", nreps)
 params_extraction <- vector("list", nreps)
 
 #setup output folder for use later
