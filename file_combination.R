@@ -5,7 +5,7 @@ options(scipen = 999)
 date <- format.Date(Sys.Date(), "%Y%m%d")
 
 # work_dir <- "C:/Users/jbrussow/Dropbox/REMS/11 Comps/Simulation/20170224_simulation-results"
-work_dir <- "F:/Comps simulation results 20170302/All_simulation_results_20170224-0306"
+work_dir <- "D:/Comps simulation results 20170302/All_simulation_results_20170224-0306"
 
 if(Sys.info()["user"] == "jbrussow"){
   setwd(work_dir)
@@ -21,6 +21,7 @@ files <- as.data.frame(list.files(getwd()))
 names(files) <- "filename"
 files$filename <- as.character(files$filename)
 files <- filter(files, filename != "combined")
+files <- filter(files, !grepl("result", filename))
 
 for(i in 1:nrow(files)){
   info <-unlist(strsplit(as.character(
@@ -57,9 +58,10 @@ for(i in 1:nrow(types_conditions)){
     out <- append(out, output)
   }
   
+  #removes the initial NA
   out <- out[c(2:length(out))]
   
-  fname <- paste0("combined_", types_conditions[i, "types"], "_", types_conditions[i, "conditions"], ".rds")
+  fname <- paste0(types_conditions[i, "types"], "_", length(out), "reps_", types_conditions[i, "conditions"], ".rds")
   saveRDS(out, paste0("combined/", fname))
   
 }
