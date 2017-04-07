@@ -3,7 +3,7 @@
 options(scipen = 999)
 date <- format.Date(Sys.Date(), "%Y%m%d")
 
-work_dir <- "C:/Users/jbrussow/Dropbox/REMS/11 Comps/Simulation/20170224_simulation-results/combined"
+work_dir <- "C:/Users/jbrussow/Dropbox/REMS/11 Comps/Simulation/20170224_simulation-results"
 
 if(Sys.info()["user"] == "jbrussow"){
   setwd(work_dir)
@@ -46,7 +46,7 @@ true_param_files <- files[which(grepl("true_params", files))]
 est_param_files <- files[which(grepl("newest_param_summary", files))]
 est_param_mean_files <- files[which(grepl("est_param_means", files))]
 
-params_summary_names <- readRDS("../../params_summary_names.rds")
+params_summary_names <- readRDS("../params_summary_names.rds")
 param_means_names <- c("a_params", "b_params", "D_params", "beta1", "mu", 
                        "sigma2", "R2", "theta", "foc_mean")
 
@@ -120,7 +120,7 @@ recovery <- recovery[, c("rho", "PREF", "b_corr", "b_corr", "D_corr",
 
 #### GRAPHS ####
 colors <- c("darkblue", "darkred", "darkgreen", "darkorange")
-source(paste0(getwd(), "/../../multiplot_fun.R"))
+source(paste0(getwd(), "/../multiplot_fun.R"))
 
 ### BIAS ####
 R2_histos <- vector("list", length(conditions))
