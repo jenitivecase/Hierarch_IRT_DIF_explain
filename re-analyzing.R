@@ -67,12 +67,12 @@ for(i in 1:nrow(results_files)){
   true_params <- readRDS(true_param_files[which(true_param_files$file_tag == results_files[i, "file_tag"]),"filename"])
     
   for(j in 1:length(output)){
-    params_summary <- summary(output[[j]], pars = c("a", "b", "D", "beta1", "mu",
-                                                 "sigma2", "R2", "theta",
-                                                 "foc_mean"),
-                              probs = c(0.025, 0.25, 0.5, 0.75, 0.975))$summary
-
-    est_param_summary[[j]] <- params_summary
+    # params_summary <- summary(output[[j]], pars = c("a", "b", "D", "beta1", "mu",
+    #                                              "sigma2", "R2", "theta",
+    #                                              "foc_mean"),
+    #                           probs = c(0.025, 0.25, 0.5, 0.75, 0.975))$summary
+    # 
+    # est_param_summary[[j]] <- params_summary
 
     params <- extract(output[[j]], pars = c("a", "b", "D", "beta1", "mu", "sigma2",
                                          "R2", "theta", "foc_mean"))
