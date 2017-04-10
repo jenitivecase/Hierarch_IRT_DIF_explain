@@ -47,28 +47,31 @@ names(types_conditions) <- c("conditions", "types")
 types_conditions <- apply(types_conditions, 2, as.character)
 
 results_files <- files[which(grepl("result", files$filename)),]
-
+true_param_files <- files[which(grepl("true", files$filename)),]
 
 for(i in 1:nrow(results_files)){
   output <- readRDS(results_files[i, "filename"])
   output <- output[!sapply(output, is.null)] 
   
-  params_extraction <- vector("list", length(output))
-  est_param_summary <- vector("list", length(output))
-  est_param_medians <- vector("list", length(output))
+  # params_extraction <- vector("list", length(output))
+  # est_param_summary <- vector("list", length(output))
+  # est_param_medians <- vector("list", length(output))
+  median_correlations <- vector("list", length(output))
   
-  for(j in 1:length(output)){
-    params_summary <- summary(output[[j]], pars = c("a", "b", "D", "beta1", "mu", 
-                                                 "sigma2", "R2", "theta",
-                                                 "foc_mean"),
-                              probs = c(0.025, 0.25, 0.5, 0.75, 0.975))$summary 
+  true_params <- readRDS(true_param_files[which(true_param_files$file_tag == results_files[i, "file_tag"]),"filename"])
     
-    est_param_summary[[j]] <- params_summary
+  for(j in 1:length(output)){
+    # params_summary <- summary(output[[j]], pars = c("a", "b", "D", "beta1", "mu", 
+    #                                              "sigma2", "R2", "theta",
+    #                                              "foc_mean"),
+    #                           probs = c(0.025, 0.25, 0.5, 0.75, 0.975))$summary 
+    # 
+    # est_param_summary[[j]] <- params_summary
 
     params <- extract(output[[j]], pars = c("a", "b", "D", "beta1", "mu", "sigma2",
                                          "R2", "theta", "foc_mean"))
     
-    params_extraction[[i]] <- params
+    # params_extraction[[i]] <- params
 
     a_params <- as.matrix(colMedians(params$a))
     b_params <- as.matrix(colMedians(params$b))
@@ -80,20 +83,36 @@ for(i in 1:nrow(results_files)){
     theta <- as.matrix(colMedians(params$theta))
     foc_mean <- median(params$foc_mean)
 
-    #save the medians of estimated parameters
-    est_param_medians[[j]] <- list(a_params, b_params, D_params, beta1,
-                                 mu, sigma2, R2, theta, foc_mean)
-    names(est_param_medians[[j]]) <- c("a_params", "b_params", "D_params",
-                                     "beta1", "mu", "sigma2", "R2", "theta",
-                                     "foc_mean")
+    # #save the medians of estimated parameters
+    # est_param_medians[[j]] <- list(a_params, b_params, D_params, beta1,
+    #                              mu, sigma2, R2, theta, foc_mean)
+    # names(est_param_medians[[j]]) <- c("a_params", "b_params", "D_params",
+    #                                  "beta1", "mu", "sigma2", "R2", "theta",
+    #                                  "foc_mean")
+    
+    #save the median correlations & differences from the expected values
+    a_corr <- cor(a_params, true_item_params[,"a_param"])
+    b_corr <- cor(b_params, true_item_params[,"b_param"])
+    D_corr <- cor(D_params, true_item_params[,"dif_param"])
+    theta_corr <- cor(theta, true_ability[, 1])
+    foc_mean_diff <- -.5-foc_mean
+    ref_mean_diff <- 0-mean(theta[1:n_ref])
+    R2_diff <- (rho^2)-R2
+    
+    median_correlations[[j]] <- list(a_corr, b_corr, D_corr, theta_corr, 
+                                     foc_mean_diff, ref_mean_diff, R2_diff)
+    names(median_correlations[[j]]) <- c("a_corr", "b_corr", "D_corr", "theta_corr",
+                                         "foc_mean_diff", "ref_mean_diff", "R2_diff")
     
   }
   
-  saveRDS(est_param_summary, paste0("newest_param_summary_", 
-                                    results_files[i, "file_tag"], ".rds"))
-  saveRDS(est_param_medians, paste0("est_param_medians_",
-                                    results_files[i, "file_tag"], ".rds"))
-  saveRDS(params_extraction, paste0("params_extraction_",
+  # saveRDS(est_param_summary, paste0("newest_param_summary_", 
+  #                                   results_files[i, "file_tag"], ".rds"))
+  # saveRDS(est_param_medians, paste0("est_param_medians_",
+  #                                   results_files[i, "file_tag"], ".rds"))
+  # saveRDS(params_extraction, paste0("params_extraction_",
+  #                                   results_files[i, "file_tag"], ".rds"))
+  saveRDS(median_correlations, paste0("median_correlations_",
                                     results_files[i, "file_tag"], ".rds"))
   
   rm(output)
