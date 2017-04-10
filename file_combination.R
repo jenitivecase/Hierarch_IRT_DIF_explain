@@ -5,7 +5,7 @@ options(scipen = 999)
 date <- format.Date(Sys.Date(), "%Y%m%d")
 
 # work_dir <- "C:/Users/jbrussow/Dropbox/REMS/11 Comps/Simulation/20170224_simulation-results"
-work_dir <- "D:/Comps simulation results 20170302/All_simulation_results_20170224-0306"
+work_dir <- "D:/Comps simulation results 20170302/All_simulation_results_20170404"
 
 if(Sys.info()["user"] == "jbrussow"){
   setwd(work_dir)
@@ -46,7 +46,7 @@ if(!dir.exists("combined")){dir.create("combined")}
 
 for(i in 1:nrow(types_conditions)){
   condition_matches <- grep(types_conditions[i, "conditions"], files$filename)
-  type_matches <- grep(types_conditions[i, "types"], files$filename)
+  type_matches <- grep(paste0("^", types_conditions[i, "types"]), files$filename)
   indices <- condition_matches[which(condition_matches %in% type_matches)]
   set_files <- files[indices, "filename"]
   
