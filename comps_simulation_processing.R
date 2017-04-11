@@ -420,6 +420,8 @@ multiplot(theta_corr_histo[[1]], theta_corr_histo[[2]], theta_corr_histo[[3]], t
 
 dev.off()
 
+
+
 ### CORRELATION SCATTERPLOTS ####
 #mean correlations
 a_corr_scatter <- vector("list", length(conditions))
@@ -451,10 +453,8 @@ for(i in 1:length(conditions)){
   a_corr_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) + 
     geom_point(alpha = 0.65, color = colors[i]) + 
     ggtitle(paste0("A-parameter correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
-    labs(x = "True Parameter Value", y = "Estimated Parameter Value") + 
-    geom_label(aes(x = min(data$true_param), y = max(data$est_param), label = 
-                     paste0("r = ", round(cor(data$true_param, data$est_param), 3))),
-               size = 3, nudge_x = .5, nudge_y = -.5) +
+    labs(x = "True Parameter Value", y = "Estimated Parameter Value", 
+         caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) +
     theme(plot.title = element_text(hjust = 0.5)) 
   
   #b_corr
@@ -473,10 +473,8 @@ for(i in 1:length(conditions)){
   b_corr_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) + 
     geom_point(alpha = 0.65, color = colors[i]) + 
     ggtitle(paste0("B-parameter correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
-    labs(x = "True Parameter Value", y = "Estimated Parameter Value") + 
-    geom_label(aes(x = min(data$true_param), y = max(data$est_param), label = 
-                     paste0("r = ", round(cor(data$true_param, data$est_param), 3))),
-               size = 3, nudge_x = .5, nudge_y = -.5) +
+    labs(x = "True Parameter Value", y = "Estimated Parameter Value", 
+         caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) + 
     theme(plot.title = element_text(hjust = 0.5)) 
   
   #D_corr
@@ -487,17 +485,15 @@ for(i in 1:length(conditions)){
   true_param <- as.data.frame(true_item_params[["dif_param"]])
   true_param <- filter(true_param, V2 == conditions[i])
   true_param <- as.data.frame(lapply(true_param, as.character), stringsAsFactors=FALSE)
-true_param <- as.numeric(true_param[,1])
+  true_param <- as.numeric(true_param[,1])
   data <- as.data.frame(cbind(data, true_param))
   names(data) <- c("est_param", "true_param")
   
   D_corr_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) + 
     geom_point(alpha = 0.65, color = colors[i]) + 
     ggtitle(paste0("D-parameter correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
-    labs(x = "True Parameter Value", y = "Estimated Parameter Value") + 
-    geom_label(aes(x = min(data$true_param), y = max(data$est_param), label = 
-                     paste0("r = ", round(cor(data$true_param, data$est_param), 3))),
-               size = 3, nudge_x = .5, nudge_y = -.5) +
+    labs(x = "True Parameter Value", y = "Estimated Parameter Value", 
+         caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) + 
     theme(plot.title = element_text(hjust = 0.5)) 
   
   
@@ -543,10 +539,8 @@ for(i in 1:length(conditions)){
   a_corr_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) + 
     geom_point(alpha = 0.65, color = colors[i]) + 
     ggtitle(paste0("A-parameter correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
-    labs(x = "True Parameter Value", y = "Estimated Parameter Value") + 
-    geom_label(aes(x = min(data$true_param), y = max(data$est_param), label = 
-                     paste0("r = ", round(cor(data$true_param, data$est_param), 3))),
-               size = 3, nudge_x = .5, nudge_y = -.5) +
+    labs(x = "True Parameter Value", y = "Estimated Parameter Value", 
+         caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) + 
     theme(plot.title = element_text(hjust = 0.5)) 
   
   #b_corr
@@ -564,10 +558,8 @@ for(i in 1:length(conditions)){
   b_corr_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) + 
     geom_point(alpha = 0.65, color = colors[i]) + 
     ggtitle(paste0("B-parameter correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
-    labs(x = "True Parameter Value", y = "Estimated Parameter Value") + 
-    geom_label(aes(x = min(data$true_param), y = max(data$est_param), label = 
-                     paste0("r = ", round(cor(data$true_param, data$est_param), 3))),
-               size = 3, nudge_x = .5, nudge_y = -.5) +
+    labs(x = "True Parameter Value", y = "Estimated Parameter Value", 
+         caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) + 
     theme(plot.title = element_text(hjust = 0.5)) 
   
   #D_corr
@@ -585,10 +577,8 @@ for(i in 1:length(conditions)){
   D_corr_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) + 
     geom_point(alpha = 0.65, color = colors[i]) + 
     ggtitle(paste0("D-parameter correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
-    labs(x = "True Parameter Value", y = "Estimated Parameter Value") + 
-    geom_label(aes(x = min(data$true_param), y = max(data$est_param), label = 
-                     paste0("r = ", round(cor(data$true_param, data$est_param), 3))),
-               size = 3, nudge_x = .5, nudge_y = -.5) +
+    labs(x = "True Parameter Value", y = "Estimated Parameter Value", 
+         caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) + 
     theme(plot.title = element_text(hjust = 0.5)) 
   
   
