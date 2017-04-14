@@ -1,6 +1,6 @@
 #MSUB -N IRT_DIF_rho04_pref05
-#MSUB -l nodes=1:ppn=3,walltime=60:00:00:00
-#MSUB -l pmem=16gb
+#MSUB -l nodes=1:ppn=4,walltime=60:00:00:00
+#MSUB -l pmem=24gb
 #MSUB -M jbrussow@ku.edu
 #MSUB -m abe 
 #MSUB -j oe 
