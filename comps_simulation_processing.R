@@ -122,25 +122,49 @@ for(i in 1:length(true_item_params)){
   true_item_params[[i]] <- matrix(data = c(unlist(true_item_params[[i]]), conditions_vec), ncol = 2)
 }
 
-#### RECOVERY DF FORMATTING ####
-recovery <- data.frame(matrix(NA, nrow = length(conditions), ncol = ncol(correlations_conditions[[1]])))
+#### MEANS RECOVERY DF FORMATTING ####
+means_recovery <- data.frame(matrix(NA, nrow = length(conditions), ncol = ncol(correlations_conditions[[1]])))
 
-names(recovery) <- colnames(correlations_conditions[[1]])
-for(i in 1:nrow(recovery)){
-  recovery[i,] <- colMeans(correlations_conditions[[i]])
+names(means_recovery) <- colnames(correlations_conditions[[1]])
+for(i in 1:nrow(means_recovery)){
+  means_recovery[i,] <- colMeans(correlations_conditions[[i]])
 }
 
-recovery$condition <- conditions
-recovery$rho <- grep("rho", unlist(strsplit(recovery$condition, "_")), value = TRUE)
-recovery$rho <- gsub("rho", "", recovery$rho)
-recovery$rho <- gsub("-", ".", recovery$rho)
+means_recovery$condition <- conditions
+means_recovery$rho <- grep("rho", unlist(strsplit(means_recovery$condition, "_")), value = TRUE)
+means_recovery$rho <- gsub("rho", "", means_recovery$rho)
+means_recovery$rho <- gsub("-", ".", means_recovery$rho)
 
-recovery$PREF <- grep("PREF", unlist(strsplit(recovery$condition, "_")), value = TRUE)
-recovery$PREF <- gsub("PREF", "", recovery$PREF)
-recovery$PREF <- gsub("-", ".", recovery$PREF)
+means_recovery$PREF <- grep("PREF", unlist(strsplit(means_recovery$condition, "_")), value = TRUE)
+means_recovery$PREF <- gsub("PREF", "", means_recovery$PREF)
+means_recovery$PREF <- gsub("-", ".", means_recovery$PREF)
 
-recovery <- recovery[, c("rho", "PREF", "b_corr", "b_corr", "D_corr", 
+means_recovery <- means_recovery[, c("rho", "PREF", "a_corr", "b_corr", "D_corr", 
                          "theta_corr", "foc_mean_diff", "ref_mean_diff", "R2_diff")]
+
+
+#### MEDIANS RECOVERY DF FORMATTING ####
+medians_recovery <- data.frame(matrix(NA, nrow = length(conditions), ncol = ncol(median_correlation_conditions[[1]])))
+
+names(medians_recovery) <- colnames(median_correlation_conditions[[1]])
+for(i in 1:nrow(medians_recovery)){
+  medians_recovery[i,] <- colMeans(median_correlation_conditions[[i]])
+}
+
+medians_recovery$condition <- conditions
+medians_recovery$rho <- grep("rho", unlist(strsplit(medians_recovery$condition, "_")), value = TRUE)
+medians_recovery$rho <- gsub("rho", "", medians_recovery$rho)
+medians_recovery$rho <- gsub("-", ".", medians_recovery$rho)
+
+medians_recovery$PREF <- grep("PREF", unlist(strsplit(medians_recovery$condition, "_")), value = TRUE)
+medians_recovery$PREF <- gsub("PREF", "", medians_recovery$PREF)
+medians_recovery$PREF <- gsub("-", ".", medians_recovery$PREF)
+
+medians_recovery <- medians_recovery[, c("rho", "PREF", "a_corr", "b_corr", "D_corr", 
+                                     "theta_corr", "foc_mean_diff", "ref_mean_diff", "R2_diff")]
+
+####means vs. medians recovery
+apply(means_recovery, 2, as.numeric) - apply(medians_recovery, 2, as.numeric)
 
 #### GRAPHS ####
 colors <- c("darkblue", "darkred", "darkgreen", "darkorange")
