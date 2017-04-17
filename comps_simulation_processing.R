@@ -65,6 +65,9 @@ names(median_correlation_conditions) <- conditions
 true_item_params <- vector("list", 3)
 names(true_item_params) <- c("a_param", "b_param", "dif_param")
 
+true_ability_params <- vector("list", 2)
+names(true_ability_params) <- c("theta", "group")
+
 est_param_means <- vector("list", length(param_means_names))
 names(est_param_means) <- param_means_names
 
@@ -88,6 +91,12 @@ for(i in 1:length(conditions)){
     true_item_params[[j]][[i]] <- true_param_get(conditions[i], true_param_files, 
                                                  param_type = "true_item_params",
                                                  param_name = names(true_item_params[j]))
+  }
+  
+  for(j in 1:length(true_ability_params)){
+    true_ability_params[[j]][[i]] <- true_param_get(conditions[i], true_param_files, 
+                                                 param_type = "true_ability",
+                                                 param_name = names(true_ability_params[j]))
   }
 }
 
@@ -122,6 +131,22 @@ for(i in 1:length(true_item_params)){
   true_item_params[[i]] <- matrix(data = c(unlist(true_item_params[[i]]), conditions_vec), ncol = 2)
 }
 
+### HERE ###
+temp <- NULL
+for(i in 1:4){
+  temp[[i]] <- cbind(true_ability_params[[1]][[i]] , true_ability_params[[2]][[i]])
+}
+true_ability_params <- temp
+
+for(i in 1:length(true_ability_params)){
+  param_vec_length <- nrow(true_ability_params[[i]])
+  conditions_vec <- NULL
+  for(j in 1:length(conditions)){
+    conditions_vec <- c(conditions_vec, rep(conditions[j], param_vec_length))
+  }
+  true_ability_params[[i]] <- matrix(data = cbind(true_ability_params[[i]], conditions_vec))
+}
+
 #### MEANS RECOVERY DF FORMATTING ####
 means_recovery <- data.frame(matrix(NA, nrow = length(conditions), ncol = ncol(correlations_conditions[[1]])))
 
@@ -142,6 +167,7 @@ means_recovery$PREF <- gsub("-", ".", means_recovery$PREF)
 means_recovery <- means_recovery[, c("rho", "PREF", "a_corr", "b_corr", "D_corr", 
                          "theta_corr", "foc_mean_diff", "ref_mean_diff", "R2_diff")]
 
+write.csv(means_recovery, "means_recovery.csv")
 
 #### MEDIANS RECOVERY DF FORMATTING ####
 medians_recovery <- data.frame(matrix(NA, nrow = length(conditions), ncol = ncol(median_correlation_conditions[[1]])))
@@ -162,6 +188,8 @@ medians_recovery$PREF <- gsub("-", ".", medians_recovery$PREF)
 
 medians_recovery <- medians_recovery[, c("rho", "PREF", "a_corr", "b_corr", "D_corr", 
                                      "theta_corr", "foc_mean_diff", "ref_mean_diff", "R2_diff")]
+
+write.csv(medians_recovery, "medians_recovery.csv")
 
 ####means vs. medians recovery
 apply(means_recovery, 2, as.numeric) - apply(medians_recovery, 2, as.numeric)
@@ -521,6 +549,27 @@ for(i in 1:length(conditions)){
     theme(plot.title = element_text(hjust = 0.5)) 
   
   
+  ###HERE###
+  #theta_corr
+  data <- as.data.frame(est_param_means[["theta"]])
+  data <- filter(data, V2 == conditions[i])
+  data <- data.frame(lapply(data, as.character), stringsAsFactors=FALSE)
+  data <- as.numeric(data[,1])
+  true_param <- as.data.frame(true_item_params[["dif_param"]])
+  true_param <- filter(true_param, V2 == conditions[i])
+  true_param <- as.data.frame(lapply(true_param, as.character), stringsAsFactors=FALSE)
+  true_param <- as.numeric(true_param[,1])
+  data <- as.data.frame(cbind(data, true_param))
+  names(data) <- c("est_param", "true_param")
+  
+  theta_corr_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) + 
+    geom_point(alpha = 0.65, color = colors[i]) + 
+    ggtitle(paste0("D-parameter correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
+    labs(x = "True Parameter Value", y = "Estimated Parameter Value", 
+         caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) + 
+    theme(plot.title = element_text(hjust = 0.5)) 
+  
+  
 }
 
 pdf("mean_corr_scatterplots.pdf", width = 10, height = 10)
@@ -616,3 +665,7 @@ multiplot(b_corr_scatter[[1]], b_corr_scatter[[2]], b_corr_scatter[[3]], b_corr_
 multiplot(D_corr_scatter[[1]], D_corr_scatter[[2]], D_corr_scatter[[3]], D_corr_scatter[[4]], cols = 2)
 
 dev.off()
+
+
+#Consider also making scatterplots w/ geom_line set to various decision criteria on the y-axis; 
+#this would also require calculating decision consistency, gross. 
