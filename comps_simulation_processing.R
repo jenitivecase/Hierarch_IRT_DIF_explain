@@ -745,10 +745,12 @@ for(j in 1:length(flag_thresholds)){
       geom_rect(data = data.frame(xmin = -Inf, xmax = flag_amt, ymin = flag_amt, ymax = Inf), 
                 aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
                 fill = "red", alpha = 0.2, show.legend = FALSE, inherit.aes = FALSE) +
-      ggtitle(paste0("D-parameter decision consistency for\nrho = ", rho, ", reference proportion = ", PREF)) + 
+      ggtitle(paste0("DIF flag decision consistency for\nrho = ", rho, ", reference proportion = ", PREF)) + 
       labs(x = "True Parameter Value", y = "Estimated Parameter Value", 
            caption = paste0("Correct ratio = ", correct_ratio)) + 
-      theme(plot.title = element_text(hjust = 0.5))  + 
+      scale_x_continuous(breaks = seq(-100, 100, .2)) +
+      scale_y_continuous(breaks = seq(-100, 100, .2)) +
+      theme(plot.title = element_text(hjust = 0.5)) + 
       geom_hline(yintercept = flag_amt) + 
       geom_vline(xintercept = flag_amt)
 
