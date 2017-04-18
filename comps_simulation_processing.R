@@ -22,7 +22,7 @@ files_df <- as.data.frame(files)
 names(files_df) <- "filename"
 files_df$filename <- as.character(files_df$filename)
 files_df <- filter(files_df, filename != "combined")
-files_df <- as.data.frame(files_df[c(grep("pdf", files_df$filename, invert = TRUE)),])
+files_df <- as.data.frame(files_df[c(grep("rds", files_df$filename)),])
 names(files_df) <- "filename"
 
 for(i in 1:nrow(files_df)){
@@ -74,6 +74,12 @@ names(est_param_means) <- param_means_names
 est_param_medians <- vector("list", length(param_means_names))
 names(est_param_medians) <- param_means_names
 
+est_ability_means <- vector("list", length(ability_means_names))
+names(est_ability_means) <- ability_means_names
+
+est_ability_medians <- vector("list", length(ability_means_names))
+names(est_ability_medians) <- ability_means_names
+
 for(i in 1:length(conditions)){
   correlations_conditions[[i]] <- correlation_get(conditions[i], correlation_files)
   
@@ -86,7 +92,7 @@ for(i in 1:length(conditions)){
   for(j in 1:length(est_param_medians)){
     est_param_medians[[j]][[i]] <- est_param_means_get(conditions[i], est_param_median_files, names(est_param_medians[j]))
   }
-  
+ 
   for(j in 1:length(true_item_params)){
     true_item_params[[j]][[i]] <- true_param_get(conditions[i], true_param_files, 
                                                  param_type = "true_item_params",
@@ -131,7 +137,6 @@ for(i in 1:length(true_item_params)){
   true_item_params[[i]] <- matrix(data = c(unlist(true_item_params[[i]]), conditions_vec), ncol = 2)
 }
 
-### HERE ###
 temp <- NULL
 for(i in 1:4){
   temp[[i]] <- cbind(true_ability_params[[1]][[i]] , true_ability_params[[2]][[i]])
@@ -141,11 +146,11 @@ true_ability_params <- temp
 for(i in 1:length(true_ability_params)){
   param_vec_length <- nrow(true_ability_params[[i]])
   conditions_vec <- NULL
-  for(j in 1:length(conditions)){
-    conditions_vec <- c(conditions_vec, rep(conditions[j], param_vec_length))
-  }
-  true_ability_params[[i]] <- matrix(data = cbind(true_ability_params[[i]], conditions_vec))
+  conditions_vec <- rep(conditions[i], param_vec_length)
+  true_ability_params[[i]] <- cbind(true_ability_params[[i]], conditions_vec)
 }
+
+true_ability_params <- do.call(rbind, true_ability_params)
 
 #### MEANS RECOVERY DF FORMATTING ####
 means_recovery <- data.frame(matrix(NA, nrow = length(conditions), ncol = ncol(correlations_conditions[[1]])))
@@ -548,15 +553,13 @@ for(i in 1:length(conditions)){
          caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) + 
     theme(plot.title = element_text(hjust = 0.5)) 
   
-  
-  ###HERE###
   #theta_corr
   data <- as.data.frame(est_param_means[["theta"]])
   data <- filter(data, V2 == conditions[i])
   data <- data.frame(lapply(data, as.character), stringsAsFactors=FALSE)
   data <- as.numeric(data[,1])
-  true_param <- as.data.frame(true_item_params[["dif_param"]])
-  true_param <- filter(true_param, V2 == conditions[i])
+  true_param <- as.data.frame(true_ability_params[which(true_ability_params$conditions_vec == conditions[i]), 
+                                                  "true_ability.theta"])
   true_param <- as.data.frame(lapply(true_param, as.character), stringsAsFactors=FALSE)
   true_param <- as.numeric(true_param[,1])
   data <- as.data.frame(cbind(data, true_param))
@@ -564,7 +567,7 @@ for(i in 1:length(conditions)){
   
   theta_corr_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) + 
     geom_point(alpha = 0.65, color = colors[i]) + 
-    ggtitle(paste0("D-parameter correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
+    ggtitle(paste0("Theta-parameter correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
     labs(x = "True Parameter Value", y = "Estimated Parameter Value", 
          caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) + 
     theme(plot.title = element_text(hjust = 0.5)) 
@@ -578,6 +581,8 @@ multiplot(a_corr_scatter[[1]], a_corr_scatter[[2]], a_corr_scatter[[3]], a_corr_
 multiplot(b_corr_scatter[[1]], b_corr_scatter[[2]], b_corr_scatter[[3]], b_corr_scatter[[4]], cols = 2)
 
 multiplot(D_corr_scatter[[1]], D_corr_scatter[[2]], D_corr_scatter[[3]], D_corr_scatter[[4]], cols = 2)
+
+multiplot(theta_corr_scatter[[1]], theta_corr_scatter[[2]], theta_corr_scatter[[3]], theta_corr_scatter[[4]], cols = 2)
 
 dev.off()
 
@@ -654,7 +659,24 @@ for(i in 1:length(conditions)){
          caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) + 
     theme(plot.title = element_text(hjust = 0.5)) 
   
+  #theta_corr
+  data <- as.data.frame(est_param_medians[["theta"]])
+  data <- filter(data, V2 == conditions[i])
+  data <- data.frame(lapply(data, as.character), stringsAsFactors=FALSE)
+  data <- as.numeric(data[,1])
+  true_param <- as.data.frame(true_ability_params[which(true_ability_params$conditions_vec == conditions[i]), 
+                                                  "true_ability.theta"])
+  true_param <- as.data.frame(lapply(true_param, as.character), stringsAsFactors=FALSE)
+  true_param <- as.numeric(true_param[,1])
+  data <- as.data.frame(cbind(data, true_param))
+  names(data) <- c("est_param", "true_param")
   
+  theta_corr_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) + 
+    geom_point(alpha = 0.65, color = colors[i]) + 
+    ggtitle(paste0("Theta-parameter correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
+    labs(x = "True Parameter Value", y = "Estimated Parameter Value", 
+         caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) + 
+    theme(plot.title = element_text(hjust = 0.5)) 
 }
 
 pdf("median_corr_scatterplots.pdf", width = 10, height = 10)
@@ -664,6 +686,7 @@ multiplot(b_corr_scatter[[1]], b_corr_scatter[[2]], b_corr_scatter[[3]], b_corr_
 
 multiplot(D_corr_scatter[[1]], D_corr_scatter[[2]], D_corr_scatter[[3]], D_corr_scatter[[4]], cols = 2)
 
+multiplot(theta_corr_scatter[[1]], theta_corr_scatter[[2]], theta_corr_scatter[[3]], theta_corr_scatter[[4]], cols = 2)
 dev.off()
 
 
