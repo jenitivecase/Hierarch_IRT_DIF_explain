@@ -13,6 +13,7 @@ if(Sys.info()["user"] == "jbrussow"){
 
 library(tidyr)
 library(dplyr)
+library(openxlsx)
 library(ggplot2)
 
 source("../functions.R")
@@ -203,7 +204,7 @@ apply(means_recovery, 2, as.numeric) - apply(medians_recovery, 2, as.numeric)
 colors <- c("darkblue", "darkred", "darkgreen", "darkorange")
 source(paste0(getwd(), "/../multiplot_fun.R"))
 
-### BIAS ####
+### BIAS HISTOGRAMS####
 R2_histos <- vector("list", length(conditions))
 focmean_histos <- vector("list", length(conditions))
 refmean_histos <- vector("list", length(conditions))
@@ -690,5 +691,74 @@ multiplot(theta_corr_scatter[[1]], theta_corr_scatter[[2]], theta_corr_scatter[[
 dev.off()
 
 
-#Consider also making scatterplots w/ geom_line set to various decision criteria on the y-axis; 
-#this would also require calculating decision consistency, gross. 
+
+### DECISION CONSISTENCY SCATTERPLOTS ####
+#mean correlations
+flag_thresholds <- c(.3, .4, .5, .6)
+
+for(j in 1:length(flag_thresholds)){
+  flag_amt <- flag_thresholds[j]
+  D_decision_scatter <- vector("list", length(conditions))
+  dec_consist_out <- createWorkbook()
+  
+  for(i in 1:length(conditions)){
+    rho <- grep("rho", unlist(strsplit(conditions[i], "_")), value = TRUE)
+    rho <- gsub("rho", "", rho)
+    rho <- gsub("-", ".", rho)
+    
+    PREF <- grep("PREF", unlist(strsplit(conditions[i], "_")), value = TRUE)
+    PREF <- gsub("PREF", "", PREF)
+    PREF <- gsub("-", ".", PREF)
+    
+    #D_corr
+    data <- as.data.frame(est_param_means[["D_params"]])
+    data <- filter(data, V2 == conditions[i])
+    data <- data.frame(lapply(data, as.character), stringsAsFactors=FALSE)
+    data <- as.numeric(data[,1])
+    true_param <- as.data.frame(true_item_params[["dif_param"]])
+    true_param <- filter(true_param, V2 == conditions[i])
+    true_param <- as.data.frame(lapply(true_param, as.character), stringsAsFactors=FALSE)
+    true_param <- as.numeric(true_param[,1])
+    data <- as.data.frame(cbind(data, true_param))
+    names(data) <- c("est_param", "true_param")
+    
+    
+    trueneg <- nrow(data[which(data$true_param < flag_amt & data$est_param < flag_amt),])
+    falsepos <- nrow(data[which(data$true_param < flag_amt & data$est_param > flag_amt),])
+    falseneg <- nrow(data[which(data$true_param > flag_amt & data$est_param < flag_amt),])
+    truepos <- nrow(data[which(data$true_param > flag_amt & data$est_param > flag_amt),])
+    
+    dec_consist <- matrix(c(truepos, falsepos, falseneg, trueneg), nrow = 2, byrow = TRUE)
+    colnames(dec_consist) <- c("True_DIF", "True_NoDIF")
+    rownames(dec_consist) <- c("Est_DIF", "Est_NoDIF")
+    
+    addWorksheet(dec_consist_out, conditions[[i]])
+    writeData(dec_consist_out, sheet = i, dec_consist)
+    
+    correct_ratio <- round((trueneg+truepos)/(trueneg+truepos+falsepos+falseneg), 3)
+    
+    D_decision_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) + 
+      geom_point(alpha = 0.65, color = colors[i]) + 
+      geom_rect(data = data.frame(xmin = flag_amt, xmax = Inf, ymin = -Inf, ymax = flag_amt), 
+                aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+                fill = "red", alpha = 0.2, show.legend = FALSE, inherit.aes = FALSE) +
+      geom_rect(data = data.frame(xmin = -Inf, xmax = flag_amt, ymin = flag_amt, ymax = Inf), 
+                aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+                fill = "red", alpha = 0.2, show.legend = FALSE, inherit.aes = FALSE) +
+      ggtitle(paste0("D-parameter decision consistency for\nrho = ", rho, ", reference proportion = ", PREF)) + 
+      labs(x = "True Parameter Value", y = "Estimated Parameter Value", 
+           caption = paste0("Correct ratio = ", correct_ratio)) + 
+      theme(plot.title = element_text(hjust = 0.5))  + 
+      geom_hline(yintercept = flag_amt) + 
+      geom_vline(xintercept = flag_amt)
+
+  }
+  pdf(paste0(flag_amt, "_threshold_mean_decision_scatterplots.pdf"), width = 10, height = 10)
+  multiplot(D_decision_scatter[[1]], D_decision_scatter[[2]], D_decision_scatter[[3]], D_decision_scatter[[4]], cols = 2)
+  dev.off()
+  
+  saveWorkbook(dec_consist_out, paste0(flag_amt, "_decision_consistency.xlsx"))
+}
+
+
+
