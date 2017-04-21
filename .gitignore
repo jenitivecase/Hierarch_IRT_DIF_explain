@@ -7,3 +7,4 @@
 */
 *.rds
 multiplot_fun.R
+*pdf
