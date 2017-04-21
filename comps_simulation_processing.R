@@ -52,6 +52,7 @@ est_param_median_files <- files[which(grepl("est_param_medians", files))]
 params_summary_names <- readRDS("../params_summary_names.rds")
 param_means_names <- c("a_params", "b_params", "D_params", "beta1", "mu", 
                        "sigma2", "R2", "theta", "foc_mean")
+ability_means_names <- c("theta", "group")
 
 #### DATA RETRIEVAL ####
 
@@ -152,6 +153,16 @@ for(i in 1:length(true_ability_params)){
 }
 
 true_ability_params <- do.call(rbind, true_ability_params)
+
+dif_params <- as.data.frame(as.numeric(true_item_params$dif_param[,1]))
+names(dif_params) <- "D_param"
+
+ggplot(data = dif_params, aes(x = D_param)) +
+  geom_histogram() +
+  labs(x = "D-parameter value", y = "Count") + 
+  theme(plot.title = element_text(hjust = 0.5)) + 
+  ggtitle("Distribution of D-parameters")
+
 
 #### MEANS RECOVERY DF FORMATTING ####
 means_recovery <- data.frame(matrix(NA, nrow = length(conditions), ncol = ncol(correlations_conditions[[1]])))
