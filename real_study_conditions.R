@@ -21,7 +21,23 @@ expand.grid(rho, P_REF, alpha, mu2)
 alpha <- c(0.85, 0.9, 0.95)
 mu1 <- 0
 mu2 <- c(0.5, 1)
-sd1 <- .01
-sd2 <- .01
-k <- rbinom(1, 1, alpha)
-(rnorm(1, mu1, sd1)^k) * (rnorm(1, mu2, sd2)^(1-k))
+sdev <- .2
+test_reps <- 10000
+
+conditions <- expand.grid(alpha, mu2)
+test_graphs <- vector("list", nrow(conditions))
+
+for(i in 1:nrow(conditions)){
+  mu2 <- conditions[i, "Var2"]
+  alpha <- conditions[i, "Var1"]
+  
+  test <- rep(NA, test_reps)
+  
+  k <- rbinom(test_reps, 1, alpha)
+  
+  test_graphs[[i]] <- qplot((rnorm(test_reps, mu1, sdev)^k) * (rnorm(test_reps, mu2, sdev)^(1-k)), main = paste0(
+    "mu1 = ", mu1, ", mu2 = ", mu2, ", alpha = ", alpha, ", sd = ", sdev))
+}
+
+multiplot(test_graphs[[1]], test_graphs[[2]], test_graphs[[3]], test_graphs[[4]], 
+          test_graphs[[5]], test_graphs[[6]], cols = 2)
