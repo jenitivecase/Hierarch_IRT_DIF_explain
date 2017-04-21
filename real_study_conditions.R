@@ -21,23 +21,26 @@ expand.grid(rho, P_REF, alpha, mu2)
 alpha <- c(0.85, 0.9, 0.95)
 mu1 <- 0
 mu2 <- c(0.5, 1)
-sdev <- .2
+sdev <- c(.1, .2)
 test_reps <- 10000
 
-conditions <- expand.grid(alpha, mu2)
-test_graphs <- vector("list", nrow(conditions))
+conditions <- expand.grid(sdev, mu2, alpha)
+names(conditions) <- c("sdev", "mu2", "alpha")
 
+pdf("mixturedist_sds.pdf")
 for(i in 1:nrow(conditions)){
-  mu2 <- conditions[i, "Var2"]
-  alpha <- conditions[i, "Var1"]
+  mu2 <- conditions[i, "mu2"]
+  alpha <- conditions[i, "alpha"]
+  sdev <- conditions[i, "sdev"]
   
   test <- rep(NA, test_reps)
   
   k <- rbinom(test_reps, 1, alpha)
   
-  test_graphs[[i]] <- qplot((rnorm(test_reps, mu1, sdev)^k) * (rnorm(test_reps, mu2, sdev)^(1-k)), main = paste0(
-    "mu1 = ", mu1, ", mu2 = ", mu2, ", alpha = ", alpha, ", sd = ", sdev))
+  print(qplot((rnorm(test_reps, mu1, sdev)^k) * (rnorm(test_reps, mu2, sdev)^(1-k)),
+                                         main = paste0("mu1 = ", mu1, ", mu2 = ", mu2, ", alpha = ", alpha, ", sd = ", sdev)))
 }
+dev.off()
 
-multiplot(test_graphs[[1]], test_graphs[[2]], test_graphs[[3]], test_graphs[[4]], 
-          test_graphs[[5]], test_graphs[[6]], cols = 2)
+
+
