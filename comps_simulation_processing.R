@@ -744,7 +744,7 @@ for(j in 1:length(flag_thresholds)){
     rownames(dec_consist) <- c("Est_DIF", "Est_NoDIF")
     
     addWorksheet(dec_consist_out, conditions[[i]])
-    writeData(dec_consist_out, sheet = i, dec_consist)
+    writeData(dec_consist_out, sheet = i, dec_consist, rowNames = TRUE)
     
     correct_ratio <- round((trueneg+truepos)/(trueneg+truepos+falsepos+falseneg), 3)
     
@@ -770,7 +770,7 @@ for(j in 1:length(flag_thresholds)){
   multiplot(D_decision_scatter[[1]], D_decision_scatter[[2]], D_decision_scatter[[3]], D_decision_scatter[[4]], cols = 2)
   dev.off()
   
-  saveWorkbook(dec_consist_out, paste0(flag_amt, "_decision_consistency.xlsx"))
+  saveWorkbook(dec_consist_out, paste0(flag_amt, "_decision_consistency.xlsx"), overwrite = TRUE)
 }
 
 
