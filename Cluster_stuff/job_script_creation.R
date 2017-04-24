@@ -22,7 +22,8 @@ for(i in 1:nrow(conditions)){
   
   name <- paste0("IRT_DIF_rho", gsub("\\.", "", rho), 
                  "_pref", gsub("\\.", "", P_REF), 
-                 "_mu", mu2, "_alpha", gsub("\\.", "", alpha))
+                 "_mu", gsub("\\.", "", mu2), 
+                 "_alpha", gsub("\\.", "", alpha))
   
   args <- paste0("seed_index=", seed_index, " rho=", rho, 
                  " P_REF=", P_REF, " mu2=", mu2,
@@ -44,4 +45,14 @@ module load Rstats/3.3
 
 R -f cluster_base_script.R --args ", args,
       sep = "", file = paste0(name, "_job.sh"))
+  
+  submission <- paste0(name, "_job.sh")
+  master_script <- rbind(master_script, submission)
 }
+
+cat("submissions=\'",master_script,"\'
+for submission in $submissions
+do
+  msub $submission
+done", sep = " ",
+    file="master_script.sh")
