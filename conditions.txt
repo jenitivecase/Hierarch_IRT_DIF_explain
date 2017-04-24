@@ -18,6 +18,8 @@ Original conditions
 9  0.8  0.9
 
 Final conditions
+1000 examinees
+
    Rho P_REF Damt
 1  0.4  0.5  1.0
 2  0.6  0.5  1.0

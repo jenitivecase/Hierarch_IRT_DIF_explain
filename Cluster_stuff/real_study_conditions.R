@@ -21,11 +21,11 @@ expand.grid(rho, P_REF, alpha, mu2)
 alpha <- c(0.85, 0.9, 0.95)
 mu1 <- 0
 mu2 <- c(0.5, 1)
-sdev <- c(.1, .2)
+sdev <- .1
 test_reps <- 10000
 
-conditions <- expand.grid(sdev, mu2, alpha)
-names(conditions) <- c("sdev", "mu2", "alpha")
+conditions <- expand.grid(rho, P_REF, mu2, alpha)
+names(conditions) <- c("rho", "P_REF", "mu2", "alpha")
 
 pdf("mixturedist_sds.pdf")
 for(i in 1:nrow(conditions)){

@@ -4,7 +4,9 @@
 .Ruserdata
 *.doc*
 *output*
-*/
+*archive*
+*results*
 *.rds
 multiplot_fun.R
 *pdf
+*.dso
