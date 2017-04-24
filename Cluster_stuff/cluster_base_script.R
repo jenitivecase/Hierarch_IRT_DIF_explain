@@ -11,7 +11,16 @@ for(i in 1:length(needed_packages)){
   library(needed_packages[i], character.only = TRUE)
 }
 
+#### SEED SETUP ####
+comm_args <- commandArgs(trailingOnly = TRUE)
 
+args <- strsplit(comm_args,"=",fixed=TRUE)
+
+for (arg in 1:length(args)){
+  argname <- args[[arg]][1]
+  argval <- as.numeric(args[[arg]][2])
+  assign(argname,argval)
+}
 
 #seed_index - specified in job script
 seeds <- readRDS("clusterseeds.rds")
@@ -33,7 +42,6 @@ mu1 <- 0
 #sdev is the standard deviation of each distribution. sdev is equal for both distributions
 sdev <- .1
 
-#### SEED SETUP ####
 
 #### STAN SETUP ####
 #load stan model scripts
