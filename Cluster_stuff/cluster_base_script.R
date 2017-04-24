@@ -2,7 +2,7 @@
 
 work_dir <- getwd()
 
-source("functions.R")
+source("mixture_functions.R")
 date <- format.Date(Sys.Date(), "%Y%m%d")
 options(scipen = 999)
 
@@ -15,15 +15,19 @@ for(i in 1:length(needed_packages)){
 #number of people
 n_people <- 2000
 #number of items
-n_items <- 40
-#number of items with DIF
-n_DIF <- 2
+n_items <- 60
 #number of reps
-nreps <- 500
-#rho is the amount of DIF explained by the second-order factors
-rho <- 0.4
-#P_REF is the proportion of people in the reference group
-P_REF <- 0.5
+nreps <- 100
+#rho is the amount of DIF explained by the second-order factors - to be specified in job script
+#P_REF is the proportion of people in the reference group - to be specified in job script
+#alpha is mixture parameter - to be specified in job script
+#mu1 is mean of distribution 1 - items with negligible DIF
+mu1 <- 0
+#mu2 is the mean of distribution 2 - items with "true" DIF - to be specified in job script
+#sdev is the standard deviation of each distribution. sdev is equal for both distributions
+sdev <- .1
+
+#### SEED SETUP ####
 
 #### STAN SETUP ####
 #load stan model scripts
@@ -63,8 +67,8 @@ tag_mod <- 1
 for(i in 1:nreps){
   #### SIMULATION ####
   #simulate a set of items
-  true_item_params <- item_sim(n_items, n_DIF, b_mean = 0, b_sd = 1, a_min = 0.5, a_max = 3, 
-                               nodif_mean = 0, nodif_sd = 0.1, dif_mean = 1, dif_sd = 0.1)
+  true_item_params <- item_sim(n_items, b_mean = 0, b_sd = 1, a_min = 0.5, a_max = 3, 
+                               mix_alpha = alpha, mix_mu1 = mu1, mix_mu2 = mu2, mix_sdev = sdev)
   
   #simulate a set of people's ability scores
   true_ability <- ability_sim(n_people, P_REF = P_REF, ref_theta_mean = 0, ref_theta_sd = 1,
