@@ -25,7 +25,10 @@ sdev <- .1
 test_reps <- 10000
 
 conditions <- expand.grid(rho, P_REF, mu2, alpha)
-names(conditions) <- c("rho", "P_REF", "mu2", "alpha")
+conditions <- cbind(c(1:nrow(conditions)), conditions)
+names(conditions) <- c("condition", "rho", "P_REF", "mu2", "alpha")
+
+write.csv(conditions, "conditions.csv", row.names = FALSE)
 
 pdf("mixturedist_sds.pdf")
 for(i in 1:nrow(conditions)){

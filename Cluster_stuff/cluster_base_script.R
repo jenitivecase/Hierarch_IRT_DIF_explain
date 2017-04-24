@@ -6,10 +6,16 @@ source("mixture_functions.R")
 date <- format.Date(Sys.Date(), "%Y%m%d")
 options(scipen = 999)
 
-needed_packages <- c("tidyr", "dplyr", "rstan", "rstudioapi", "robustbase")
+needed_packages <- c("tidyr", "dplyr", "rstan", "rstudioapi", "robustbase", "portableParallelSeeds")
 for(i in 1:length(needed_packages)){
   library(needed_packages[i], character.only = TRUE)
 }
+
+
+
+#seed_index - specified in job script
+seeds <- readRDS("clusterseeds.rds")
+setSeeds(seeds, run = seed_index)
 
 #### SPECIFICATIONS ####
 #number of people
@@ -186,7 +192,7 @@ for(i in 1:nreps){
   names(median_correlations[[i]]) <- c("a_corr", "b_corr", "D_corr", "theta_corr",
                                        "foc_mean_diff", "ref_mean_diff", "R2_diff")
   
-  if(i %% 50 == 0){
+  if(i %% 5 == 0){
     file_tag <- paste0(tag_mod, "-", file_tag)
     tag_mod <- tag_mod + 1
     #write all the good stuff out to disk
@@ -198,10 +204,15 @@ for(i in 1:nreps){
     saveRDS(est_param_medians, paste0("est_param_medians_", file_tag, ".rds"))
     saveRDS(correlations, paste0("correlations_", file_tag, ".rds"))
     saveRDS(median_correlations, paste0("median_correlations_", file_tag, ".rds"))
-    
-    print(paste0("Replication ", i, " complete"))
-    print(paste0("Max R-hat value: ", max(params_summary[, "Rhat"])))
-    print(paste0("Mean R-hat value: ", mean(params_summary[, "Rhat"])))
   }
 }
 
+#write all the good stuff out to disk
+saveRDS(true_params, paste0("true_params_", file_tag, ".rds"))
+# saveRDS(result_objs, paste0("result_objs_", file_tag, ".rds"))
+saveRDS(est_param_summary, paste0("est_param_summary_", file_tag, ".rds"))
+saveRDS(params_extraction, paste0("params_extraction_", file_tag, ".rds"))
+saveRDS(est_param_means, paste0("est_param_means_", file_tag, ".rds"))
+saveRDS(est_param_medians, paste0("est_param_medians_", file_tag, ".rds"))
+saveRDS(correlations, paste0("correlations_", file_tag, ".rds"))
+saveRDS(median_correlations, paste0("median_correlations_", file_tag, ".rds"))
