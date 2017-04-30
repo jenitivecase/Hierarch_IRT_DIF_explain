@@ -200,27 +200,13 @@ for(i in 1:nreps){
   names(median_correlations[[i]]) <- c("a_corr", "b_corr", "D_corr", "theta_corr",
                                        "foc_mean_diff", "ref_mean_diff", "R2_diff")
   
-  if(i %% 5 == 0){
-    file_tag <- paste0(tag_mod, "-", file_tag)
-    tag_mod <- tag_mod + 1
-    #write all the good stuff out to disk
-    saveRDS(true_params, paste0("true_params_", file_tag, ".rds"))
-    # saveRDS(result_objs, paste0("result_objs_", file_tag, ".rds"))
-    saveRDS(est_param_summary, paste0("est_param_summary_", file_tag, ".rds"))
-    saveRDS(params_extraction, paste0("params_extraction_", file_tag, ".rds"))
-    saveRDS(est_param_means, paste0("est_param_means_", file_tag, ".rds"))
-    saveRDS(est_param_medians, paste0("est_param_medians_", file_tag, ".rds"))
-    saveRDS(correlations, paste0("correlations_", file_tag, ".rds"))
-    saveRDS(median_correlations, paste0("median_correlations_", file_tag, ".rds"))
-  }
+  #write all the good stuff out to disk
+  saveRDS(true_params, paste0("true_params_", file_tag, ".rds"))
+  # saveRDS(result_objs, paste0("result_objs_", file_tag, ".rds"))
+  saveRDS(est_param_summary, paste0("est_param_summary_", file_tag, ".rds"))
+  saveRDS(params_extraction, paste0("params_extraction_", file_tag, ".rds"))
+  saveRDS(est_param_means, paste0("est_param_means_", file_tag, ".rds"))
+  saveRDS(est_param_medians, paste0("est_param_medians_", file_tag, ".rds"))
+  saveRDS(correlations, paste0("correlations_", file_tag, ".rds"))
+  saveRDS(median_correlations, paste0("median_correlations_", file_tag, ".rds"))
 }
-
-#write all the good stuff out to disk
-saveRDS(true_params, paste0("true_params_", file_tag, ".rds"))
-# saveRDS(result_objs, paste0("result_objs_", file_tag, ".rds"))
-saveRDS(est_param_summary, paste0("est_param_summary_", file_tag, ".rds"))
-saveRDS(params_extraction, paste0("params_extraction_", file_tag, ".rds"))
-saveRDS(est_param_means, paste0("est_param_means_", file_tag, ".rds"))
-saveRDS(est_param_medians, paste0("est_param_medians_", file_tag, ".rds"))
-saveRDS(correlations, paste0("correlations_", file_tag, ".rds"))
-saveRDS(median_correlations, paste0("median_correlations_", file_tag, ".rds"))
