@@ -32,7 +32,7 @@ n_people <- 2000
 #number of items
 n_items <- 60
 #number of reps
-nreps <- 100
+nreps <- 10
 #rho is the amount of DIF explained by the second-order factors - to be specified in job script
 #P_REF is the proportion of people in the reference group - to be specified in job script
 #alpha is mixture parameter - to be specified in job script
@@ -69,7 +69,10 @@ params_extraction <- vector("list", nreps)
 folder_name <- paste0(date, "_simulation-results")
 file_tag <- paste0(nreps, "reps_", 
                    gsub(".", "-", as.character(rho), fixed = TRUE), "rho_", 
-                   gsub(".", "-", as.character(P_REF), fixed = TRUE), "PREF")
+                   gsub(".", "-", as.character(P_REF), fixed = TRUE), "PREF_", 
+                   gsub(".", "-", as.character(mu2), fixed = TRUE), "mu_",
+                   gsub(".", "-", as.character(alpha), fixed = TRUE), "alpha_",
+                   date)
 
 if(!dir.exists(paste0(work_dir, "/", folder_name))){
   dir.create(paste0(work_dir, "/", folder_name))
