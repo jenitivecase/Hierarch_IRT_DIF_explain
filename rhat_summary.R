@@ -45,7 +45,7 @@ for(file in 1:length(files)){
   
     Rhat_max_histo[[file]] <- ggplot(Rhat_values, aes(x = Rhat_max)) + 
       geom_histogram(binwidth = 0.02, alpha = 0.65, fill = colors[file]) + 
-      scale_x_continuous(limits = c(1, 2)) +
+      scale_x_continuous(limits = c(0.5, 2)) +
       ggtitle(paste0("R-hat max values for\nrho = ", rho, ", reference proportion = ", PREF)) + 
       labs(x = "R-hat  values", y = "Count") + 
       theme(plot.title = element_text(hjust = 0.5)) + 
@@ -53,11 +53,15 @@ for(file in 1:length(files)){
     
     Rhat_mean_histo[[file]] <- ggplot(Rhat_values, aes(x = Rhat_mean)) + 
       geom_histogram(binwidth = 0.02, alpha = 0.65, fill = colors[file]) + 
-      scale_x_continuous(limits = c(1, 2)) +
+      scale_x_continuous(limits = c(0.5, 2)) +
       ggtitle(paste0("R-hat mean values for\nrho = ", rho, ", reference proportion = ", PREF)) + 
       labs(x = "R-hat  values", y = "Count") + 
       theme(plot.title = element_text(hjust = 0.5)) + 
       geom_vline(xintercept = mean(Rhat_values$Rhat_mean), color = "black", linetype="dotted")
+    
+  print(paste0(condition, " number of mean R-hat values < 1.2 ", nrow(Rhat_values[which(Rhat_values$Rhat_mean <= 1.2), ])/nrow(Rhat_values)))
+  
+  print(paste0(condition, " number of max R-hat values < 1.2 ", nrow(Rhat_values[which(Rhat_values$Rhat_max <= 1.2), ])/nrow(Rhat_values)))
 }
 
 pdf("C:/Users/Jen/Dropbox/REMS/11 Comps/Simulation/all_simulation-results/Rhat_histograms.pdf", width = 10, height = 10)
