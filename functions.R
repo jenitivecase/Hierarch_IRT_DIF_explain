@@ -5,15 +5,20 @@ item_sim <- function(n_items, n_DIF, b_mean, b_sd, a_min, a_max,
                      nodif_mean, nodif_sd, dif_mean, dif_sd){
   item_param <- matrix(NA, nrow = n_items, ncol = 3)
   colnames(item_param) <- c("b_param", "a_param", "dif_param")
-  noDIF_rows <- c(1:(nrow(item_param)-n_DIF))
-  DIF_rows <- c((nrow(item_param)-n_DIF+1):nrow(item_param))
   
   item_param[, "b_param"] <- rnorm(nrow(item_param), b_mean, b_sd)
   #change to draw uniform distribution .5, 3.5
   item_param[, "a_param"] <- runif(nrow(item_param), a_min, a_max)
-  item_param[noDIF_rows, "dif_param"] <- rnorm(length(noDIF_rows), 
-                                               nodif_mean, nodif_sd)
-  item_param[DIF_rows, "dif_param"] <- rnorm(length(DIF_rows), dif_mean, dif_sd)
+
+  if(n_DIF > 0){
+    noDIF_rows <- c(1:(nrow(item_param)-n_DIF))
+    DIF_rows <- c((nrow(item_param)-n_DIF+1):nrow(item_param))
+    item_param[noDIF_rows, "dif_param"] <- rnorm(length(noDIF_rows), 
+                                                 nodif_mean, nodif_sd)
+    item_param[DIF_rows, "dif_param"] <- rnorm(length(DIF_rows), dif_mean, dif_sd)
+  } else {
+    item_param[, "dif_param"] <- rnorm(nrow(item_param), nodif_mean, nodif_sd)
+  }
   
   return(item_param)
 }
