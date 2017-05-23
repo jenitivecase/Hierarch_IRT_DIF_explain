@@ -140,7 +140,7 @@ for(i in 1:nreps){
   est_param_summary[[i]] <- params_summary
   
   #calculate the means of the estimated parameters
-  params <- extract(analysis, pars = c("a", "b", "D", "beta1", "mu", "sigma2", 
+  params <- extract(analysis, pars = c("a", "b", "D", "beta0", "beta1", "mu", "sigma2", 
                                        "R2", "theta", "foc_mean"))
   
   params_extraction[[i]] <- params
@@ -148,6 +148,7 @@ for(i in 1:nreps){
   a_params <- as.matrix(colMeans(params$a))
   b_params <- as.matrix(colMeans(params$b))
   D_params <- as.matrix(colMeans(params$D))
+  beta0 <- mean(params$beta0)
   beta1 <- mean(params$beta1)
   mu <- as.matrix(colMeans(params$mu))
   sigma2 <- mean(params$sigma2)
@@ -156,7 +157,7 @@ for(i in 1:nreps){
   foc_mean <- mean(params$foc_mean)
   
   beta1_true <- sdev_D/sd(params$D)
-  beta0 <- 
+  beta0_true <- mean(params$D) - (beta1_true*mean(DIFpredict))
   
   #save the means of estimated parameters
   est_param_means[[i]] <- list(a_params, b_params, D_params, beta1, 
