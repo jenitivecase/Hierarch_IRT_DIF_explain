@@ -46,7 +46,7 @@ mu1 <- 0
 #sdev is the standard deviation of each distribution. sdev is equal for both distributions
 sdev <- .1
 
-sdev_D <- sqrt(alpha*(sdev^2)) + ((1-alpha)*(sdev^2)) + alpha*(1-alpha)*((mu1-mu2)^2)
+sdev_D <- sqrt(((alpha*(sdev^2)) + ((1-alpha)*(sdev^2)) + (alpha*(1-alpha)*((mu1-mu2)^2)))/n_items)
 
 
 #### STAN SETUP ####
