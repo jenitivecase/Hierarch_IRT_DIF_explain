@@ -12,7 +12,11 @@ for(i in 1:length(needed_packages)){
 }
 
 #### SEED SETUP ####
-comm_args <- commandArgs(trailingOnly = TRUE)
+#commment out when not testing
+comm_args <- c("seed_index=27", "rho=0.8", "P_REF=0.5", "mu2=0.5", "alpha=0.95")
+
+#uncomment for real run
+# comm_args <- commandArgs(trailingOnly = TRUE)
 
 args <- strsplit(comm_args,"=",fixed=TRUE)
 
@@ -41,6 +45,8 @@ mu1 <- 0
 #mu2 is the mean of distribution 2 - items with "true" DIF - to be specified in job script
 #sdev is the standard deviation of each distribution. sdev is equal for both distributions
 sdev <- .1
+
+sdev_D <- sqrt(alpha*(sdev^2)) + ((1-alpha)*(sdev^2)) + alpha*(1-alpha)*((mu1-mu2)^2)
 
 
 #### STAN SETUP ####
@@ -79,7 +85,6 @@ if(!dir.exists(paste0(work_dir, "/", folder_name))){
 }
 setwd(paste0(work_dir, "/", folder_name))
 
-tag_mod <- 1
 
 for(i in 1:nreps){
   #### SIMULATION ####
@@ -149,6 +154,8 @@ for(i in 1:nreps){
   R2 <- mean(params$R2)
   theta <- as.matrix(colMeans(params$theta))
   foc_mean <- mean(params$foc_mean)
+  
+  beta1 <- sdev_D/sd(params$D)
   
   #save the means of estimated parameters
   est_param_means[[i]] <- list(a_params, b_params, D_params, beta1, 
