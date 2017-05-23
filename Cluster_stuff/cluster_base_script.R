@@ -157,7 +157,7 @@ for(i in 1:nreps){
   foc_mean <- mean(params$foc_mean)
   
   beta1_true <- sdev_D/sd(true_item_params[, "dif_param"])
-  beta0_true <- mean(true_item_params[, "dif_param"]) - (beta1_true*mean(DIFpredict))
+  beta0_true <- mean(true_item_params[, "dif_param"]) - (beta1_true*mean(true_item_params[, "dif_param"]))
   
   #save the means of estimated parameters
   est_param_means[[i]] <- list(a_params, b_params, D_params, beta1, 
@@ -174,11 +174,14 @@ for(i in 1:nreps){
   foc_mean_diff <- foc_mean-(-.5)
   ref_mean_diff <- mean(theta[1:n_ref])-0
   R2_diff <- R2-(rho^2)
+  beta1_diff <- beta1_true - beta1
+  beta0_diff <- beta0_true - beta0
   
   correlations[[i]] <- list(a_corr, b_corr, D_corr, theta_corr, 
                             foc_mean_diff, ref_mean_diff, R2_diff)
   names(correlations[[i]]) <- c("a_corr", "b_corr", "D_corr", "theta_corr",
-                                "foc_mean_diff", "ref_mean_diff", "R2_diff")
+                                "foc_mean_diff", "ref_mean_diff", "R2_diff",
+                                "beta1_diff", "beta0_diff")
   
   #calculate the medians of the estimated parameters
   a_params <- as.matrix(colMedians(params$a))
