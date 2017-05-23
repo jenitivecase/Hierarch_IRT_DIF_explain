@@ -156,8 +156,8 @@ for(i in 1:nreps){
   theta <- as.matrix(colMeans(params$theta))
   foc_mean <- mean(params$foc_mean)
   
-  beta1_true <- sdev_D/sd(params$D)
-  beta0_true <- mean(params$D) - (beta1_true*mean(DIFpredict))
+  beta1_true <- sdev_D/sd(true_item_params[, "dif_param"])
+  beta0_true <- mean(true_item_params[, "dif_param"]) - (beta1_true*mean(DIFpredict))
   
   #save the means of estimated parameters
   est_param_means[[i]] <- list(a_params, b_params, D_params, beta1, 
