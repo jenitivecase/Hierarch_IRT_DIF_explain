@@ -11,7 +11,7 @@ for(i in 1:length(needed_packages)){
   library(needed_packages[i], character.only = TRUE)
 }
 
-#### SEED SETUP ####
+#### COMMAND LINE ARGUMENT SETUP ####
 #commment out when not testing
 comm_args <- c("rho=0.8", "P_REF=0.5", "mu2=0.5", "alpha=0.95")
 
@@ -46,13 +46,13 @@ sdev <- .1
 #sdev_D is used to calculate beta1 and beta0
 sdev_D <- sqrt(alpha*(sdev^2)) + ((1-alpha)*(sdev^2)) + (alpha*(1-alpha)*((mu1-mu2)^2))
 
-#Seed Setup
+#### SEED SETUP ####
 filename <- paste0("seeds_", gsub(".", "-", as.character(rho), fixed = TRUE), "rho_", 
                    gsub(".", "-", as.character(P_REF), fixed = TRUE), "PREF_", 
                    gsub(".", "-", as.character(mu2), fixed = TRUE), "mu_",
                    gsub(".", "-", as.character(alpha), fixed = TRUE), "alpha.rds")
 
-seeds <- readRDS("filename")
+seeds <- readRDS(filename)
 
 #### STAN SETUP ####
 #load stan model scripts
