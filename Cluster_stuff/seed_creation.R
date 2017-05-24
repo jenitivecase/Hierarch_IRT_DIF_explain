@@ -4,7 +4,7 @@ library(portableParallelSeeds)
 conditions <- read.csv("conditions.csv")
 
 for(i in 1:nrow(conditions)){
-  rho <- Conditions[i, "rho"]
+  rho <- conditions[i, "rho"]
   P_REF <- conditions[i, "P_REF"]
   mu2 <- conditions[i, "mu2"]
   alpha <- conditions[i, "alpha"]
