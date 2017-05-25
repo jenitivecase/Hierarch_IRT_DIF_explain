@@ -12,7 +12,7 @@ rho <- c(0.4, 0.6, 0.8)
 #P_REF is the proportion of people in the reference group
 P_REF <- c(0.5, 0.9)
 #true_dif
-true_dif <- c(0.5, 0.1)
+true_dif <- c(0.5, 1)
 
 expand.grid(rho, P_REF, alpha, mu2)
 

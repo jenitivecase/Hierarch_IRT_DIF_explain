@@ -30,7 +30,7 @@ for (arg in 1:length(args)){
 
 #### SPECIFICATIONS ####
 #number of people
-n_people <- 2000
+n_people <- 1000
 #number of items
 n_items <- 60
 #number of reps
@@ -93,6 +93,7 @@ setwd(paste0(work_dir, "/", folder_name))
 
 for(i in 1:nreps){
   setSeeds(seeds, run = i)
+  
   #### SIMULATION ####
   #simulate a set of items
   true_item_params <- item_sim(n_items, b_mean = 0, b_sd = 1, a_min = 0.5, a_max = 3, 
