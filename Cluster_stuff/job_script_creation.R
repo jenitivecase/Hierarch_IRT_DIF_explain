@@ -8,13 +8,12 @@ if(Sys.info()["user"] == "jbrussow"){
 
 conditions <- read.csv("conditions.csv")
 
-library(portableParallelSeeds)
-seeds <- seedCreator(nrow(conditions), (ncol(conditions)-1), seed = "72714", file = "clusterseeds.rds")
+# library(portableParallelSeeds)
+# seeds <- seedCreator(nrow(conditions), (ncol(conditions)-1), seed = "72714", file = "clusterseeds.rds")
 
 master_script <- NULL
 
 for(i in 1:nrow(conditions)){
-  seed_index <- conditions[i, "condition"]
   rho <- conditions[i, "rho"]
   P_REF <- conditions[i, "P_REF"]
   mu2 <- conditions[i, "mu2"]
@@ -25,7 +24,7 @@ for(i in 1:nrow(conditions)){
                  "_mu", gsub("\\.", "", mu2), 
                  "_alpha", gsub("\\.", "", alpha))
   
-  args <- paste0("seed_index=", seed_index, " rho=", rho, 
+  args <- paste0("rho=", rho, 
                  " P_REF=", P_REF, " mu2=", mu2,
                  " alpha=", alpha)
   cat("#MSUB -N ",  name, "
