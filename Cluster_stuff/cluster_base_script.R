@@ -185,7 +185,8 @@ for(i in 1:nreps){
   beta0_diff <- beta0_true - beta0
   
   correlations[[i]] <- list(a_corr, b_corr, D_corr, theta_corr, 
-                            foc_mean_diff, ref_mean_diff, R2_diff)
+                            foc_mean_diff, ref_mean_diff, R2_diff, 
+                            beta1_diff, beta0_diff)
   names(correlations[[i]]) <- c("a_corr", "b_corr", "D_corr", "theta_corr",
                                 "foc_mean_diff", "ref_mean_diff", "R2_diff",
                                 "beta1_diff", "beta0_diff")
