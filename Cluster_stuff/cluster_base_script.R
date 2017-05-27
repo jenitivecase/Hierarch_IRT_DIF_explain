@@ -138,7 +138,7 @@ for(i in 1:nreps){
   
   #### OUTPUT ####
   #pull out the summary of the estimated parameters
-  params_summary <- summary(analysis, pars = c("a", "b", "D", "beta1", "mu", 
+  params_summary <- summary(analysis, pars = c("a", "b", "D", "beta0", "beta1", "mu", 
                                                "sigma2", "R2", "theta",
                                                "foc_mean"),
                             probs = c(0.025, 0.25, 0.5, 0.75, 0.975))$summary
