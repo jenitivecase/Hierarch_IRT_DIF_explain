@@ -71,9 +71,7 @@ true_params <- vector("list", nreps)
 # result_objs <- vector("list", nreps)
 est_param_summary <- vector("list", nreps)
 est_param_means <- vector("list", nreps)
-# est_param_medians <- vector("list", nreps)
 correlations <- vector("list", nreps)
-# median_correlations <- vector("list", nreps)
 params_extraction <- vector("list", nreps)
 
 #setup output folder for use later
@@ -191,45 +189,11 @@ for(i in 1:nreps){
                                 "foc_mean_diff", "ref_mean_diff", "R2_diff",
                                 "beta1_diff", "beta0_diff")
   
-  # #calculate the medians of the estimated parameters
-  # a_params <- as.matrix(colMedians(params$a))
-  # b_params <- as.matrix(colMedians(params$b))
-  # D_params <- as.matrix(colMedians(params$D))
-  # beta1 <- median(params$beta1)
-  # mu <- as.matrix(colMedians(params$mu))
-  # sigma2 <- median(params$sigma2)
-  # R2 <- median(params$R2)
-  # theta <- as.matrix(colMedians(params$theta))
-  # foc_mean <- median(params$foc_mean)
-  # 
-  # #save the medians of estimated parameters
-  # est_param_medians[[i]] <- list(a_params, b_params, D_params, beta1, 
-  #                                mu, sigma2, R2, theta, foc_mean)
-  # names(est_param_medians[[i]]) <- c("a_params", "b_params", "D_params", 
-  #                                    "beta1", "mu", "sigma2", "R2", "theta", 
-  #                                    "foc_mean")
-  # 
-  # #save the median correlations & differences from the expected values
-  # a_corr <- cor(a_params, true_item_params[,"a_param"])
-  # b_corr <- cor(b_params, true_item_params[,"b_param"])
-  # D_corr <- cor(D_params, true_item_params[,"dif_param"])
-  # theta_corr <- cor(theta, true_ability[, 1])
-  # foc_mean_diff <- -.5-foc_mean
-  # ref_mean_diff <- 0-mean(theta[1:n_ref])
-  # R2_diff <- (rho^2)-R2
-  # 
-  # median_correlations[[i]] <- list(a_corr, b_corr, D_corr, theta_corr, 
-  #                                  foc_mean_diff, ref_mean_diff, R2_diff)
-  # names(median_correlations[[i]]) <- c("a_corr", "b_corr", "D_corr", "theta_corr",
-  #                                      "foc_mean_diff", "ref_mean_diff", "R2_diff")
-  
   #write all the good stuff out to disk
   saveRDS(true_params, paste0("true_params_", file_tag, ".rds"))
   # saveRDS(result_objs, paste0("result_objs_", file_tag, ".rds"))
   saveRDS(est_param_summary, paste0("est_param_summary_", file_tag, ".rds"))
   saveRDS(params_extraction, paste0("params_extraction_", file_tag, ".rds"))
   saveRDS(est_param_means, paste0("est_param_means_", file_tag, ".rds"))
-  # saveRDS(est_param_medians, paste0("est_param_medians_", file_tag, ".rds"))
   saveRDS(correlations, paste0("correlations_", file_tag, ".rds"))
-  # saveRDS(median_correlations, paste0("median_correlations_", file_tag, ".rds"))
 }
