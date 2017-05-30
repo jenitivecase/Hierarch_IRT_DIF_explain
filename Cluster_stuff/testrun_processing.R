@@ -40,11 +40,13 @@ params_extraction <- readRDS("C:/Users/Jen/Dropbox/REMS/11 Comps/Simulation/Clus
 
 correlations <- readRDS("C:/Users/Jen/Dropbox/REMS/11 Comps/Simulation/Cluster_stuff/20170526_simulation-results/correlations_10reps_0-8rho_0-5PREF_0-5mu_0-95alpha_20170526.rds")
 
+params_summary <- readRDS("C:/Users/Jen/Dropbox/REMS/11 Comps/Simulation/Cluster_stuff/20170526_simulation-results/est_param_summary_10reps_0-8rho_0-5PREF_0-5mu_0-95alpha_20170526.rds")
 
 true_params <- true_params[[6]]
 est_param_means <- est_param_means[[6]]
 params_extraction <- params_extraction[[6]]
 correlations <- correlations[[6]]
+params_summary <- params_summary[[6]]
 
 
 for(i in 1:length(true_params)){
@@ -66,7 +68,7 @@ beta0 <- mean(params_extraction$beta0)
 beta0
 beta0_true
 
-##################################################3
+################################################################################
 
 correlations
 
@@ -74,3 +76,16 @@ for(i in 1:length(correlations)){
   print(names(correlations)[i])
   print(correlations[i])
 }
+
+
+################################################################################
+plot(true_item_params[,"a_param"], a_params)
+plot(true_item_params[,"b_param"], b_params)
+plot(true_item_params[,"dif_param"], D_params)
+plot(true_ability[,"theta"], theta)
+
+cor(true_item_params[,"a_param"], a_params)
+cor(true_item_params[,"b_param"], b_params)
+cor(true_item_params[,"dif_param"], D_params)
+cor(true_ability[,"theta"], theta)
+
