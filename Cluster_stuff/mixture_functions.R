@@ -185,6 +185,22 @@ est_param_means_get <- function(condition, file_list, param_name){
   return(param)
 }
 
+#### CI ANALYSIS ####
+CI_retrieval <- function(true_param_vec, est_param_mat){
+  if(NROW(true_param_vec) != NROW(est_param_mat)){
+    stop("Unequal param count!")
+  }
+  
+  CI_out <- c(rep(NA, NROW(true_param_vec)))
+  
+  for(i in 1:NROW(true_param_vec)){
+    CI_out[i] <- ifelse(true_param_vec[i] > est_param_mat[i, "2.5%"] & 
+             true_param_vec[i] < est_param_mat[i, "97.5%"], TRUE, FALSE)
+  }
+  
+  return(CI_out)
+}
+
 #### GRAPHING ####
 scale_def <- function(list, column){
   scale <- NA
