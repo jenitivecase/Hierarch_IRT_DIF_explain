@@ -36,9 +36,16 @@ true_params <- readRDS("C:/Users/Jen/Dropbox/REMS/11 Comps/Simulation/Cluster_st
 
 est_param_means <- readRDS("C:/Users/Jen/Dropbox/REMS/11 Comps/Simulation/Cluster_stuff/20170526_simulation-results/est_param_means_10reps_0-8rho_0-5PREF_0-5mu_0-95alpha_20170526.rds")
 
-true_params <- true_params[[6]]
+params_extraction <- readRDS("C:/Users/Jen/Dropbox/REMS/11 Comps/Simulation/Cluster_stuff/20170526_simulation-results/params_extraction_10reps_0-8rho_0-5PREF_0-5mu_0-95alpha_20170526.rds")
 
+correlations <- readRDS("C:/Users/Jen/Dropbox/REMS/11 Comps/Simulation/Cluster_stuff/20170526_simulation-results/correlations_10reps_0-8rho_0-5PREF_0-5mu_0-95alpha_20170526.rds")
+
+
+true_params <- true_params[[6]]
 est_param_means <- est_param_means[[6]]
+params_extraction <- params_extraction[[6]]
+correlations <- correlations[[6]]
+
 
 for(i in 1:length(true_params)){
   assign(names(true_params)[i], true_params[[i]])
@@ -55,5 +62,15 @@ beta0_true <- mean(DIFpredict) - (beta1_true*mean(true_item_params[, "dif_param"
 beta1
 beta1_true
 
+beta0 <- mean(params_extraction$beta0)
 beta0
 beta0_true
+
+##################################################3
+
+correlations
+
+for(i in 1:length(correlations)){
+  print(names(correlations)[i])
+  print(correlations[i])
+}
