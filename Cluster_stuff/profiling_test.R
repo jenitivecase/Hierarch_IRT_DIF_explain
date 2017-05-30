@@ -169,11 +169,11 @@ beta1_true <- rho*sdev_D/sd(DIFpredict)
 beta0_true <- mean(DIFpredict) - (beta1_true*mean(true_item_params[, "dif_param"]))
 
 #save the means of estimated parameters
-est_param_means[[i]] <- list(a_params, b_params, D_params, beta1, 
+est_param_means[[i]] <- list(a_params, b_params, D_params, beta1, beta0,
                              mu, sigma2, R2, theta, foc_mean)
 names(est_param_means[[i]]) <- c("a_params", "b_params", "D_params", 
-                                 "beta1", "mu", "sigma2", "R2", "theta", 
-                                 "foc_mean")
+                                 "beta1", "beta0", "mu", "sigma2", 
+                                 "R2", "theta", "foc_mean")
 
 #save the mean correlations & differences from the expected values
 a_corr <- cor(a_params, true_item_params[,"a_param"])
