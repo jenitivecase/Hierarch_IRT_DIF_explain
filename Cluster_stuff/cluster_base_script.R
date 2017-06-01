@@ -45,6 +45,8 @@ mu1 <- 0
 sdev <- .1
 #sdev_D is used to calculate beta1 and beta0
 sdev_D <- sqrt(alpha*(sdev^2)) + ((1-alpha)*(sdev^2)) + (alpha*(1-alpha)*((mu1-mu2)^2))
+#R2 is the amount of variance attributed to item-level features
+R2_true <- (rho^2)
 
 #### SEED SETUP ####
 filename <- paste0("seeds_", gsub(".", "-", as.character(rho), fixed = TRUE), "rho_", 
@@ -107,10 +109,15 @@ for(i in 1:nreps){
   #get values for the DIF predictor
   DIFpredict <- DIF_predictor(true_item_params, rho = rho)
   
+  #calculate beta1 and beta0
+  beta1_true <- rho*sdev_D
+  beta0_true <- mean(DIFpredict) - (beta1_true*mean(true_item_params[, "dif_param"]))
+  
   #save the true parameters
-  true_params[[i]] <- list(true_item_params, true_ability, dataset, DIFpredict)
+  true_params[[i]] <- list(true_item_params, true_ability, dataset, DIFpredict, 
+                           beta1_true, beta0_true)
   names(true_params[[i]]) <- c("true_item_params", "true_ability", "dataset", 
-                               "DIFpredict")
+                               "DIFpredict", "beta1_true", "beta0_true")
   
   #set up grouping variable
   group <- true_ability[,2]
@@ -160,9 +167,6 @@ for(i in 1:nreps){
   R2 <- mean(params$R2)
   theta <- as.matrix(colMeans(params$theta))
   foc_mean <- mean(params$foc_mean)
-  
-  beta1_true <- rho*sdev_D/sd(DIFpredict)
-  beta0_true <- mean(DIFpredict) - (beta1_true*mean(true_item_params[, "dif_param"]))
   
   #save the means of estimated parameters
   est_param_means[[i]] <- list(a_params, b_params, D_params, beta1, beta0,
