@@ -252,4 +252,6 @@ for(i in 1:nreps){
   saveRDS(params_extraction, paste0("params_extraction_", file_tag, ".rds"))
   saveRDS(est_param_means, paste0("est_param_means_", file_tag, ".rds"))
   saveRDS(correlations, paste0("correlations_", file_tag, ".rds"))
+  saveRDS(CIs_analysis, paste0("CIs_analysis_", file_tag, ".rds"))
+  saveRDS(CIs_proportion, paste0("CIs_proportion_", file_tag, ".rds"))
 }
