@@ -13,10 +13,10 @@ for(i in 1:length(needed_packages)){
 
 #### COMMAND LINE ARGUMENT SETUP ####
 #commment out when not testing
-comm_args <- c("rho=0.8", "P_REF=0.5", "mu2=0.5", "alpha=0.95")
+# comm_args <- c("rho=0.8", "P_REF=0.5", "mu2=0.5", "alpha=0.95")
 
 #uncomment for real run
-# comm_args <- commandArgs(trailingOnly = TRUE)
+comm_args <- commandArgs(trailingOnly = TRUE)
 
 args <- strsplit(comm_args,"=",fixed=TRUE)
 
