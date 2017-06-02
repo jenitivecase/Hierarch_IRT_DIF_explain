@@ -136,6 +136,7 @@ for(i in 1:nreps){
   
   n_observations <- nrow(dataset)
   
+  #### ANALYSIS ####
   #conducting the analysis
   analysis <- sampling(precomp_model, data = b.dat_long,
                        iter = 12000, warmup = 5000, chains = 2, verbose = FALSE, cores = 2)
@@ -245,6 +246,7 @@ for(i in 1:nreps){
   names(CIs_proportion[[i]]) <- list("a_param_CI_prop", "b_param_CI_prop", 
                               "D_param_CI_prop", "theta_param_CI_prop")
   
+  #### SAVE TO DISK ####
   #write all the good stuff out to disk
   saveRDS(true_params, paste0("true_params_", file_tag, ".rds"))
   # saveRDS(result_objs, paste0("result_objs_", file_tag, ".rds"))
