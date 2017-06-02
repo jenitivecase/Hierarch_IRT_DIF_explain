@@ -17,17 +17,17 @@ for(i in 1:nrow(param_types)){
 
 #item_params: a, b, D
 a_param_CIs <- CI_retrieval(true_item_params[, "a_param"], a_params_summary)
-sum(a_param_CIs)/n_items
+a_param_CI_prop <- sum(a_param_CIs)/n_items
 
 b_param_CIs <- CI_retrieval(true_item_params[, "b_param"], b_params_summary)
-sum(b_param_CIs)/n_items
+b_param_CI_prop <- sum(b_param_CIs)/n_items
 
 D_param_CIs <- CI_retrieval(true_item_params[, "dif_param"], D_params_summary)
-sum(D_param_CIs)/n_items
+D_param_CI_prop <- sum(D_param_CIs)/n_items
 
 #ability_params: theta
 theta_param_CIs <- CI_retrieval(true_ability[, "theta"], theta_params_summary)
-sum(theta_param_CIs)/n_people
+theta_param_CI_prop <- sum(theta_param_CIs)/n_people
 
 #scalar params: beta0, beta1, R2 
 beta0_CIs <- CI_retrieval(beta0_true, t(beta0_params_summary))
