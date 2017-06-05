@@ -203,13 +203,13 @@ for(i in 1:nreps){
                        rep("vec", 1), rep("scalar", 2), 
                        rep("vec", 1), rep("scalar", 1))
   
-  for(i in 1:nrow(param_types)){
-    if(param_types[i, "dim"] == "vec"){
-      assign(paste0(param_types[i, "param"], "_params_summary"), params_summary[
-        grep(paste0("^", param_types[i, "param"], "\\["), rownames(params_summary)),])
-    } else if(param_types[i, "dim"] == "scalar"){
-      assign(paste0(param_types[i, "param"], "_params_summary"), params_summary[
-        grep(paste0("^", param_types[i, "param"]), rownames(params_summary)),])
+for(j in 1:nrow(param_types)){
+    if(param_types[j, "dim"] == "vec"){
+      assign(paste0(param_types[j, "param"], "_params_summary"), params_summary[
+        grep(paste0("^", param_types[j, "param"], "\\["), rownames(params_summary)),])
+    } else if(param_types[j, "dim"] == "scalar"){
+      assign(paste0(param_types[j, "param"], "_params_summary"), params_summary[
+        grep(paste0("^", param_types[j, "param"]), rownames(params_summary)),])
     }
   }
   
