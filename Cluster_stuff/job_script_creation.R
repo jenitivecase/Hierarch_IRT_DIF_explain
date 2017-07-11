@@ -38,9 +38,6 @@ for(i in 1:nrow(conditions)){
 
 
 cd $PBS_O_WORKDIR
-module purge
-module use /panfs/pfs.local/work/crmda/tools/modules
-module load Rstats/3.3
 
 R --vanilla -f cluster_base_script.R --args ", args,
       sep = "", file = paste0(name, "_job.sh"))
