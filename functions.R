@@ -141,27 +141,19 @@ one_analysis_BUGS <- function(x, n_iter = 1000, n_burn = 300, b_dat = b.dat,
 }
 
 #### PROCESSING - DATA RETRIEVAL ####
-correlation_get <- function(condition, file_list){
-  output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
+correlation_get <- function(condition, file_list, file_loc){
+  output <- readRDS(paste0(file_loc, "/", file_list[grepl(condition, file_list)]))
+  output <- output[2:length(output)]
+  
+  conditions[i]
   output <- lapply(output, unlist, recursive = FALSE)
   output <- do.call(rbind, output)
   return(output)
 }
 
-# param_get <- function(condition, file_list, param_name){
-#   output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
-#   
-#   param <- lapply(output, function(x){
-#     x <- x[which(grepl("param", names(x)))]
-#   })
-#   param <- lapply(param, unlist, recursive = FALSE)
-#   param <- unlist(param, recursive = FALSE)
-#   
-#   return(param)
-# }
-
-true_param_get <- function(condition, file_list, param_type, param_name){
-  output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
+true_param_get <- function(condition, file_list, param_type, param_name, file_loc){
+  output <- readRDS(paste0(file_loc, "/", file_list[grepl(condition, file_list)]))
+  output <- output[2:length(output)]
   
   param <- vector("list", length(output))
   
@@ -173,23 +165,16 @@ true_param_get <- function(condition, file_list, param_type, param_name){
     param[[i]] <- as.data.frame(param[[i]][grep(param_name, names(param[[i]]))])
   }
   
-  param <- bind_rows(param, .id = names(output))
+  param <- bind_rows(param)
   return(param)
 }
 
-est_param_get <- function(condition, file_list, param_name){
-  output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
-  
-  param <- lapply(output, as.data.frame)
-  param <- bind_rows(param, .id = names(output))
-  return(param)
-}
-
-est_param_means_get <- function(condition, file_list, param_name){
-  output <- readRDS(paste0(file_list[grepl(condition, file_list)]))
+est_param_means_get <- function(condition, file_list, param_name, file_loc){
+  output <- readRDS(paste0(file_loc, "/", file_list[grepl(condition, file_list)]))
+  output <- output[2:length(output)]
   
   param <- lapply(output, function(x) as.data.frame(x[param_name]))
-  param <- bind_rows(param, .id = names(output))
+  param <- do.call(rbind, param)
   return(param)
 }
 
