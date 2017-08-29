@@ -132,12 +132,7 @@ for(i in 1:length(true_item_params)){
   true_item_params[[i]] <- matrix(data = c(unlist(true_item_params[[i]]), conditions_vec), ncol = 2)
 }
 
-temp <- NULL
-for(i in 1:4){
-  temp[[i]] <- cbind(true_ability_params[[1]][[i]] , true_ability_params[[2]][[i]])
-}
-true_ability_params <- temp
-
+true_ability_params <- unlist(true_ability_params, recursive = FALSE)
 for(i in 1:length(true_ability_params)){
   param_vec_length <- nrow(true_ability_params[[i]])
   conditions_vec <- NULL
@@ -151,7 +146,7 @@ dif_params <- as.data.frame(as.numeric(true_item_params$dif_param[,1]))
 names(dif_params) <- "D_param"
 
 ggplot(data = dif_params, aes(x = D_param)) +
-  geom_histogram() +
+  geom_histogram(binwidth = 0.01) +
   labs(x = "D-parameter value", y = "Count") + 
   theme(plot.title = element_text(hjust = 0.5)) + 
   ggtitle("Distribution of D-parameters")
