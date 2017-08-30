@@ -7,7 +7,6 @@
 *archive*
 *results*
 *.rds
-multiplot_fun.R
 *pdf
 *.dso
 *job.sh
