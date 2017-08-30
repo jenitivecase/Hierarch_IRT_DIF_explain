@@ -1,26 +1,29 @@
 #### SETUP ####
-file_loc <- "E:/Dissertation Simulation results/combined"
 options(scipen = 999)
 date <- format.Date(Sys.Date(), "%Y%m%d")
 
-work_dir <- "C:/Users/jbrussow/Dropbox/REMS/11 Comps/Simulation/"
+work_dir <- "C:/Users/jbrussow/Dropbox/REMS/11 Comps/Simulation/combined_dissertation_results"
 
 if(Sys.info()["user"] == "jbrussow"){
   setwd(work_dir)
 } else if (Sys.info()["user"] == "Jen"){
-  setwd(gsub("jbrussow", "Jen", work_dir))
-} else if (Sys.info()["user"] == "jennifer.brussow"){
-  setwd(gsub("jbrussow", "jennifer.brussow", work_dir))
+  work_dir <- gsub("jbrussow", "Jen", work_dir)
+  setwd(work_dir)
+} else if(Sys.info()["user"] == "jennifer.brussow"){
+  work_dir <- gsub("jbrussow", "jennifer.brussow", work_dir)
+  setwd(work_dir)
 }
+
+if(!dir.exists("analysis")) dir.create("analysis")
 
 library(tidyr)
 library(dplyr)
 library(openxlsx)
 library(ggplot2)
 
-source("functions.R")
+source("../functions.R")
 
-files <- list.files(file_loc)
+files <- list.files(work_dir, pattern = ".rds")
 files <- as.data.frame(files)
 names(files) <- "filename"
 files$filename <- as.character(files$filename)
@@ -64,7 +67,7 @@ est_param_mean_files <- files[which(grepl("est_param_means", files$filename)), "
 CIs_proportion_files <- files[which(grepl("CIs_proportion", files$filename)), "filename"]
 CIs_analysis_files <- files[which(grepl("CIs_analysis", files$filename)), "filename"]
 
-params_summary_names <- readRDS("params_summary_names.rds")
+params_summary_names <- readRDS("../params_summary_names.rds")
 param_means_names <- c("a_params", "b_params", "D_params", "beta0", "beta1", "mu", 
                        "sigma2", "R2", "theta", "foc_mean")
 ability_means_names <- c("theta")
@@ -89,24 +92,24 @@ est_ability_means <- vector("list", length(ability_means_names))
 names(est_ability_means) <- ability_means_names
 
 for(i in 1:length(conditions)){
-  correlations_conditions[[i]] <- correlation_get(conditions[i], correlation_files, file_loc)
+  correlations_conditions[[i]] <- correlation_get(conditions[i], correlation_files, work_dir)
   
 
   for(j in 1:length(est_param_means)){
    est_param_means[[j]][[i]] <- est_param_means_get(conditions[i], est_param_mean_files, 
-                                                    names(est_param_means[j]), file_loc)
+                                                    names(est_param_means[j]), work_dir)
   }
   
   for(j in 1:length(true_item_params)){
     true_item_params[[j]][[i]] <- true_param_get(conditions[i], true_param_files, 
                                                  param_type = "true_item_params",
-                                                 param_name = names(true_item_params[j]), file_loc)
+                                                 param_name = names(true_item_params[j]), work_dir)
   }
   
   for(j in 1:length(true_ability_params)){
     true_ability_params[[j]][[i]] <- true_param_get(conditions[i], true_param_files, 
                                                  param_type = "true_ability",
-                                                 param_name = names(true_ability_params[j]), file_loc)
+                                                 param_name = names(true_ability_params[j]), work_dir)
   }
 }
 
@@ -151,6 +154,8 @@ ggplot(data = dif_params, aes(x = D_param)) +
   theme(plot.title = element_text(hjust = 0.5)) + 
   ggtitle("Distribution of D-parameters")
 
+ggsave("./analysis/d-param_distribution.png", width = 8, height = 8)
+
 
 #### MEANS RECOVERY DF FORMATTING ####
 means_recovery <- data.frame(matrix(NA, nrow = length(conditions), ncol = ncol(correlations_conditions[[1]])))
@@ -180,13 +185,13 @@ means_recovery$alpha <- gsub("-", ".", means_recovery$alpha)
 means_recovery <- means_recovery[, c("rho", "PREF", "mu", "alpha", "a_corr", "b_corr", "D_corr", 
                          "theta_corr", "foc_mean_diff", "ref_mean_diff", "R2_diff")]
 
-write.csv(means_recovery, "means_recovery.csv")
+write.csv(means_recovery, "./analysis/means_recovery.csv")
 
 
 #### GRAPHS ####
 colors <- c(rep("darkblue", 6), rep("darkred", 6), rep("darkgreen", 6), 
             rep("darkorange", 6), rep("darkorchid", 6), rep("darkseagreen", 6))
-source("multiplot_fun.R")
+source("../multiplot_fun.R")
 
 ### BIAS HISTOGRAMS####
 R2_histos <- vector("list", length(conditions))
@@ -254,7 +259,7 @@ for(i in 1:length(conditions)){
     geom_vline(xintercept = mean(data$ref_mean_diff), color = "black", linetype="dotted")
 }
 
-pdf("R2_bias_histograms.pdf", width = 10, height = 10)
+pdf("./analysis/R2_bias_histograms.pdf", width = 10, height = 10)
 for(i in seq(1, 36, 6)){
   multiplot(R2_histos[[i]], R2_histos[[i+1]], R2_histos[[i+2]], 
             R2_histos[[i+3]], R2_histos[[i+4]], R2_histos[[i+5]], cols = 3, 
@@ -262,20 +267,20 @@ for(i in seq(1, 36, 6)){
 }
 dev.off()
 
-pdf("focmean_bias_histograms.pdf", width = 10, height = 10)
+pdf("./analysis/focmean_bias_histograms.pdf", width = 10, height = 10)
 for(i in seq(1, 36, 6)){
   multiplot(focmean_histos[[i]], focmean_histos[[i+1]], focmean_histos[[i+2]], 
             focmean_histos[[i+3]], focmean_histos[[i+4]], focmean_histos[[i+5]], cols = 3, 
-            title = "R-squared recovery bias")
+            title = "Focal mean recovery bias")
 }
 dev.off()
 
 
-pdf("refmean_bias_histograms.pdf", width = 10, height = 10)
+pdf("./analysis/refmean_bias_histograms.pdf", width = 10, height = 10)
 for(i in seq(1, 36, 6)){
   multiplot(refmean_histos[[i]], refmean_histos[[i+1]], refmean_histos[[i+2]], 
             refmean_histos[[i+3]], refmean_histos[[i+4]], refmean_histos[[i+5]], cols = 3, 
-            title = "R-squared recovery bias")
+            title = "Reference mean recovery bias")
 }
 dev.off()
 
