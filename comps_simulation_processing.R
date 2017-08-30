@@ -146,7 +146,7 @@ dif_params <- as.data.frame(as.numeric(true_item_params$dif_param[,1]))
 names(dif_params) <- "D_param"
 
 ggplot(data = dif_params, aes(x = D_param)) +
-  geom_histogram(binwidth = 0.01) +
+  geom_histogram(binwidth = 0.05) +
   labs(x = "D-parameter value", y = "Count") + 
   theme(plot.title = element_text(hjust = 0.5)) + 
   ggtitle("Distribution of D-parameters")
@@ -169,15 +169,24 @@ means_recovery$PREF <- grep("PREF", unlist(strsplit(means_recovery$condition, "_
 means_recovery$PREF <- gsub("PREF", "", means_recovery$PREF)
 means_recovery$PREF <- gsub("-", ".", means_recovery$PREF)
 
-means_recovery <- means_recovery[, c("rho", "PREF", "a_corr", "b_corr", "D_corr", 
+means_recovery$mu <- grep("mu", unlist(strsplit(means_recovery$condition, "_")), value = TRUE)
+means_recovery$mu <- gsub("mu", "", means_recovery$mu)
+means_recovery$mu <- gsub("-", ".", means_recovery$mu)
+
+means_recovery$alpha <- grep("alpha", unlist(strsplit(means_recovery$condition, "_")), value = TRUE)
+means_recovery$alpha <- gsub("alpha", "", means_recovery$alpha)
+means_recovery$alpha <- gsub("-", ".", means_recovery$alpha)
+
+means_recovery <- means_recovery[, c("rho", "PREF", "mu", "alpha", "a_corr", "b_corr", "D_corr", 
                          "theta_corr", "foc_mean_diff", "ref_mean_diff", "R2_diff")]
 
 write.csv(means_recovery, "means_recovery.csv")
 
 
 #### GRAPHS ####
-colors <- c("darkblue", "darkred", "darkgreen", "darkorange")
-source(paste0(getwd(), "/../multiplot_fun.R"))
+colors <- c(rep("darkblue", 6), rep("darkred", 6), rep("darkgreen", 6), 
+            rep("darkorange", 6), rep("darkorchid", 6), rep("darkseagreen", 6))
+source("multiplot_fun.R")
 
 ### BIAS HISTOGRAMS####
 R2_histos <- vector("list", length(conditions))
@@ -189,11 +198,19 @@ for(i in 1:length(conditions)){
   data <- as.data.frame(correlations_conditions[[paste0(conditions[i])]])
   rho <- grep("rho", unlist(strsplit(conditions[i], "_")), value = TRUE)
   rho <- gsub("rho", "", rho)
-  rho <- gsub("-", ".", rho)
+  rho <- sprintf("%.1f", as.numeric(gsub("-", ".", rho)))
   
   PREF <- grep("PREF", unlist(strsplit(conditions[i], "_")), value = TRUE)
   PREF <- gsub("PREF", "", PREF)
-  PREF <- gsub("-", ".", PREF)
+  PREF <- sprintf("%.1f", as.numeric(gsub("-", ".", PREF)))
+  
+  mu <- grep("mu", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  mu <- gsub("mu", "", mu)
+  mu <- sprintf("%.1f", as.numeric(gsub("-", ".", mu)))
+  
+  alpha <- grep("alpha", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  alpha <- gsub("alpha", "", alpha)
+  alpha <- sprintf("%.2f", as.numeric(gsub("-", ".", alpha)))
   
   #R2 difference
   xscale <- scale_def(correlations_conditions, "R2_diff")
@@ -202,9 +219,10 @@ for(i in 1:length(conditions)){
   R2_histos[[i]] <- ggplot(data, aes(x = R2_diff)) + 
     geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
     scale_x_continuous(limits = c(-xscale, xscale)) +
-    ggtitle(paste0("R-squared recovery bias for\nrho = ", rho, ", reference proportion = ", PREF)) + 
-    labs(x = "Difference in R-squared", y = "Count") + 
-    theme(plot.title = element_text(hjust = 0.5)) + 
+    labs(x = "Difference in R-squared", y = "Count",
+         title = paste0("rho = ", rho, ", reference proportion = ", PREF, 
+                        "\nmu = ", mu, ", alpha = ", alpha)) + 
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) + 
     geom_vline(xintercept = mean(data$R2_diff), color = "black", linetype="dotted")
   
   #focal mean difference
@@ -215,8 +233,10 @@ for(i in 1:length(conditions)){
     geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
     scale_x_continuous(limits = c(-xscale, xscale)) +
     ggtitle(paste0("Focal group mean recovery bias for\nrho = ", rho, ", reference proportion = ", PREF)) + 
-    labs(x = "Difference in focal group mean", y = "Count") + 
-    theme(plot.title = element_text(hjust = 0.5)) + 
+    labs(x = "Difference in focal group mean", y = "Count",
+         title = paste0("rho = ", rho, ", reference proportion = ", PREF, 
+                        "\nmu = ", mu, ", alpha = ", alpha)) +  
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) +
     geom_vline(xintercept = mean(data$foc_mean_diff), color = "black", linetype="dotted")
   
   #reference mean difference
@@ -227,18 +247,38 @@ for(i in 1:length(conditions)){
     geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
     scale_x_continuous(limits = c(-xscale, xscale)) +
     ggtitle(paste0("Reference group mean recovery bias for\nrho = ", rho, ", reference proportion = ", PREF)) + 
-    labs(x = "Difference in reference group mean", y = "Count") + 
-    theme(plot.title = element_text(hjust = 0.5)) + 
+    labs(x = "Difference in reference group mean", y = "Count",
+         title = paste0("rho = ", rho, ", reference proportion = ", PREF, 
+                        "\nmu = ", mu, ", alpha = ", alpha)) +  
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) +
     geom_vline(xintercept = mean(data$ref_mean_diff), color = "black", linetype="dotted")
 }
 
-pdf("Mean_bias_histograms.pdf", width = 10, height = 10)
-multiplot(R2_histos[[1]], R2_histos[[2]], R2_histos[[3]], R2_histos[[4]], cols = 2)
-
-multiplot(focmean_histos[[1]], focmean_histos[[2]], focmean_histos[[3]], focmean_histos[[4]], cols = 2)
-
-multiplot(refmean_histos[[1]], refmean_histos[[2]], refmean_histos[[3]], refmean_histos[[4]], cols = 2)
+pdf("R2_bias_histograms.pdf", width = 10, height = 10)
+for(i in seq(1, 36, 6)){
+  multiplot(R2_histos[[i]], R2_histos[[i+1]], R2_histos[[i+2]], 
+            R2_histos[[i+3]], R2_histos[[i+4]], R2_histos[[i+5]], cols = 3, 
+            title = "R-squared recovery bias")
+}
 dev.off()
+
+pdf("focmean_bias_histograms.pdf", width = 10, height = 10)
+for(i in seq(1, 36, 6)){
+  multiplot(focmean_histos[[i]], focmean_histos[[i+1]], focmean_histos[[i+2]], 
+            focmean_histos[[i+3]], focmean_histos[[i+4]], focmean_histos[[i+5]], cols = 3, 
+            title = "R-squared recovery bias")
+}
+dev.off()
+
+
+pdf("refmean_bias_histograms.pdf", width = 10, height = 10)
+for(i in seq(1, 36, 6)){
+  multiplot(refmean_histos[[i]], refmean_histos[[i+1]], refmean_histos[[i+2]], 
+            refmean_histos[[i+3]], refmean_histos[[i+4]], refmean_histos[[i+5]], cols = 3, 
+            title = "R-squared recovery bias")
+}
+dev.off()
+
 
 
 ### CORRELATION HISTOGRAMS ####
