@@ -237,7 +237,6 @@ for(i in 1:length(conditions)){
   focmean_histos[[i]] <- ggplot(data, aes(x = foc_mean_diff)) + 
     geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
     scale_x_continuous(limits = c(-xscale, xscale)) +
-    ggtitle(paste0("Focal group mean recovery bias for\nrho = ", rho, ", reference proportion = ", PREF)) + 
     labs(x = "Difference in focal group mean", y = "Count",
          title = paste0("rho = ", rho, ", reference proportion = ", PREF, 
                         "\nmu = ", mu, ", alpha = ", alpha)) +  
@@ -250,8 +249,7 @@ for(i in 1:length(conditions)){
   
   refmean_histos[[i]] <- ggplot(data, aes(x = ref_mean_diff)) + 
     geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
-    scale_x_continuous(limits = c(-xscale, xscale)) +
-    ggtitle(paste0("Reference group mean recovery bias for\nrho = ", rho, ", reference proportion = ", PREF)) + 
+    scale_x_continuous(limits = c(-xscale, xscale)) + 
     labs(x = "Difference in reference group mean", y = "Count",
          title = paste0("rho = ", rho, ", reference proportion = ", PREF, 
                         "\nmu = ", mu, ", alpha = ", alpha)) +  
@@ -263,7 +261,7 @@ pdf("./analysis/R2_bias_histograms.pdf", width = 10, height = 10)
 for(i in seq(1, 36, 6)){
   multiplot(R2_histos[[i]], R2_histos[[i+1]], R2_histos[[i+2]], 
             R2_histos[[i+3]], R2_histos[[i+4]], R2_histos[[i+5]], cols = 3, 
-            title = "R-squared recovery bias")
+            plot_title = "R-squared recovery bias")
 }
 dev.off()
 
@@ -271,7 +269,7 @@ pdf("./analysis/focmean_bias_histograms.pdf", width = 10, height = 10)
 for(i in seq(1, 36, 6)){
   multiplot(focmean_histos[[i]], focmean_histos[[i+1]], focmean_histos[[i+2]], 
             focmean_histos[[i+3]], focmean_histos[[i+4]], focmean_histos[[i+5]], cols = 3, 
-            title = "Focal mean recovery bias")
+            plot_title = "Focal mean recovery bias")
 }
 dev.off()
 
@@ -280,7 +278,7 @@ pdf("./analysis/refmean_bias_histograms.pdf", width = 10, height = 10)
 for(i in seq(1, 36, 6)){
   multiplot(refmean_histos[[i]], refmean_histos[[i+1]], refmean_histos[[i+2]], 
             refmean_histos[[i+3]], refmean_histos[[i+4]], refmean_histos[[i+5]], cols = 3, 
-            title = "Reference mean recovery bias")
+            plot_title = "Reference mean recovery bias")
 }
 dev.off()
 
@@ -297,11 +295,19 @@ for(i in 1:length(conditions)){
   data <- as.data.frame(correlations_conditions[[paste0(conditions[i])]])
   rho <- grep("rho", unlist(strsplit(conditions[i], "_")), value = TRUE)
   rho <- gsub("rho", "", rho)
-  rho <- gsub("-", ".", rho)
+  rho <- sprintf("%.1f", as.numeric(gsub("-", ".", rho)))
   
   PREF <- grep("PREF", unlist(strsplit(conditions[i], "_")), value = TRUE)
   PREF <- gsub("PREF", "", PREF)
-  PREF <- gsub("-", ".", PREF)
+  PREF <- sprintf("%.1f", as.numeric(gsub("-", ".", PREF)))
+  
+  mu <- grep("mu", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  mu <- gsub("mu", "", mu)
+  mu <- sprintf("%.1f", as.numeric(gsub("-", ".", mu)))
+  
+  alpha <- grep("alpha", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  alpha <- gsub("alpha", "", alpha)
+  alpha <- sprintf("%.2f", as.numeric(gsub("-", ".", alpha)))
   
   #a_corr
   xscale <- scale_def_corr(correlations_conditions, "a_corr")
@@ -310,9 +316,10 @@ for(i in 1:length(conditions)){
   a_corr_histo[[i]] <- ggplot(data, aes(x = a_corr)) + 
     geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
     scale_x_continuous(limits = xscale) +
-    ggtitle(paste0("A-parameter correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
-    labs(x = "A-parameter correlation", y = "Count") + 
-    theme(plot.title = element_text(hjust = 0.5)) + 
+    labs(x = "A-parameter correlation", y = "Count",
+         title = paste0("rho = ", rho, ", reference proportion = ", PREF, 
+                        "\nmu = ", mu, ", alpha = ", alpha)) +  
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) +
     geom_vline(xintercept = mean(data$a_corr), color = "black", linetype="dotted")
   
   #b_corr
@@ -322,9 +329,10 @@ for(i in 1:length(conditions)){
   b_corr_histo[[i]] <- ggplot(data, aes(x = b_corr)) + 
     geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
     scale_x_continuous(limits = xscale) +
-    ggtitle(paste0("B-parameter correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
-    labs(x = "B-parameter correlation", y = "Count") + 
-    theme(plot.title = element_text(hjust = 0.5)) + 
+    labs(x = "B-parameter correlation", y = "Count",
+         title = paste0("rho = ", rho, ", reference proportion = ", PREF, 
+                        "\nmu = ", mu, ", alpha = ", alpha)) +  
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) +
     geom_vline(xintercept = mean(data$b_corr), color = "black", linetype="dotted")
   
   #D_corr
@@ -334,9 +342,10 @@ for(i in 1:length(conditions)){
   D_corr_histo[[i]] <- ggplot(data, aes(x = D_corr)) + 
     geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
     scale_x_continuous(limits = xscale) +
-    ggtitle(paste0("D-parameter correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
-    labs(x = "D-parameter correlation", y = "Count") + 
-    theme(plot.title = element_text(hjust = 0.5)) + 
+    labs(x = "D-parameter correlation", y = "Count",
+         title = paste0("rho = ", rho, ", reference proportion = ", PREF, 
+                        "\nmu = ", mu, ", alpha = ", alpha)) +  
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) +
     geom_vline(xintercept = mean(data$D_corr), color = "black", linetype="dotted")
   
   #theta_corr
@@ -346,24 +355,45 @@ for(i in 1:length(conditions)){
   theta_corr_histo[[i]] <- ggplot(data, aes(x = theta_corr)) + 
     geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
     scale_x_continuous(limits = xscale) +
-    ggtitle(paste0("Theta correlations for\nrho = ", rho, ", reference proportion = ", PREF)) + 
-    labs(x = "Theta correlation", y = "Count") + 
-    theme(plot.title = element_text(hjust = 0.5)) + 
+    labs(x = "Theta correlation", y = "Count",
+         title = paste0("rho = ", rho, ", reference proportion = ", PREF, 
+                        "\nmu = ", mu, ", alpha = ", alpha)) +  
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) +
     geom_vline(xintercept = mean(data$theta_corr), color = "black", linetype="dotted")
   
 }
 
-pdf("mean_corr_histograms.pdf", width = 10, height = 10)
-multiplot(a_corr_histo[[1]], a_corr_histo[[2]], a_corr_histo[[3]], a_corr_histo[[4]], cols = 2)
-
-multiplot(b_corr_histo[[1]], b_corr_histo[[2]], b_corr_histo[[3]], b_corr_histo[[4]], cols = 2)
-
-multiplot(D_corr_histo[[1]], D_corr_histo[[2]], D_corr_histo[[3]], D_corr_histo[[4]], cols = 2)
-
-multiplot(theta_corr_histo[[1]], theta_corr_histo[[2]], theta_corr_histo[[3]], theta_corr_histo[[4]], cols = 2)
-
+pdf("./analysis/a_corr_histograms.pdf", width = 10, height = 10)
+for(i in seq(1, 36, 6)){
+  multiplot(a_corr_histo[[i]], a_corr_histo[[i+1]], a_corr_histo[[i+2]], 
+            a_corr_histo[[i+3]], a_corr_histo[[i+4]], a_corr_histo[[i+5]], cols = 3, 
+            plot_title = "a-parameter mean recovery bias")
+}
 dev.off()
 
+pdf("./analysis/b_corr_histograms.pdf", width = 10, height = 10)
+for(i in seq(1, 36, 6)){
+  multiplot(b_corr_histo[[i]], b_corr_histo[[i+1]], b_corr_histo[[i+2]], 
+            b_corr_histo[[i+3]], b_corr_histo[[i+4]], b_corr_histo[[i+5]], cols = 3, 
+            plot_title = "b-parameter mean recovery bias")
+}
+dev.off()
+
+pdf("./analysis/D_corr_histograms.pdf", width = 10, height = 10)
+for(i in seq(1, 36, 6)){
+  multiplot(D_corr_histo[[i]], D_corr_histo[[i+1]], D_corr_histo[[i+2]], 
+            D_corr_histo[[i+3]], D_corr_histo[[i+4]], D_corr_histo[[i+5]], cols = 3, 
+            plot_title = "D-parameter mean recovery bias")
+}
+dev.off()
+
+pdf("./analysis/theta_corr_histograms.pdf", width = 10, height = 10)
+for(i in seq(1, 36, 6)){
+  multiplot(theta_corr_histo[[i]], theta_corr_histo[[i+1]], theta_corr_histo[[i+2]], 
+            theta_corr_histo[[i+3]], theta_corr_histo[[i+4]], theta_corr_histo[[i+5]], cols = 3, 
+            plot_title = "theta-parameter mean recovery bias")
+}
+dev.off()
 
 ### CORRELATION SCATTERPLOTS ####
 #mean correlations
