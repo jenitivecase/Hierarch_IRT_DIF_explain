@@ -527,7 +527,7 @@ write.csv(means_recovery, "./analysis/means_recovery.csv")
 # for(i in seq(1, 36, 6)){
 #   multiplot(b_corr_scatter[[i]], b_corr_scatter[[i+1]], b_corr_scatter[[i+2]], 
 #             b_corr_scatter[[i+3]], b_corr_scatter[[i+4]], b_corr_scatter[[i+5]], cols = 3, 
-#             plot_title = "b-parameter mean recovery bias")
+#             plot_title = "b-parameter scatterplots")
 # }
 # dev.off()
 # 
@@ -535,7 +535,7 @@ write.csv(means_recovery, "./analysis/means_recovery.csv")
 # for(i in seq(1, 36, 6)){
 #   multiplot(D_corr_scatter[[i]], D_corr_scatter[[i+1]], D_corr_scatter[[i+2]], 
 #             D_corr_scatter[[i+3]], D_corr_scatter[[i+4]], D_corr_scatter[[i+5]], cols = 3, 
-#             plot_title = "D-parameter mean recovery bias")
+#             plot_title = "D-parameter scatterplots")
 # }
 # dev.off()
 # 
@@ -543,7 +543,7 @@ write.csv(means_recovery, "./analysis/means_recovery.csv")
 # for(i in seq(1, 36, 6)){
 #   multiplot(theta_corr_scatter[[i]], theta_corr_scatter[[i+1]], theta_corr_scatter[[i+2]], 
 #             theta_corr_scatter[[i+3]], theta_corr_scatter[[i+4]], theta_corr_scatter[[i+5]], cols = 3, 
-#             plot_title = "theta-parameter mean recovery bias")
+#             plot_title = "theta-parameter scatterplots")
 # }
 # dev.off()
 # 
@@ -563,11 +563,19 @@ for(j in 1:length(flag_thresholds)){
   for(i in 1:length(conditions)){
     rho <- grep("rho", unlist(strsplit(conditions[i], "_")), value = TRUE)
     rho <- gsub("rho", "", rho)
-    rho <- gsub("-", ".", rho)
-    
+    rho <- sprintf("%.1f", as.numeric(gsub("-", ".", rho)))
+
     PREF <- grep("PREF", unlist(strsplit(conditions[i], "_")), value = TRUE)
     PREF <- gsub("PREF", "", PREF)
-    PREF <- gsub("-", ".", PREF)
+    PREF <- sprintf("%.1f", as.numeric(gsub("-", ".", PREF)))
+
+    mu <- grep("mu", unlist(strsplit(conditions[i], "_")), value = TRUE)
+    mu <- gsub("mu", "", mu)
+    mu <- sprintf("%.1f", as.numeric(gsub("-", ".", mu)))
+
+    alpha <- grep("alpha", unlist(strsplit(conditions[i], "_")), value = TRUE)
+    alpha <- gsub("alpha", "", alpha)
+    alpha <- sprintf("%.2f", as.numeric(gsub("-", ".", alpha)))
     
     #D_corr
     data <- as.data.frame(est_param_means[["D_params"]])
@@ -581,44 +589,80 @@ for(j in 1:length(flag_thresholds)){
     data <- as.data.frame(cbind(data, true_param))
     names(data) <- c("est_param", "true_param")
     
+    data <- data %>%
+      mutate(Decision = ifelse(abs(true_param) >= flag_amt & abs(est_param) >= flag_amt, "Correct Classification",
+                               ifelse(abs(true_param) >= flag_amt & abs(est_param) < flag_amt, "Incorrect Classification",
+                                      ifelse(abs(true_param) < flag_amt & abs(est_param) < flag_amt, "Correct Classification",
+                                             ifelse(abs(true_param) < flag_amt & abs(est_param) >= flag_amt, "Incorrect Classification", NA)))), NA) %>%
+      mutate(Decision_spec = ifelse(abs(true_param) >= flag_amt & abs(est_param), "True Positive", 
+                                    ifelse(abs(true_param) >= flag_amt & abs(est_param) < flag_amt, "False Negative", 
+                                           ifelse(abs(true_param) < flag_amt & abs(est_param) < flag_amt, "True Negative", 
+                                                  ifelse(abs(true_param) < flag_amt & abs(est_param) >= flag_amt, "False Positive", NA)))), NA)
     
-    trueneg <- nrow(data[which(data$true_param < flag_amt & data$est_param < flag_amt),])
-    falsepos <- nrow(data[which(data$true_param < flag_amt & data$est_param > flag_amt),])
-    falseneg <- nrow(data[which(data$true_param > flag_amt & data$est_param < flag_amt),])
-    truepos <- nrow(data[which(data$true_param > flag_amt & data$est_param > flag_amt),])
+    N <- nrow(data)
+    TP_N <- nrow(filter(data, Decision_spec == "True Positive"))
+    FP_N <- nrow(filter(data, Decision_spec == "False Positive"))
+      
+    # dec_consist <- matrix(c(truepos, falsepos, falseneg, trueneg), nrow = 2, byrow = TRUE)
+    # colnames(dec_consist) <- c("True_DIF", "True_NoDIF")
+    # rownames(dec_consist) <- c("Est_DIF", "Est_NoDIF")
+    # 
+    # addWorksheet(dec_consist_out, conditions[[i]])
+    # writeData(dec_consist_out, sheet = i, dec_consist, rowNames = TRUE)
+    # 
+    # correct_ratio <- round((trueneg+truepos)/(trueneg+truepos+falsepos+falseneg), 3)
     
-    dec_consist <- matrix(c(truepos, falsepos, falseneg, trueneg), nrow = 2, byrow = TRUE)
-    colnames(dec_consist) <- c("True_DIF", "True_NoDIF")
-    rownames(dec_consist) <- c("Est_DIF", "Est_NoDIF")
+    ggplot(data, aes(x = true_param, y = est_param, color = Decision)) +
+      geom_point() +
+      scale_x_continuous(limits = c(-1, 2), breaks = seq(-1, 2, 0.5)) +
+      scale_y_continuous(limits = c(-1, 2), breaks = seq(-1, 2, 0.5)) +
+      labs(x = "True Parameter Value", y = "Estimated Parameter Value",
+                    title = paste0("rho = ", rho, ", reference proportion = ", PREF,
+                                   "\nmu = ", mu, ", alpha = ", alpha),
+                    caption = paste0("False Pos Rate = ", sprintf("%.3f", FP_N/N),
+                                     "; Power = ", sprintf("%.3f", TP_N/N),
+                                     "; Precision = ", sprintf("%.3f", TP_N/(TP_N + FP_N)))) +
+      theme_bw() + 
+      scale_color_manual(values = c("forestgreen", "darkred")) + 
+      geom_hline(aes(yintercept = flag_amt), color = "darkgray") +
+      geom_vline(aes(xintercept = flag_amt), color = "darkgray") +
+      geom_hline(aes(yintercept = -flag_amt), color = "darkgray") +
+      geom_vline(aes(xintercept = -flag_amt), color = "darkgray") +
+      theme(legend.position = "bottom") +
+      theme(plot.title = element_text(hjust = 0.5, size = 12)) 
     
-    addWorksheet(dec_consist_out, conditions[[i]])
-    writeData(dec_consist_out, sheet = i, dec_consist, rowNames = TRUE)
     
-    correct_ratio <- round((trueneg+truepos)/(trueneg+truepos+falsepos+falseneg), 3)
+    D_decision_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param, color = Decision)) +
+      geom_point() +
+      scale_x_continuous(limits = c(-1, 2), breaks = seq(-1, 2, 0.5)) +
+      scale_y_continuous(limits = c(-1, 2), breaks = seq(-1, 2, 0.5)) +
+      labs(x = "True Parameter Value", y = "Estimated Parameter Value",
+           title = paste0("rho = ", rho, ", reference proportion = ", PREF,
+                          "\nmu = ", mu, ", alpha = ", alpha),
+           caption = paste0("False Pos Rate = ", sprintf("%.3f", FP_N/N),
+                            "; Power = ", sprintf("%.3f", TP_N/N),
+                            "; Precision = ", sprintf("%.3f", TP_N/(TP_N + FP_N)))) +
+      theme_bw() + 
+      scale_color_manual(values = c("forestgreen", "darkred")) + 
+      geom_hline(aes(yintercept = flag_amt), color = "darkgray") +
+      geom_vline(aes(xintercept = flag_amt), color = "darkgray") +
+      geom_hline(aes(yintercept = -flag_amt), color = "darkgray") +
+      geom_vline(aes(xintercept = -flag_amt), color = "darkgray") +
+      theme(legend.position = "bottom") +
+      theme(plot.title = element_text(hjust = 0.5, size = 12)) 
     
-    D_decision_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) + 
-      geom_point(alpha = 0.65, color = colors[i]) + 
-      geom_rect(data = data.frame(xmin = flag_amt, xmax = Inf, ymin = -Inf, ymax = flag_amt), 
-                aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
-                fill = "red", alpha = 0.2, show.legend = FALSE, inherit.aes = FALSE) +
-      geom_rect(data = data.frame(xmin = -Inf, xmax = flag_amt, ymin = flag_amt, ymax = Inf), 
-                aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
-                fill = "red", alpha = 0.2, show.legend = FALSE, inherit.aes = FALSE) +
-      ggtitle(paste0("DIF flag decision consistency for\nrho = ", rho, ", reference proportion = ", PREF)) + 
-      labs(x = "True Parameter Value", y = "Estimated Parameter Value", 
-           caption = paste0("Correct ratio = ", correct_ratio)) + 
-      scale_x_continuous(breaks = seq(-100, 100, .2)) +
-      scale_y_continuous(breaks = seq(-100, 100, .2)) +
-      theme(plot.title = element_text(hjust = 0.5)) + 
-      geom_hline(yintercept = flag_amt) + 
-      geom_vline(xintercept = flag_amt)
-
+    print(i)
   }
-  pdf(paste0(flag_amt, "_threshold_mean_decision_scatterplots.pdf"), width = 10, height = 10)
-  multiplot(D_decision_scatter[[1]], D_decision_scatter[[2]], D_decision_scatter[[3]], D_decision_scatter[[4]], cols = 2)
+  
+  pdf(paste0("./analysis/decision-consistency", gsub("\\.", "-", flag_amt), "_scatterplots.pdf"), width = 14, height = 12)
+  for(i in seq(1, 36, 6)){
+    multiplot(D_decision_scatter[[i]], D_decision_scatter[[i+1]], D_decision_scatter[[i+2]],
+              D_decision_scatter[[i+3]], D_decision_scatter[[i+4]], D_decision_scatter[[i+5]], cols = 3,
+              plot_title = paste0("Decision Consistency for flag threshold ", flag_amt))
+  }
   dev.off()
   
-  saveWorkbook(dec_consist_out, paste0(flag_amt, "_decision_consistency.xlsx"), overwrite = TRUE)
+  # saveWorkbook(dec_consist_out, paste0(flag_amt, "_decision_consistency.xlsx"), overwrite = TRUE)
 }
 
 
