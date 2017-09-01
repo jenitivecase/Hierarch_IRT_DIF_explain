@@ -187,368 +187,368 @@ means_recovery <- means_recovery[, c("rho", "PREF", "mu", "alpha", "a_corr", "b_
 
 write.csv(means_recovery, "./analysis/means_recovery.csv")
 
-# 
-# #### GRAPHS ####
-# colors <- c(rep("darkblue", 6), rep("darkred", 6), rep("darkgreen", 6), 
-#             rep("darkorange", 6), rep("darkorchid", 6), rep("darkseagreen", 6))
-# source("../multiplot_fun.R")
-# 
-# ### BIAS HISTOGRAMS####
-# R2_histos <- vector("list", length(conditions))
-# focmean_histos <- vector("list", length(conditions))
-# refmean_histos <- vector("list", length(conditions))
-# 
-# #mean correlations
-# for(i in 1:length(conditions)){
-#   data <- as.data.frame(correlations_conditions[[paste0(conditions[i])]])
-#   rho <- grep("rho", unlist(strsplit(conditions[i], "_")), value = TRUE)
-#   rho <- gsub("rho", "", rho)
-#   rho <- sprintf("%.1f", as.numeric(gsub("-", ".", rho)))
-#   
-#   PREF <- grep("PREF", unlist(strsplit(conditions[i], "_")), value = TRUE)
-#   PREF <- gsub("PREF", "", PREF)
-#   PREF <- sprintf("%.1f", as.numeric(gsub("-", ".", PREF)))
-#   
-#   mu <- grep("mu", unlist(strsplit(conditions[i], "_")), value = TRUE)
-#   mu <- gsub("mu", "", mu)
-#   mu <- sprintf("%.1f", as.numeric(gsub("-", ".", mu)))
-#   
-#   alpha <- grep("alpha", unlist(strsplit(conditions[i], "_")), value = TRUE)
-#   alpha <- gsub("alpha", "", alpha)
-#   alpha <- sprintf("%.2f", as.numeric(gsub("-", ".", alpha)))
-#   
-#   #R2 difference
-#   xscale <- scale_def(correlations_conditions, "R2_diff")
-#   increment <- (xscale*2)/25
-#   
-#   R2_histos[[i]] <- ggplot(data, aes(x = R2_diff)) + 
-#     geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
-#     scale_x_continuous(limits = c(-xscale, xscale)) +
-#     labs(x = "Difference in R-squared", y = "Count",
-#          title = paste0("rho = ", rho, ", reference proportion = ", PREF, 
-#                         "\nmu = ", mu, ", alpha = ", alpha)) + 
-#     theme(plot.title = element_text(hjust = 0.5, size = 12)) + 
-#     geom_vline(xintercept = mean(data$R2_diff), color = "black", linetype="dotted")
-#   
-#   #focal mean difference
-#   xscale <- scale_def(correlations_conditions, "foc_mean_diff")
-#   increment <- (xscale*2)/25
-#   
-#   focmean_histos[[i]] <- ggplot(data, aes(x = foc_mean_diff)) + 
-#     geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
-#     scale_x_continuous(limits = c(-xscale, xscale)) +
-#     labs(x = "Difference in focal group mean", y = "Count",
-#          title = paste0("rho = ", rho, ", reference proportion = ", PREF, 
-#                         "\nmu = ", mu, ", alpha = ", alpha)) +  
-#     theme(plot.title = element_text(hjust = 0.5, size = 12)) +
-#     geom_vline(xintercept = mean(data$foc_mean_diff), color = "black", linetype="dotted")
-#   
-#   #reference mean difference
-#   xscale <- scale_def(correlations_conditions, "ref_mean_diff")
-#   increment <- (xscale*2)/25
-#   
-#   refmean_histos[[i]] <- ggplot(data, aes(x = ref_mean_diff)) + 
-#     geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
-#     scale_x_continuous(limits = c(-xscale, xscale)) + 
-#     labs(x = "Difference in reference group mean", y = "Count",
-#          title = paste0("rho = ", rho, ", reference proportion = ", PREF, 
-#                         "\nmu = ", mu, ", alpha = ", alpha)) +  
-#     theme(plot.title = element_text(hjust = 0.5, size = 12)) +
-#     geom_vline(xintercept = mean(data$ref_mean_diff), color = "black", linetype="dotted")
-# }
-# 
-# pdf("./analysis/R2_bias_histograms.pdf", width = 10, height = 10)
-# for(i in seq(1, 36, 6)){
-#   multiplot(R2_histos[[i]], R2_histos[[i+1]], R2_histos[[i+2]], 
-#             R2_histos[[i+3]], R2_histos[[i+4]], R2_histos[[i+5]], cols = 3, 
-#             plot_title = "R-squared recovery bias")
-# }
-# dev.off()
-# 
-# pdf("./analysis/focmean_bias_histograms.pdf", width = 10, height = 10)
-# for(i in seq(1, 36, 6)){
-#   multiplot(focmean_histos[[i]], focmean_histos[[i+1]], focmean_histos[[i+2]], 
-#             focmean_histos[[i+3]], focmean_histos[[i+4]], focmean_histos[[i+5]], cols = 3, 
-#             plot_title = "Focal mean recovery bias")
-# }
-# dev.off()
-# 
-# 
-# pdf("./analysis/refmean_bias_histograms.pdf", width = 10, height = 10)
-# for(i in seq(1, 36, 6)){
-#   multiplot(refmean_histos[[i]], refmean_histos[[i+1]], refmean_histos[[i+2]], 
-#             refmean_histos[[i+3]], refmean_histos[[i+4]], refmean_histos[[i+5]], cols = 3, 
-#             plot_title = "Reference mean recovery bias")
-# }
-# dev.off()
-# 
-# rm(R2_histos, focmean_histos, refmean_histos)
-# 
-# 
-# ### CORRELATION HISTOGRAMS ####
-# #mean correlations
-# a_corr_histo <- vector("list", length(conditions))
-# b_corr_histo <- vector("list", length(conditions))
-# D_corr_histo <- vector("list", length(conditions))
-# theta_corr_histo <- vector("list", length(conditions))
-# 
-# for(i in 1:length(conditions)){
-#   data <- as.data.frame(correlations_conditions[[paste0(conditions[i])]])
-#   rho <- grep("rho", unlist(strsplit(conditions[i], "_")), value = TRUE)
-#   rho <- gsub("rho", "", rho)
-#   rho <- sprintf("%.1f", as.numeric(gsub("-", ".", rho)))
-#   
-#   PREF <- grep("PREF", unlist(strsplit(conditions[i], "_")), value = TRUE)
-#   PREF <- gsub("PREF", "", PREF)
-#   PREF <- sprintf("%.1f", as.numeric(gsub("-", ".", PREF)))
-#   
-#   mu <- grep("mu", unlist(strsplit(conditions[i], "_")), value = TRUE)
-#   mu <- gsub("mu", "", mu)
-#   mu <- sprintf("%.1f", as.numeric(gsub("-", ".", mu)))
-#   
-#   alpha <- grep("alpha", unlist(strsplit(conditions[i], "_")), value = TRUE)
-#   alpha <- gsub("alpha", "", alpha)
-#   alpha <- sprintf("%.2f", as.numeric(gsub("-", ".", alpha)))
-#   
-#   #a_corr
-#   xscale <- scale_def_corr(correlations_conditions, "a_corr")
-#   increment <- (diff(xscale))/25
-#   
-#   a_corr_histo[[i]] <- ggplot(data, aes(x = a_corr)) + 
-#     geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
-#     scale_x_continuous(limits = xscale) +
-#     labs(x = "A-parameter correlation", y = "Count",
-#          title = paste0("rho = ", rho, ", reference proportion = ", PREF, 
-#                         "\nmu = ", mu, ", alpha = ", alpha)) +  
-#     theme(plot.title = element_text(hjust = 0.5, size = 12)) +
-#     geom_vline(xintercept = mean(data$a_corr), color = "black", linetype="dotted")
-#   
-#   #b_corr
-#   xscale <- scale_def_corr(correlations_conditions, "b_corr")
-#   increment <- (diff(xscale))/25
-#   
-#   b_corr_histo[[i]] <- ggplot(data, aes(x = b_corr)) + 
-#     geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
-#     scale_x_continuous(limits = xscale) +
-#     labs(x = "B-parameter correlation", y = "Count",
-#          title = paste0("rho = ", rho, ", reference proportion = ", PREF, 
-#                         "\nmu = ", mu, ", alpha = ", alpha)) +  
-#     theme(plot.title = element_text(hjust = 0.5, size = 12)) +
-#     geom_vline(xintercept = mean(data$b_corr), color = "black", linetype="dotted")
-#   
-#   #D_corr
-#   xscale <- scale_def_corr(correlations_conditions, "D_corr")
-#   increment <- (diff(xscale))/25
-#   
-#   D_corr_histo[[i]] <- ggplot(data, aes(x = D_corr)) + 
-#     geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
-#     scale_x_continuous(limits = xscale) +
-#     labs(x = "D-parameter correlation", y = "Count",
-#          title = paste0("rho = ", rho, ", reference proportion = ", PREF, 
-#                         "\nmu = ", mu, ", alpha = ", alpha)) +  
-#     theme(plot.title = element_text(hjust = 0.5, size = 12)) +
-#     geom_vline(xintercept = mean(data$D_corr), color = "black", linetype="dotted")
-#   
-#   #theta_corr
-#   xscale <- scale_def_corr(correlations_conditions, "theta_corr")
-#   increment <- (diff(xscale))/25
-#   
-#   theta_corr_histo[[i]] <- ggplot(data, aes(x = theta_corr)) + 
-#     geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) + 
-#     scale_x_continuous(limits = xscale) +
-#     labs(x = "Theta correlation", y = "Count",
-#          title = paste0("rho = ", rho, ", reference proportion = ", PREF, 
-#                         "\nmu = ", mu, ", alpha = ", alpha)) +  
-#     theme(plot.title = element_text(hjust = 0.5, size = 12)) +
-#     geom_vline(xintercept = mean(data$theta_corr), color = "black", linetype="dotted")
-#   
-# }
-# 
-# pdf("./analysis/a_corr_histograms.pdf", width = 10, height = 10)
-# for(i in seq(1, 36, 6)){
-# multiplot(a_corr_histo[[i]], a_corr_histo[[i+1]], a_corr_histo[[i+2]], 
-#             a_corr_histo[[i+3]], a_corr_histo[[i+4]], a_corr_histo[[i+5]], cols = 3, 
-#             plot_title = "a-parameter mean recovery bias")
-# }
-# dev.off()
-# 
-# pdf("./analysis/b_corr_histograms.pdf", width = 10, height = 10)
-# for(i in seq(1, 36, 6)){
-#   multiplot(b_corr_histo[[i]], b_corr_histo[[i+1]], b_corr_histo[[i+2]], 
-#             b_corr_histo[[i+3]], b_corr_histo[[i+4]], b_corr_histo[[i+5]], cols = 3, 
-#             plot_title = "b-parameter mean recovery bias")
-# }
-# dev.off()
-# 
-# pdf("./analysis/D_corr_histograms.pdf", width = 10, height = 10)
-# for(i in seq(1, 36, 6)){
-#   multiplot(D_corr_histo[[i]], D_corr_histo[[i+1]], D_corr_histo[[i+2]], 
-#             D_corr_histo[[i+3]], D_corr_histo[[i+4]], D_corr_histo[[i+5]], cols = 3, 
-#             plot_title = "D-parameter mean recovery bias")
-# }
-# dev.off()
-# 
-# pdf("./analysis/theta_corr_histograms.pdf", width = 10, height = 10)
-# for(i in seq(1, 36, 6)){
-#   multiplot(theta_corr_histo[[i]], theta_corr_histo[[i+1]], theta_corr_histo[[i+2]], 
-#             theta_corr_histo[[i+3]], theta_corr_histo[[i+4]], theta_corr_histo[[i+5]], cols = 3, 
-#             plot_title = "theta-parameter mean recovery bias")
-# }
-# dev.off()
-# 
-# rm(a_corr_histo, b_corr_histo, D_corr_histo, theta_corr_histo)
-# 
-# ### CORRELATION SCATTERPLOTS ####
-# #mean correlations
-# a_corr_scatter <- vector("list", length(conditions))
-# b_corr_scatter <- vector("list", length(conditions))
-# D_corr_scatter <- vector("list", length(conditions))
-# theta_corr_scatter <- vector("list", length(conditions))
-# 
-# for(i in 1:length(conditions)){
-#   rho <- grep("rho", unlist(strsplit(conditions[i], "_")), value = TRUE)
-#   rho <- gsub("rho", "", rho)
-#   rho <- sprintf("%.1f", as.numeric(gsub("-", ".", rho)))
-#   
-#   PREF <- grep("PREF", unlist(strsplit(conditions[i], "_")), value = TRUE)
-#   PREF <- gsub("PREF", "", PREF)
-#   PREF <- sprintf("%.1f", as.numeric(gsub("-", ".", PREF)))
-#   
-#   mu <- grep("mu", unlist(strsplit(conditions[i], "_")), value = TRUE)
-#   mu <- gsub("mu", "", mu)
-#   mu <- sprintf("%.1f", as.numeric(gsub("-", ".", mu)))
-#   
-#   alpha <- grep("alpha", unlist(strsplit(conditions[i], "_")), value = TRUE)
-#   alpha <- gsub("alpha", "", alpha)
-#   alpha <- sprintf("%.2f", as.numeric(gsub("-", ".", alpha)))
-#   
-#   #a_corr
-#   data <- as.data.frame(est_param_means[["a_params"]])
-#   data <- filter(data, V2 == conditions[i])
-#   data <- data.frame(lapply(data, as.character), stringsAsFactors=FALSE)
-#   data <- as.numeric(data[,1])
-#   true_param <- as.data.frame(true_item_params[["a_param"]])
-#   true_param <- filter(true_param, V2 == conditions[i])
-#   true_param <- as.data.frame(lapply(true_param, as.character), stringsAsFactors=FALSE)
-#   true_param <- as.numeric(true_param[,1])
-#   data <- as.data.frame(cbind(data, true_param))
-#   names(data) <- c("est_param", "true_param")
-#   
-#   a_corr_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) + 
-#     geom_point(alpha = 0.65, color = colors[i]) + 
-#     labs(x = "True Parameter Value", y = "Estimated Parameter Value",
-#          title = paste0("rho = ", rho, ", reference proportion = ", PREF, 
-#                         "\nmu = ", mu, ", alpha = ", alpha),
-#          caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) +
-#     scale_x_continuous(limits = c(0, 4), breaks = seq(0, 4, 0.5)) +
-#     scale_y_continuous(limits = c(0, 4), breaks = seq(0, 4, 0.5)) + 
-#     theme(plot.title = element_text(hjust = 0.5, size = 12))
-#   
-#   #b_corr
-#   data <- as.data.frame(est_param_means[["b_params"]])
-#   data <- filter(data, V2 == conditions[i])
-#   data <- data.frame(lapply(data, as.character), stringsAsFactors=FALSE)
-#   data <- as.numeric(data[,1])
-#   true_param <- as.data.frame(true_item_params[["b_param"]])
-#   true_param <- filter(true_param, V2 == conditions[i])
-#   true_param <- as.data.frame(lapply(true_param, as.character), stringsAsFactors=FALSE)
-#   true_param <- as.numeric(true_param[,1])
-#   data <- as.data.frame(cbind(data, true_param))
-#   names(data) <- c("est_param", "true_param")
-#   
-#   
-#   b_corr_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) + 
-#     geom_point(alpha = 0.65, color = colors[i]) + 
-#     labs(x = "True Parameter Value", y = "Estimated Parameter Value",
-#          title = paste0("rho = ", rho, ", reference proportion = ", PREF, 
-#                         "\nmu = ", mu, ", alpha = ", alpha),
-#          caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) +
-#     scale_x_continuous(limits = c(-4, 4), breaks = seq(-4, 4, 1)) +
-#     scale_y_continuous(limits = c(-4, 4), breaks = seq(-4, 4, 1)) +
-#     theme(plot.title = element_text(hjust = 0.5, size = 12)) 
-#   
-#   #D_corr
-#   data <- as.data.frame(est_param_means[["D_params"]])
-#   data <- filter(data, V2 == conditions[i])
-#   data <- data.frame(lapply(data, as.character), stringsAsFactors=FALSE)
-#   data <- as.numeric(data[,1])
-#   true_param <- as.data.frame(true_item_params[["dif_param"]])
-#   true_param <- filter(true_param, V2 == conditions[i])
-#   true_param <- as.data.frame(lapply(true_param, as.character), stringsAsFactors=FALSE)
-#   true_param <- as.numeric(true_param[,1])
-#   data <- as.data.frame(cbind(data, true_param))
-#   names(data) <- c("est_param", "true_param")
-#   
-#   D_corr_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) + 
-#     geom_point(alpha = 0.65, color = colors[i]) + 
-#     labs(x = "True Parameter Value", y = "Estimated Parameter Value",
-#          title = paste0("rho = ", rho, ", reference proportion = ", PREF, 
-#                         "\nmu = ", mu, ", alpha = ", alpha),
-#          caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) +
-#     scale_x_continuous(limits = c(-1, 2), breaks = seq(-1, 2, 0.5)) +
-#     scale_y_continuous(limits = c(-1, 2), breaks = seq(-1, 2, 0.5)) +
-#     theme(plot.title = element_text(hjust = 0.5, size = 12)) 
-#   
-#   #theta_corr
-#   data <- as.data.frame(est_param_means[["theta"]])
-#   data <- filter(data, V2 == conditions[i])
-#   data <- data.frame(lapply(data, as.character), stringsAsFactors=FALSE)
-#   data <- as.numeric(data[,1])
-#   true_param <- as.data.frame(true_ability_params[which(true_ability_params$conditions_vec == conditions[i]), 
-#                                                   "true_ability.theta"])
-#   true_param <- as.data.frame(lapply(true_param, as.character), stringsAsFactors=FALSE)
-#   true_param <- as.numeric(true_param[,1])
-#   data <- as.data.frame(cbind(data, true_param))
-#   names(data) <- c("est_param", "true_param")
-#   
-#   theta_corr_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) + 
-#     geom_point(alpha = 0.65, color = colors[i]) + 
-#     labs(x = "True Parameter Value", y = "Estimated Parameter Value",
-#          title = paste0("rho = ", rho, ", reference proportion = ", PREF, 
-#                         "\nmu = ", mu, ", alpha = ", alpha),
-#          caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) +
-#     scale_x_continuous(limits = c(-4, 4), breaks = seq(-4, 4, 1)) +
-#     scale_y_continuous(limits = c(-4, 4), breaks = seq(-4, 4, 1)) +
-#     theme(plot.title = element_text(hjust = 0.5, size = 12))
-#   
-#   
-# }
-# 
-# 
-# pdf("./analysis/a_corr_scatterplots.pdf", width = 10, height = 10)
-# for(i in seq(1, 36, 6)){
-#   multiplot(a_corr_scatter[[i]], a_corr_scatter[[i+1]], a_corr_scatter[[i+2]], 
-#             a_corr_scatter[[i+3]], a_corr_scatter[[i+4]], a_corr_scatter[[i+5]], cols = 3, 
-#             plot_title = "a-parameter scatterplots")
-# }
-# dev.off()
-# 
-# pdf("./analysis/b_corr_scatterplots.pdf", width = 10, height = 10)
-# for(i in seq(1, 36, 6)){
-#   multiplot(b_corr_scatter[[i]], b_corr_scatter[[i+1]], b_corr_scatter[[i+2]], 
-#             b_corr_scatter[[i+3]], b_corr_scatter[[i+4]], b_corr_scatter[[i+5]], cols = 3, 
-#             plot_title = "b-parameter scatterplots")
-# }
-# dev.off()
-# 
-# pdf("./analysis/D_corr_scatterplots.pdf", width = 10, height = 10)
-# for(i in seq(1, 36, 6)){
-#   multiplot(D_corr_scatter[[i]], D_corr_scatter[[i+1]], D_corr_scatter[[i+2]], 
-#             D_corr_scatter[[i+3]], D_corr_scatter[[i+4]], D_corr_scatter[[i+5]], cols = 3, 
-#             plot_title = "D-parameter scatterplots")
-# }
-# dev.off()
-# 
-# pdf("./analysis/theta_corr_scatterplots.pdf", width = 10, height = 10)
-# for(i in seq(1, 36, 6)){
-#   multiplot(theta_corr_scatter[[i]], theta_corr_scatter[[i+1]], theta_corr_scatter[[i+2]], 
-#             theta_corr_scatter[[i+3]], theta_corr_scatter[[i+4]], theta_corr_scatter[[i+5]], cols = 3, 
-#             plot_title = "theta-parameter scatterplots")
-# }
-# dev.off()
-# 
-# rm(a_corr_scatter, b_corr_scatter, D_corr_scatter, theta_corr_scatter)
-# gc()
+
+#### GRAPHS ####
+colors <- c(rep("darkblue", 6), rep("darkred", 6), rep("darkgreen", 6),
+            rep("darkorange", 6), rep("darkorchid", 6), rep("darkseagreen", 6))
+source("../multiplot_fun.R")
+
+### BIAS HISTOGRAMS####
+R2_histos <- vector("list", length(conditions))
+focmean_histos <- vector("list", length(conditions))
+refmean_histos <- vector("list", length(conditions))
+
+#mean correlations
+for(i in 1:length(conditions)){
+  data <- as.data.frame(correlations_conditions[[paste0(conditions[i])]])
+  rho <- grep("rho", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  rho <- gsub("rho", "", rho)
+  rho <- sprintf("%.1f", as.numeric(gsub("-", ".", rho)))
+
+  PREF <- grep("PREF", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  PREF <- gsub("PREF", "", PREF)
+  PREF <- sprintf("%.1f", as.numeric(gsub("-", ".", PREF)))
+
+  mu <- grep("mu", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  mu <- gsub("mu", "", mu)
+  mu <- sprintf("%.1f", as.numeric(gsub("-", ".", mu)))
+
+  alpha <- grep("alpha", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  alpha <- gsub("alpha", "", alpha)
+  alpha <- sprintf("%.2f", as.numeric(gsub("-", ".", alpha)))
+
+  #R2 difference
+  xscale <- scale_def(correlations_conditions, "R2_diff")
+  increment <- (xscale*2)/25
+
+  R2_histos[[i]] <- ggplot(data, aes(x = R2_diff)) +
+    geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) +
+    scale_x_continuous(limits = c(-xscale, xscale)) +
+    labs(x = "Difference in R-squared", y = "Count",
+         title = paste0("rho = ", rho, ", reference proportion = ", PREF,
+                        "\nmu = ", mu, ", alpha = ", alpha)) +
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) +
+    geom_vline(xintercept = mean(data$R2_diff), color = "black", linetype="dotted")
+
+  #focal mean difference
+  xscale <- scale_def(correlations_conditions, "foc_mean_diff")
+  increment <- (xscale*2)/25
+
+  focmean_histos[[i]] <- ggplot(data, aes(x = foc_mean_diff)) +
+    geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) +
+    scale_x_continuous(limits = c(-xscale, xscale)) +
+    labs(x = "Difference in focal group mean", y = "Count",
+         title = paste0("rho = ", rho, ", reference proportion = ", PREF,
+                        "\nmu = ", mu, ", alpha = ", alpha)) +
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) +
+    geom_vline(xintercept = mean(data$foc_mean_diff), color = "black", linetype="dotted")
+
+  #reference mean difference
+  xscale <- scale_def(correlations_conditions, "ref_mean_diff")
+  increment <- (xscale*2)/25
+
+  refmean_histos[[i]] <- ggplot(data, aes(x = ref_mean_diff)) +
+    geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) +
+    scale_x_continuous(limits = c(-xscale, xscale)) +
+    labs(x = "Difference in reference group mean", y = "Count",
+         title = paste0("rho = ", rho, ", reference proportion = ", PREF,
+                        "\nmu = ", mu, ", alpha = ", alpha)) +
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) +
+    geom_vline(xintercept = mean(data$ref_mean_diff), color = "black", linetype="dotted")
+}
+
+pdf("./analysis/R2_bias_histograms.pdf", width = 14, height = 12)
+for(i in seq(1, 36, 6)){
+  multiplot(R2_histos[[i]], R2_histos[[i+1]], R2_histos[[i+2]],
+            R2_histos[[i+3]], R2_histos[[i+4]], R2_histos[[i+5]], cols = 3,
+            plot_title = "R-squared recovery bias")
+}
+dev.off()
+
+pdf("./analysis/focmean_bias_histograms.pdf", width = 14, height = 12)
+for(i in seq(1, 36, 6)){
+  multiplot(focmean_histos[[i]], focmean_histos[[i+1]], focmean_histos[[i+2]],
+            focmean_histos[[i+3]], focmean_histos[[i+4]], focmean_histos[[i+5]], cols = 3,
+            plot_title = "Focal mean recovery bias")
+}
+dev.off()
+
+
+pdf("./analysis/refmean_bias_histograms.pdf", width = 14, height = 12)
+for(i in seq(1, 36, 6)){
+  multiplot(refmean_histos[[i]], refmean_histos[[i+1]], refmean_histos[[i+2]],
+            refmean_histos[[i+3]], refmean_histos[[i+4]], refmean_histos[[i+5]], cols = 3,
+            plot_title = "Reference mean recovery bias")
+}
+dev.off()
+
+rm(R2_histos, focmean_histos, refmean_histos)
+
+
+### CORRELATION HISTOGRAMS ####
+#mean correlations
+a_corr_histo <- vector("list", length(conditions))
+b_corr_histo <- vector("list", length(conditions))
+D_corr_histo <- vector("list", length(conditions))
+theta_corr_histo <- vector("list", length(conditions))
+
+for(i in 1:length(conditions)){
+  data <- as.data.frame(correlations_conditions[[paste0(conditions[i])]])
+  rho <- grep("rho", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  rho <- gsub("rho", "", rho)
+  rho <- sprintf("%.1f", as.numeric(gsub("-", ".", rho)))
+
+  PREF <- grep("PREF", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  PREF <- gsub("PREF", "", PREF)
+  PREF <- sprintf("%.1f", as.numeric(gsub("-", ".", PREF)))
+
+  mu <- grep("mu", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  mu <- gsub("mu", "", mu)
+  mu <- sprintf("%.1f", as.numeric(gsub("-", ".", mu)))
+
+  alpha <- grep("alpha", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  alpha <- gsub("alpha", "", alpha)
+  alpha <- sprintf("%.2f", as.numeric(gsub("-", ".", alpha)))
+
+  #a_corr
+  xscale <- scale_def_corr(correlations_conditions, "a_corr")
+  increment <- (diff(xscale))/25
+
+  a_corr_histo[[i]] <- ggplot(data, aes(x = a_corr)) +
+    geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) +
+    scale_x_continuous(limits = xscale) +
+    labs(x = "A-parameter correlation", y = "Count",
+         title = paste0("rho = ", rho, ", reference proportion = ", PREF,
+                        "\nmu = ", mu, ", alpha = ", alpha)) +
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) +
+    geom_vline(xintercept = mean(data$a_corr), color = "black", linetype="dotted")
+
+  #b_corr
+  xscale <- scale_def_corr(correlations_conditions, "b_corr")
+  increment <- (diff(xscale))/25
+
+  b_corr_histo[[i]] <- ggplot(data, aes(x = b_corr)) +
+    geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) +
+    scale_x_continuous(limits = xscale) +
+    labs(x = "B-parameter correlation", y = "Count",
+         title = paste0("rho = ", rho, ", reference proportion = ", PREF,
+                        "\nmu = ", mu, ", alpha = ", alpha)) +
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) +
+    geom_vline(xintercept = mean(data$b_corr), color = "black", linetype="dotted")
+
+  #D_corr
+  xscale <- scale_def_corr(correlations_conditions, "D_corr")
+  increment <- (diff(xscale))/25
+
+  D_corr_histo[[i]] <- ggplot(data, aes(x = D_corr)) +
+    geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) +
+    scale_x_continuous(limits = xscale) +
+    labs(x = "D-parameter correlation", y = "Count",
+         title = paste0("rho = ", rho, ", reference proportion = ", PREF,
+                        "\nmu = ", mu, ", alpha = ", alpha)) +
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) +
+    geom_vline(xintercept = mean(data$D_corr), color = "black", linetype="dotted")
+
+  #theta_corr
+  xscale <- scale_def_corr(correlations_conditions, "theta_corr")
+  increment <- (diff(xscale))/25
+
+  theta_corr_histo[[i]] <- ggplot(data, aes(x = theta_corr)) +
+    geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) +
+    scale_x_continuous(limits = xscale) +
+    labs(x = "Theta correlation", y = "Count",
+         title = paste0("rho = ", rho, ", reference proportion = ", PREF,
+                        "\nmu = ", mu, ", alpha = ", alpha)) +
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) +
+    geom_vline(xintercept = mean(data$theta_corr), color = "black", linetype="dotted")
+
+}
+
+pdf("./analysis/a_corr_histograms.pdf", width = 14, height = 12)
+for(i in seq(1, 36, 6)){
+multiplot(a_corr_histo[[i]], a_corr_histo[[i+1]], a_corr_histo[[i+2]],
+            a_corr_histo[[i+3]], a_corr_histo[[i+4]], a_corr_histo[[i+5]], cols = 3,
+            plot_title = "a-parameter mean recovery bias")
+}
+dev.off()
+
+pdf("./analysis/b_corr_histograms.pdf", width = 14, height = 12)
+for(i in seq(1, 36, 6)){
+  multiplot(b_corr_histo[[i]], b_corr_histo[[i+1]], b_corr_histo[[i+2]],
+            b_corr_histo[[i+3]], b_corr_histo[[i+4]], b_corr_histo[[i+5]], cols = 3,
+            plot_title = "b-parameter mean recovery bias")
+}
+dev.off()
+
+pdf("./analysis/D_corr_histograms.pdf", width = 14, height = 12)
+for(i in seq(1, 36, 6)){
+  multiplot(D_corr_histo[[i]], D_corr_histo[[i+1]], D_corr_histo[[i+2]],
+            D_corr_histo[[i+3]], D_corr_histo[[i+4]], D_corr_histo[[i+5]], cols = 3,
+            plot_title = "D-parameter mean recovery bias")
+}
+dev.off()
+
+pdf("./analysis/theta_corr_histograms.pdf", width = 14, height = 12)
+for(i in seq(1, 36, 6)){
+  multiplot(theta_corr_histo[[i]], theta_corr_histo[[i+1]], theta_corr_histo[[i+2]],
+            theta_corr_histo[[i+3]], theta_corr_histo[[i+4]], theta_corr_histo[[i+5]], cols = 3,
+            plot_title = "theta-parameter mean recovery bias")
+}
+dev.off()
+
+rm(a_corr_histo, b_corr_histo, D_corr_histo, theta_corr_histo)
+
+### CORRELATION SCATTERPLOTS ####
+#mean correlations
+a_corr_scatter <- vector("list", length(conditions))
+b_corr_scatter <- vector("list", length(conditions))
+D_corr_scatter <- vector("list", length(conditions))
+theta_corr_scatter <- vector("list", length(conditions))
+
+for(i in 1:length(conditions)){
+  rho <- grep("rho", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  rho <- gsub("rho", "", rho)
+  rho <- sprintf("%.1f", as.numeric(gsub("-", ".", rho)))
+
+  PREF <- grep("PREF", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  PREF <- gsub("PREF", "", PREF)
+  PREF <- sprintf("%.1f", as.numeric(gsub("-", ".", PREF)))
+
+  mu <- grep("mu", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  mu <- gsub("mu", "", mu)
+  mu <- sprintf("%.1f", as.numeric(gsub("-", ".", mu)))
+
+  alpha <- grep("alpha", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  alpha <- gsub("alpha", "", alpha)
+  alpha <- sprintf("%.2f", as.numeric(gsub("-", ".", alpha)))
+
+  #a_corr
+  data <- as.data.frame(est_param_means[["a_params"]])
+  data <- filter(data, V2 == conditions[i])
+  data <- data.frame(lapply(data, as.character), stringsAsFactors=FALSE)
+  data <- as.numeric(data[,1])
+  true_param <- as.data.frame(true_item_params[["a_param"]])
+  true_param <- filter(true_param, V2 == conditions[i])
+  true_param <- as.data.frame(lapply(true_param, as.character), stringsAsFactors=FALSE)
+  true_param <- as.numeric(true_param[,1])
+  data <- as.data.frame(cbind(data, true_param))
+  names(data) <- c("est_param", "true_param")
+
+  a_corr_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) +
+    geom_point(alpha = 0.65, color = colors[i]) +
+    labs(x = "True Parameter Value", y = "Estimated Parameter Value",
+         title = paste0("rho = ", rho, ", reference proportion = ", PREF,
+                        "\nmu = ", mu, ", alpha = ", alpha),
+         caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) +
+    scale_x_continuous(limits = c(0, 4), breaks = seq(0, 4, 0.5)) +
+    scale_y_continuous(limits = c(0, 4), breaks = seq(0, 4, 0.5)) +
+    theme(plot.title = element_text(hjust = 0.5, size = 12))
+
+  #b_corr
+  data <- as.data.frame(est_param_means[["b_params"]])
+  data <- filter(data, V2 == conditions[i])
+  data <- data.frame(lapply(data, as.character), stringsAsFactors=FALSE)
+  data <- as.numeric(data[,1])
+  true_param <- as.data.frame(true_item_params[["b_param"]])
+  true_param <- filter(true_param, V2 == conditions[i])
+  true_param <- as.data.frame(lapply(true_param, as.character), stringsAsFactors=FALSE)
+  true_param <- as.numeric(true_param[,1])
+  data <- as.data.frame(cbind(data, true_param))
+  names(data) <- c("est_param", "true_param")
+
+
+  b_corr_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) +
+    geom_point(alpha = 0.65, color = colors[i]) +
+    labs(x = "True Parameter Value", y = "Estimated Parameter Value",
+         title = paste0("rho = ", rho, ", reference proportion = ", PREF,
+                        "\nmu = ", mu, ", alpha = ", alpha),
+         caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) +
+    scale_x_continuous(limits = c(-4, 4), breaks = seq(-4, 4, 1)) +
+    scale_y_continuous(limits = c(-4, 4), breaks = seq(-4, 4, 1)) +
+    theme(plot.title = element_text(hjust = 0.5, size = 12))
+
+  #D_corr
+  data <- as.data.frame(est_param_means[["D_params"]])
+  data <- filter(data, V2 == conditions[i])
+  data <- data.frame(lapply(data, as.character), stringsAsFactors=FALSE)
+  data <- as.numeric(data[,1])
+  true_param <- as.data.frame(true_item_params[["dif_param"]])
+  true_param <- filter(true_param, V2 == conditions[i])
+  true_param <- as.data.frame(lapply(true_param, as.character), stringsAsFactors=FALSE)
+  true_param <- as.numeric(true_param[,1])
+  data <- as.data.frame(cbind(data, true_param))
+  names(data) <- c("est_param", "true_param")
+
+  D_corr_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) +
+    geom_point(alpha = 0.65, color = colors[i]) +
+    labs(x = "True Parameter Value", y = "Estimated Parameter Value",
+         title = paste0("rho = ", rho, ", reference proportion = ", PREF,
+                        "\nmu = ", mu, ", alpha = ", alpha),
+         caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) +
+    scale_x_continuous(limits = c(-1, 2), breaks = seq(-1, 2, 0.5)) +
+    scale_y_continuous(limits = c(-1, 2), breaks = seq(-1, 2, 0.5)) +
+    theme(plot.title = element_text(hjust = 0.5, size = 12))
+
+  #theta_corr
+  data <- as.data.frame(est_param_means[["theta"]])
+  data <- filter(data, V2 == conditions[i])
+  data <- data.frame(lapply(data, as.character), stringsAsFactors=FALSE)
+  data <- as.numeric(data[,1])
+  true_param <- as.data.frame(true_ability_params[which(true_ability_params$conditions_vec == conditions[i]),
+                                                  "true_ability.theta"])
+  true_param <- as.data.frame(lapply(true_param, as.character), stringsAsFactors=FALSE)
+  true_param <- as.numeric(true_param[,1])
+  data <- as.data.frame(cbind(data, true_param))
+  names(data) <- c("est_param", "true_param")
+
+  theta_corr_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) +
+    geom_point(alpha = 0.65, color = colors[i]) +
+    labs(x = "True Parameter Value", y = "Estimated Parameter Value",
+         title = paste0("rho = ", rho, ", reference proportion = ", PREF,
+                        "\nmu = ", mu, ", alpha = ", alpha),
+         caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) +
+    scale_x_continuous(limits = c(-4, 4), breaks = seq(-4, 4, 1)) +
+    scale_y_continuous(limits = c(-4, 4), breaks = seq(-4, 4, 1)) +
+    theme(plot.title = element_text(hjust = 0.5, size = 12))
+  
+  print(i)
+}
+
+
+pdf("./analysis/a_corr_scatterplots.pdf", width = 14, height = 12)
+for(i in seq(1, 36, 6)){
+  multiplot(a_corr_scatter[[i]], a_corr_scatter[[i+1]], a_corr_scatter[[i+2]],
+            a_corr_scatter[[i+3]], a_corr_scatter[[i+4]], a_corr_scatter[[i+5]], cols = 3,
+            plot_title = "a-parameter scatterplots")
+}
+dev.off()
+
+pdf("./analysis/b_corr_scatterplots.pdf", width = 14, height = 12)
+for(i in seq(1, 36, 6)){
+  multiplot(b_corr_scatter[[i]], b_corr_scatter[[i+1]], b_corr_scatter[[i+2]],
+            b_corr_scatter[[i+3]], b_corr_scatter[[i+4]], b_corr_scatter[[i+5]], cols = 3,
+            plot_title = "b-parameter scatterplots")
+}
+dev.off()
+
+pdf("./analysis/D_corr_scatterplots.pdf", width = 14, height = 12)
+for(i in seq(1, 36, 6)){
+  multiplot(D_corr_scatter[[i]], D_corr_scatter[[i+1]], D_corr_scatter[[i+2]],
+            D_corr_scatter[[i+3]], D_corr_scatter[[i+4]], D_corr_scatter[[i+5]], cols = 3,
+            plot_title = "D-parameter scatterplots")
+}
+dev.off()
+
+pdf("./analysis/theta_corr_scatterplots.pdf", width = 14, height = 12)
+for(i in seq(1, 36, 6)){
+  multiplot(theta_corr_scatter[[i]], theta_corr_scatter[[i+1]], theta_corr_scatter[[i+2]],
+            theta_corr_scatter[[i+3]], theta_corr_scatter[[i+4]], theta_corr_scatter[[i+5]], cols = 3,
+            plot_title = "theta-parameter scatterplots")
+}
+dev.off()
+
+rm(a_corr_scatter, b_corr_scatter, D_corr_scatter, theta_corr_scatter)
+gc()
 
 
 ### DECISION CONSISTENCY SCATTERPLOTS ####
@@ -612,30 +612,10 @@ for(j in 1:length(flag_thresholds)){
     # 
     # correct_ratio <- round((trueneg+truepos)/(trueneg+truepos+falsepos+falseneg), 3)
     
-    ggplot(data, aes(x = true_param, y = est_param, color = Decision)) +
-      geom_point() +
-      scale_x_continuous(limits = c(-1, 2), breaks = seq(-1, 2, 0.5)) +
-      scale_y_continuous(limits = c(-1, 2), breaks = seq(-1, 2, 0.5)) +
-      labs(x = "True Parameter Value", y = "Estimated Parameter Value",
-                    title = paste0("rho = ", rho, ", reference proportion = ", PREF,
-                                   "\nmu = ", mu, ", alpha = ", alpha),
-                    caption = paste0("False Pos Rate = ", sprintf("%.3f", FP_N/N),
-                                     "; Power = ", sprintf("%.3f", TP_N/N),
-                                     "; Precision = ", sprintf("%.3f", TP_N/(TP_N + FP_N)))) +
-      theme_bw() + 
-      scale_color_manual(values = c("forestgreen", "darkred")) + 
-      geom_hline(aes(yintercept = flag_amt), color = "darkgray") +
-      geom_vline(aes(xintercept = flag_amt), color = "darkgray") +
-      geom_hline(aes(yintercept = -flag_amt), color = "darkgray") +
-      geom_vline(aes(xintercept = -flag_amt), color = "darkgray") +
-      theme(legend.position = "bottom") +
-      theme(plot.title = element_text(hjust = 0.5, size = 12)) 
-    
-    
     D_decision_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param, color = Decision)) +
       geom_point() +
-      scale_x_continuous(limits = c(-1, 2), breaks = seq(-1, 2, 0.5)) +
-      scale_y_continuous(limits = c(-1, 2), breaks = seq(-1, 2, 0.5)) +
+      scale_x_continuous(limits = c(-1.2, 2), breaks = seq(-1, 2, 0.5)) +
+      scale_y_continuous(limits = c(-1.2, 2), breaks = seq(-1, 2, 0.5)) +
       labs(x = "True Parameter Value", y = "Estimated Parameter Value",
            title = paste0("rho = ", rho, ", reference proportion = ", PREF,
                           "\nmu = ", mu, ", alpha = ", alpha),
