@@ -34,7 +34,7 @@ n_people <- 1000
 #number of items
 n_items <- 60
 #number of reps
-nreps <- 5
+nreps <- 10
 #rho is the amount of DIF explained by the second-order factors - to be specified in job script
 #P_REF is the proportion of people in the reference group - to be specified in job script
 #alpha is mixture parameter - to be specified in job script
