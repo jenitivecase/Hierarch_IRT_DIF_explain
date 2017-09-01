@@ -193,6 +193,46 @@ colors <- c(rep("darkblue", 6), rep("darkred", 6), rep("darkgreen", 6),
             rep("darkorange", 6), rep("darkorchid", 6), rep("darkseagreen", 6))
 source("../multiplot_fun.R")
 
+
+as.data.frame(est_param_means[["R2"]]) %>%
+  mutate("estR2" = as.numeric(as.character(V1))) %>%
+  mutate("condition" = as.character(V2)) %>%
+  mutate("simR2" = as.numeric(gsub("-", ".", gsub("rho", "", grep("rho", unlist(strsplit(condition, "_")), value = TRUE))))^2) %>%
+  select(simR2, estR2, condition) %>%
+  ggplot(aes(x = condition, y = estR2, color = simR2)) +
+  facet_grid(. ~ simR2, scales = "free", space = "free", switch = "x") +
+  geom_jitter(height = 0, width = 0.4, show.legend = FALSE) +
+  geom_hline(aes(yintercept = simR2)) + 
+  scale_y_continuous(limits = c(0,1), breaks = c(seq(0, 1, 0.2))) +
+  theme_bw() +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        plot.title = element_text(hjust = 0.5)) + 
+  labs(x = bquote("Simulated " *~R^2* " value"), y = bquote("Estimated "*~R^2*" value"),
+       title = bquote("" *~R^2*" Recovery"))
+
+ggsave("./analysis/R2_recovery_scatter.png", width = 10, height = 6)
+
+as.data.frame(est_param_means[["R2"]]) %>%
+  mutate("estR2" = as.numeric(as.character(V1))) %>%
+  mutate("condition" = as.character(V2)) %>%
+  mutate("simR2" = as.numeric(gsub("-", ".", gsub("rho", "", grep("rho", unlist(strsplit(condition, "_")), value = TRUE))))^2) %>%
+  select(simR2, estR2, condition) %>%
+  ggplot(aes(x = estR2, fill = simR2, color = simR2)) +
+  facet_grid(simR2 ~ ., scales = "free", space = "free", switch = "y") +
+  geom_density(alpha = 0.8) +
+  geom_vline(aes(xintercept = simR2)) + 
+  scale_y_continuous(limits = c(0, 4.2), breaks = c(seq(0, 4, 1))) +
+  scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
+  theme_bw() +
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        plot.title = element_text(hjust = 0.5),
+        legend.position = "none") + 
+  labs(y = bquote("Simulated "*~R^2*" value"), x = bquote("Estimated "*~R^2*" value"),
+       title = bquote("" *~R^2*" Recovery"))
+
+ggsave("./analysis/R2_recovery_density.png", width = 10, height = 6)
+
+
 ### BIAS HISTOGRAMS####
 R2_histos <- vector("list", length(conditions))
 focmean_histos <- vector("list", length(conditions))
@@ -224,7 +264,7 @@ for(i in 1:length(conditions)){
   R2_histos[[i]] <- ggplot(data, aes(x = R2_diff)) +
     geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) +
     scale_x_continuous(limits = c(-xscale, xscale)) +
-    labs(x = "Difference in R-squared", y = "Count",
+    labs(x = bquote("Difference in " *~R^2* ""), y = "Count",
          title = paste0("rho = ", rho, ", reference proportion = ", PREF,
                         "\nmu = ", mu, ", alpha = ", alpha)) +
     theme(plot.title = element_text(hjust = 0.5, size = 12)) +
@@ -261,7 +301,7 @@ pdf("./analysis/R2_bias_histograms.pdf", width = 14, height = 12)
 for(i in seq(1, 36, 6)){
   multiplot(R2_histos[[i]], R2_histos[[i+1]], R2_histos[[i+2]],
             R2_histos[[i+3]], R2_histos[[i+4]], R2_histos[[i+5]], cols = 3,
-            plot_title = "R-squared recovery bias")
+            plot_title = bquote("" *~R^2*" recovery bias"))
 }
 dev.off()
 
