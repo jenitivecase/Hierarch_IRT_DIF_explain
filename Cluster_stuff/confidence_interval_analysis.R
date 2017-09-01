@@ -1,4 +1,3 @@
-
 param_types <- as.data.frame(unique(gsub("\\[.*", "", rownames(params_summary))))
 colnames(param_types) <- "param"
 param_types$dim <- c(rep("vec", 3), rep("scalar", 2), 
