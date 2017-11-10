@@ -91,6 +91,11 @@ names(est_param_means) <- param_means_names
 est_ability_means <- vector("list", length(ability_means_names))
 names(est_ability_means) <- ability_means_names
 
+#confidence interval files
+CI_values <- vector("list", 7)
+names(CI_values) <- c("a_param_CIs", "b_param_CIs", "D_param_CIs", "theta_param_CIs",
+                      "beta0_CIs", "beta1_CIs", "R2_CIs")
+
 for(i in 1:length(conditions)){
   correlations_conditions[[i]] <- correlation_get(conditions[i], correlation_files, work_dir)
   
@@ -111,6 +116,14 @@ for(i in 1:length(conditions)){
                                                  param_type = "true_ability",
                                                  param_name = names(true_ability_params[j]), work_dir)
   }
+  
+  
+  for(j in 1:length(CI_values)){
+    CI_values[[j]][[i]] <- est_param_means_get(conditions[i], CIs_analysis_files,
+                                        param_name = names(CI_values[j]), work_dir)
+  }  
+  
+  
 }
 
 nreps <- nrow(correlations_conditions[[1]])
@@ -125,6 +138,14 @@ for(i in 1:length(est_param_means)){
   est_param_means[[i]] <- matrix(data = c(unlist(est_param_means[[i]]), conditions_vec), ncol = 2)
 }
 
+for(i in 1:length(CI_values)){
+  param_vec_length <- nrow(CI_values[[i]][[1]])
+  conditions_vec <- NULL
+  for(j in 1:length(conditions)){
+    conditions_vec <- c(conditions_vec, rep(conditions[j], param_vec_length))
+  }
+  CI_values[[i]] <- matrix(data = c(unlist(CI_values[[i]]), conditions_vec), ncol = 2)
+}
 
 for(i in 1:length(true_item_params)){
   param_vec_length <- nrow(true_item_params[[i]][[1]])
@@ -145,16 +166,45 @@ for(i in 1:length(true_ability_params)){
 
 true_ability_params <- do.call(rbind, true_ability_params)
 
-dif_params <- as.data.frame(as.numeric(true_item_params$dif_param[,1]))
-names(dif_params) <- "D_param"
+dif_params <- as.data.frame(true_item_params$dif_param)
+names(dif_params) <- c("D_param", "condition")
+dif_params$D_param <- as.numeric(as.character(dif_params$D_param))
+dif_params$condition <- as.character(dif_params$condition)
 
-ggplot(data = dif_params, aes(x = D_param)) +
-  geom_histogram(binwidth = 0.05) +
-  labs(x = "D-parameter value", y = "Count") + 
-  theme(plot.title = element_text(hjust = 0.5)) + 
-  ggtitle("Distribution of D-parameters")
-
-ggsave("./analysis/d-param_distribution.png", width = 8, height = 8)
+pdf("./analysis/d-param_distributions.pdf")
+for(i in 1:length(conditions)){
+  temp <- dif_params[which(dif_params$condition == conditions[i]),]
+  
+  rho <- grep("rho", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  rho <- gsub("rho", "", rho)
+  rho <- sprintf("%.1f", as.numeric(gsub("-", ".", rho)))
+  
+  PREF <- grep("PREF", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  PREF <- gsub("PREF", "", PREF)
+  PREF <- sprintf("%.1f", as.numeric(gsub("-", ".", PREF)))
+  
+  mu <- grep("mu", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  mu <- gsub("mu", "", mu)
+  mu <- sprintf("%.1f", as.numeric(gsub("-", ".", mu)))
+  
+  alpha <- grep("alpha", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  alpha <- gsub("alpha", "", alpha)
+  alpha <- sprintf("%.2f", as.numeric(gsub("-", ".", alpha)))
+  
+  plot <- ggplot(data = temp, aes(x = D_param)) +
+    #geom_histogram(binwidth = 0.05) +
+    geom_density(fill = "darkgray", alpha = 0.8) +
+    labs(x = "D-parameter value", y = "Density",
+         subtitle = paste0("rho = ", rho, ", reference proportion = ", PREF,
+                           "\nmu = ", mu, ", alpha = ", alpha),
+         title = "Distribution of D-parameters") + 
+    theme(plot.title = element_text(hjust = 0.5),
+          plot.subtitle = element_text(hjust = 0.5)) +
+    scale_x_continuous(limits = c(-1.0, 1.5), breaks = seq(-1, 1.5, .5))
+  
+  print(plot)
+}
+dev.off()
 
 
 #### MEANS RECOVERY DF FORMATTING ####
@@ -187,6 +237,17 @@ means_recovery <- means_recovery[, c("rho", "PREF", "mu", "alpha", "a_corr", "b_
 
 write.csv(means_recovery, "./analysis/means_recovery.csv")
 
+#### CONFIDENCE INTERVAL PROCESSING ####
+CI_recovery <- data.frame(matrix(NA, nrow = length(conditions), ncol = length(CI_values)))
+
+names(CI_recovery) <- names(CI_values)
+for(condition in 1:length(conditions)){
+  for(param in 1:length(CI_values)){
+    CI_recovery[condition,param] <- mean(as.logical(CI_values[[param]]
+                                                    [which(CI_values[[param]][,2] == conditions[[condition]]), 1]))
+  }
+}
+write.csv(CI_recovery, "./analysis/CI_recovery.csv")
 
 #### GRAPHS ####
 colors <- c(rep("darkblue", 6), rep("darkred", 6), rep("darkgreen", 6),
