@@ -143,6 +143,7 @@ one_analysis_BUGS <- function(x, n_iter = 1000, n_burn = 300, b_dat = b.dat,
 #### PROCESSING - DATA RETRIEVAL ####
 correlation_get <- function(condition, file_list, file_loc){
   output <- readRDS(paste0(file_loc, "/", file_list[grepl(condition, file_list)]))
+  #added to remove bad first value. remove for future use
   output <- output[2:length(output)]
   
   conditions[i]
@@ -153,6 +154,7 @@ correlation_get <- function(condition, file_list, file_loc){
 
 true_param_get <- function(condition, file_list, param_type, param_name, file_loc){
   output <- readRDS(paste0(file_loc, "/", file_list[grepl(condition, file_list)]))
+  #added to remove bad first value. remove for future use
   output <- output[2:length(output)]
   
   param <- vector("list", length(output))
@@ -171,12 +173,14 @@ true_param_get <- function(condition, file_list, param_type, param_name, file_lo
 
 est_param_means_get <- function(condition, file_list, param_name, file_loc){
   output <- readRDS(paste0(file_loc, "/", file_list[grepl(condition, file_list)]))
+  #added to remove bad first value. remove for future use
   output <- output[2:length(output)]
   
   param <- lapply(output, function(x) as.data.frame(x[param_name]))
   param <- do.call(rbind, param)
   return(param)
 }
+
 
 #### GRAPHING ####
 scale_def <- function(list, column){
