@@ -1,4 +1,4 @@
-multiplot <- function(..., plotlist=NULL, file, cols=1, plot_layout=NULL, plot_title = NULL, width = unit(1, "npc"), height = unit(1, "npc")) {
+multiplot <- function(..., plotlist=NULL, file, cols=1, plot_layout=NULL, plot_title = NULL) {
   library(grid)
   
   # Make a list from the ... arguments and plotlist
@@ -28,10 +28,9 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, plot_layout=NULL, plot_t
     # Set up the page
     grid.newpage()
 
-    # Make each plot in the correct location
+    # Make each plot, in the correct location
     if(is.null(plot_title)){
-      pushViewport(viewport(width = width, height = height, default.units = "inches", 
-                            layout = grid.layout(nrow(plot_layout), ncol(plot_layout))))
+      pushViewport(viewport(layout = grid.layout(nrow(plot_layout), ncol(plot_layout))))
       
       for(i in 1:numPlots) {
         # Get the i,j matrix positions of the regions that contain this subplot
@@ -41,8 +40,7 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, plot_layout=NULL, plot_t
                                         layout.pos.col = matchidx$col))
       }
     } else {
-      pushViewport(viewport(width = width, height = height, default.units = "inches",
-                            layout = grid.layout(nrow(plot_layout), ncol(plot_layout), 
+      pushViewport(viewport(layout = grid.layout(nrow(plot_layout), ncol(plot_layout), 
                                                  heights = unit(c(1, rep(4, nrow(plot_layout)-1)), "null"))))
       
       grid.text(plot_title, gp = gpar(fontsize = 20, fontface = "bold"),
