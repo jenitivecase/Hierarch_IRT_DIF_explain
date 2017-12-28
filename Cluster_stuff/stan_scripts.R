@@ -60,7 +60,7 @@ model {
   foc_mean ~ normal(0, 4);
   beta0 ~ normal(0, 1);
   beta1 ~ normal(0, 1);
-  sigma2 ~ normal(0, 10);
+  sigma2 ~ uniform(0, 10);
 
   for(i in 1:n_observations){
     eta[i] = a[itemid[i]]*(theta[respondentid[i]] - (b[itemid[i]] + D[itemid[i]] * group_long[i]));
