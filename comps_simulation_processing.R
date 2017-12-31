@@ -20,6 +20,7 @@ library(tidyr)
 library(dplyr)
 library(openxlsx)
 library(ggplot2)
+library(rlang)
 
 source("./../functions.R")
 
@@ -27,6 +28,7 @@ source("./../functions.R")
 # files <- as.data.frame(files)
 # names(files) <- "filename"
 # files$filename <- as.character(files$filename)
+# files <- files[which(apply(X = files, MARGIN = 1, FUN = function(x){length(grep("_", unlist(strsplit(x, split = ""))))}) > 3), , drop = FALSE]
 # 
 # 
 # for(i in 1:nrow(files)){
@@ -46,13 +48,13 @@ source("./../functions.R")
 #   } else if(grepl("^est_param_means", filename_temp)){
 #     type <- "est_param_means"
 #   } else if(grepl("^est_param_summary", filename_temp)){
-#     type <- "est_param_summary" 
+#     type <- "est_param_summary"
 #   } else if(grepl("^true_params", filename_temp)){
 #     type <- "true_params"
 #   } else {
 #     type <- NA
 #   }
-#   
+# 
 #   files[i, "condition"] <- condition
 #   files[i, "type"] <- type
 # }
@@ -68,7 +70,7 @@ source("./../functions.R")
 # CIs_analysis_files <- files[which(grepl("CIs_analysis", files$filename)), "filename"]
 # 
 # params_summary_names <- readRDS("../params_summary_names.rds")
-# param_means_names <- c("a_params", "b_params", "D_params", "beta0", "beta1", "mu", 
+# param_means_names <- c("a_params", "b_params", "D_params", "beta0", "beta1", "mu",
 #                        "sigma2", "R2", "theta", "foc_mean")
 # ability_means_names <- c("theta")
 # 
@@ -179,6 +181,8 @@ source("./../functions.R")
 # saveRDS(est_param_means, "est_param_means.rds")
 # saveRDS(dif_params, "dif_params.rds")
 # saveRDS(CI_values, "CI_values.rds")
+# saveRDS(conditions, "conditions.rds")
+# saveRDS(types, "types.rds")
 
 
 #### READING IN PROCESSED DATA ####
@@ -188,8 +192,10 @@ true_ability_params <- readRDS("true_ability_params.rds")
 est_param_means <- readRDS("est_param_means.rds")
 dif_params <- readRDS("dif_params.rds")
 CI_values <- readRDS("CI_values.rds")
+conditions <- readRDS("conditions.rds")
+types <- readRDS("types.rds")
 
-#### MAKING CHARTS ####
+#### D-PARAMETER DISTRIBUTION CHARTS ####
 pdf("./analysis/d-param_distributions.pdf")
 for(i in 1:length(conditions)){
   temp <- dif_params[which(dif_params$condition == conditions[i]),]
@@ -224,6 +230,8 @@ for(i in 1:length(conditions)){
   print(plot)
 }
 dev.off()
+
+
 
 
 #### MEANS RECOVERY DF FORMATTING ####
@@ -268,10 +276,10 @@ for(condition in 1:length(conditions)){
 }
 write.csv(CI_recovery, "./analysis/CI_recovery.csv")
 
-#### GRAPHS ####
+#### R2 DENSITY PLOTS ####
 colors <- c(rep("darkblue", 6), rep("darkred", 6), rep("darkgreen", 6),
             rep("darkorange", 6), rep("darkorchid", 6), rep("darkseagreen", 6))
-source("../multiplot_fun.R")
+source("./../multiplot_fun.R")
 
 
 as.data.frame(est_param_means[["R2"]]) %>%
@@ -340,7 +348,8 @@ for(i in 1:length(conditions)){
          caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) +
     scale_x_continuous(limits = c(0, 4), breaks = seq(0, 4, 0.5)) +
     scale_y_continuous(limits = c(0, 4), breaks = seq(0, 4, 0.5)) +
-    theme(plot.title = element_text(hjust = 0.5, size = 12))
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) +
+    geom_abline(intercept = 0, slope = 1)
 
   #b_corr
   data <- as.data.frame(est_param_means[["b_params"]])
@@ -363,7 +372,8 @@ for(i in 1:length(conditions)){
          caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) +
     scale_x_continuous(limits = c(-4, 4), breaks = seq(-4, 4, 1)) +
     scale_y_continuous(limits = c(-4, 4), breaks = seq(-4, 4, 1)) +
-    theme(plot.title = element_text(hjust = 0.5, size = 12))
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) +
+    geom_abline(intercept = 0, slope = 1)
 
   #D_corr
   data <- as.data.frame(est_param_means[["D_params"]])
@@ -376,6 +386,10 @@ for(i in 1:length(conditions)){
   true_param <- as.numeric(true_param[,1])
   data <- as.data.frame(cbind(data, true_param))
   names(data) <- c("est_param", "true_param")
+  
+  mu <- unlist(strsplit(conditions[i], "_"))[3]
+  mu <- gsub("mu", "", mu)
+  mu <- as.numeric(gsub("-", ".", mu))
 
   D_corr_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param)) +
     geom_point(alpha = 0.65, color = colors[i]) +
@@ -385,7 +399,9 @@ for(i in 1:length(conditions)){
          caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) +
     scale_x_continuous(limits = c(-1, 2), breaks = seq(-1, 2, 0.5)) +
     scale_y_continuous(limits = c(-1, 2), breaks = seq(-1, 2, 0.5)) +
-    theme(plot.title = element_text(hjust = 0.5, size = 12))
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) +
+    geom_abline(intercept = 0, slope = 1) +
+    geom_vline(xintercept = UQ(mu), linetype = "dashed")
 
   #theta_corr
   data <- as.data.frame(est_param_means[["theta"]])
@@ -407,7 +423,8 @@ for(i in 1:length(conditions)){
          caption = paste0("r = ", round(cor(data$true_param, data$est_param), 3))) +
     scale_x_continuous(limits = c(-4, 4), breaks = seq(-4, 4, 1)) +
     scale_y_continuous(limits = c(-4, 4), breaks = seq(-4, 4, 1)) +
-    theme(plot.title = element_text(hjust = 0.5, size = 12))
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) +
+    geom_abline(intercept = 0, slope = 1)
   
   print(i)
 }
@@ -487,15 +504,18 @@ for(j in 1:length(flag_thresholds)){
     data <- as.data.frame(cbind(data, true_param))
     names(data) <- c("est_param", "true_param")
     
+    
     data <- data %>%
-      mutate(Decision = ifelse(abs(true_param) >= flag_amt & abs(est_param) >= flag_amt, "Correct Classification",
-                               ifelse(abs(true_param) >= flag_amt & abs(est_param) < flag_amt, "Incorrect Classification",
-                                      ifelse(abs(true_param) < flag_amt & abs(est_param) < flag_amt, "Correct Classification",
-                                             ifelse(abs(true_param) < flag_amt & abs(est_param) >= flag_amt, "Incorrect Classification", NA)))), NA) %>%
-      mutate(Decision_spec = ifelse(abs(true_param) >= flag_amt & abs(est_param), "True Positive", 
-                                    ifelse(abs(true_param) >= flag_amt & abs(est_param) < flag_amt, "False Negative", 
-                                           ifelse(abs(true_param) < flag_amt & abs(est_param) < flag_amt, "True Negative", 
-                                                  ifelse(abs(true_param) < flag_amt & abs(est_param) >= flag_amt, "False Positive", NA)))), NA)
+      mutate(Decision = case_when((abs(true_param) >= flag_amt & abs(est_param) >= flag_amt) ~ "Correct Classification",
+                                  (abs(true_param) >= flag_amt & abs(est_param) < flag_amt) ~ "Incorrect Classification",
+                                  (abs(true_param) < flag_amt & abs(est_param) < flag_amt) ~ "Correct Classification",
+                                  (abs(true_param) < flag_amt & abs(est_param) >= flag_amt) ~ "Incorrect Classification",
+                                  TRUE ~ "NA")) %>%
+      mutate(Decision_spec = case_when((abs(true_param) >= flag_amt & abs(est_param) >= flag_amt) ~ "True Positive", 
+                                       (abs(true_param) >= flag_amt & abs(est_param) < flag_amt) ~ "False Negative",
+                                       (abs(true_param) < flag_amt & abs(est_param) < flag_amt) ~ "True Negative", 
+                                       (abs(true_param) < flag_amt & abs(est_param) >= flag_amt) ~ "False Positive",
+                                       TRUE ~ "NA"))
     
     N <- nrow(data)
     TP_N <- nrow(filter(data, Decision_spec == "True Positive"))
@@ -527,7 +547,7 @@ for(j in 1:length(flag_thresholds)){
       geom_hline(aes(yintercept = -flag_amt), color = "darkgray") +
       geom_vline(aes(xintercept = -flag_amt), color = "darkgray") +
       theme(legend.position = "bottom") +
-      theme(plot.title = element_text(hjust = 0.5, size = 12)) 
+      theme(plot.title = element_text(hjust = 0.5, size = 12))
     
     print(i)
   }
