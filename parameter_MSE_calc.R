@@ -162,18 +162,47 @@ write.xlsx(big_bias_out, "./analysis/replication_parameter_estimate_bias.xlsx")
 library(car)
 library(lsr)
 
-a_MSE_anova <- lm(`a-params` ~ rho + PREF + mu + alpha, data = big_MSE_out)
-car::Anova(a_MSE_anova)
+
+big_MSE_out <- read.xlsx( "./analysis/replication_parameter_estimate_MSEs.xlsx")
+big_bias_out <- read.xlsx("./analysis/replication_parameter_estimate_bias.xlsx")
+
+a_MSE_anova <- lm(`a-params` ~ rho + PREF + mu + alpha +
+                    rho*PREF + rho*mu + rho*alpha + 
+                    PREF*mu + PREF*alpha + 
+                    mu*alpha +
+                    rho*PREF*mu + rho*PREF*alpha + rho*mu*alpha + 
+                    PREF*mu*alpha +
+                    rho*PREF*mu*alpha, data = big_MSE_out)
+anova(a_MSE_anova)
 lsr::etaSquared(a_MSE_anova)
 
-b_MSE_anova <- lm(`b-params` ~ rho + PREF + mu + alpha, data = big_MSE_out)
-car::Anova(b_MSE_anova)
+b_MSE_anova <- lm(`b-params` ~ rho + PREF + mu + alpha +
+                    rho*PREF + rho*mu + rho*alpha + 
+                    PREF*mu + PREF*alpha + 
+                    mu*alpha +
+                    rho*PREF*mu + rho*PREF*alpha + rho*mu*alpha + 
+                    PREF*mu*alpha +
+                    rho*PREF*mu*alpha, data = big_MSE_out)
+anova(b_MSE_anova)
 lsr::etaSquared(b_MSE_anova)
 
-D_MSE_anova <- lm(`D-params` ~ rho + PREF + mu + alpha, data = big_MSE_out)
-car::Anova(D_MSE_anova)
+D_MSE_anova <- lm(`D-params` ~ rho + PREF + mu + alpha +
+                    rho*PREF + rho*mu + rho*alpha + 
+                    PREF*mu + PREF*alpha + 
+                    mu*alpha +
+                    rho*PREF*mu + rho*PREF*alpha + rho*mu*alpha + 
+                    PREF*mu*alpha +
+                    rho*PREF*mu*alpha, data = big_MSE_out)
+anova(D_MSE_anova)
 lsr::etaSquared(D_MSE_anova)
 
-theta_MSE_anova <- lm(`thetas` ~ rho + PREF + mu + alpha, data = big_MSE_out)
-car::Anova(theta_MSE_anova)
+
+theta_MSE_anova <- lm(`thetas` ~ rho + PREF + mu + alpha +
+                    rho*PREF + rho*mu + rho*alpha + 
+                    PREF*mu + PREF*alpha + 
+                    mu*alpha +
+                    rho*PREF*mu + rho*PREF*alpha + rho*mu*alpha + 
+                    PREF*mu*alpha +
+                    rho*PREF*mu*alpha, data = big_MSE_out)
+anova(theta_MSE_anova)
 lsr::etaSquared(theta_MSE_anova)
