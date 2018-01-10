@@ -151,5 +151,8 @@ for(i in 1:length(conditions)){
 }
 
 
-write.xlsx(MSE_out, "./analysis/parameter_estimate_MSEs.xlsx")
-write.xlsx(MSE_out, "./analysis/parameter_estimate_bias.xlsx")
+write.xlsx(MSE_out, "./analysis/mean_parameter_estimate_MSEs.xlsx")
+write.xlsx(bias_out, "./analysis/mean_parameter_estimate_bias.xlsx")
+
+write.xlsx(big_MSE_out, "./analysis/replication_parameter_estimate_MSEs.xlsx")
+write.xlsx(big_bias_out, "./analysis/replication_parameter_estimate_bias.xlsx")
