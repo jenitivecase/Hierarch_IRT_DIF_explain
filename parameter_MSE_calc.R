@@ -156,3 +156,24 @@ write.xlsx(bias_out, "./analysis/mean_parameter_estimate_bias.xlsx")
 
 write.xlsx(big_MSE_out, "./analysis/replication_parameter_estimate_MSEs.xlsx")
 write.xlsx(big_bias_out, "./analysis/replication_parameter_estimate_bias.xlsx")
+
+
+#anovas
+library(car)
+library(lsr)
+
+a_MSE_anova <- lm(`a-params` ~ rho + PREF + mu + alpha, data = big_MSE_out)
+car::Anova(a_MSE_anova)
+lsr::etaSquared(a_MSE_anova)
+
+b_MSE_anova <- lm(`b-params` ~ rho + PREF + mu + alpha, data = big_MSE_out)
+car::Anova(b_MSE_anova)
+lsr::etaSquared(b_MSE_anova)
+
+D_MSE_anova <- lm(`D-params` ~ rho + PREF + mu + alpha, data = big_MSE_out)
+car::Anova(D_MSE_anova)
+lsr::etaSquared(D_MSE_anova)
+
+theta_MSE_anova <- lm(`thetas` ~ rho + PREF + mu + alpha, data = big_MSE_out)
+car::Anova(theta_MSE_anova)
+lsr::etaSquared(theta_MSE_anova)
