@@ -166,43 +166,140 @@ library(lsr)
 big_MSE_out <- read.xlsx( "./analysis/replication_parameter_estimate_MSEs.xlsx")
 big_bias_out <- read.xlsx("./analysis/replication_parameter_estimate_bias.xlsx")
 
-a_MSE_anova <- lm(`a-params` ~ rho + PREF + mu + alpha +
+
+a_bias_anova <- lm(`a-params` ~ rho + PREF + mu + alpha +
                     rho*PREF + rho*mu + rho*alpha + 
                     PREF*mu + PREF*alpha + 
                     mu*alpha +
                     rho*PREF*mu + rho*PREF*alpha + rho*mu*alpha + 
                     PREF*mu*alpha +
-                    rho*PREF*mu*alpha, data = big_MSE_out)
-anova(a_MSE_anova)
-lsr::etaSquared(a_MSE_anova)
+                    rho*PREF*mu*alpha, data = big_bias_out)
+a_bias_anova_results <- as.data.frame(anova(a_bias_anova)) %>% 
+  tibble::rownames_to_column("Predictor")
+a_bias_anova_effects <- as.data.frame(lsr::etaSquared(a_bias_anova))
+
+a_bias_anova_out <- cbind(a_bias_anova_results, 
+                          rbind(a_bias_anova_effects, rep(NA, ncol(a_bias_anova_effects))))
+
+b_bias_anova <- lm(`b-params` ~ rho + PREF + mu + alpha +
+                    rho*PREF + rho*mu + rho*alpha + 
+                    PREF*mu + PREF*alpha + 
+                    mu*alpha +
+                    rho*PREF*mu + rho*PREF*alpha + rho*mu*alpha + 
+                    PREF*mu*alpha +
+                    rho*PREF*mu*alpha, data = big_bias_out)
+b_bias_anova_results <- as.data.frame(anova(b_bias_anova)) %>% 
+  tibble::rownames_to_column("Predictor")
+b_bias_anova_effects <- as.data.frame(lsr::etaSquared(b_bias_anova))
+
+b_bias_anova_out <- cbind(b_bias_anova_results, 
+                          rbind(b_bias_anova_effects, rep(NA, ncol(b_bias_anova_effects))))
+
+D_bias_anova <- lm(`D-params` ~ rho + PREF + mu + alpha +
+                    rho*PREF + rho*mu + rho*alpha + 
+                    PREF*mu + PREF*alpha + 
+                    mu*alpha +
+                    rho*PREF*mu + rho*PREF*alpha + rho*mu*alpha + 
+                    PREF*mu*alpha +
+                    rho*PREF*mu*alpha, data = big_bias_out)
+D_bias_anova_results <- as.data.frame(anova(D_bias_anova)) %>% 
+  tibble::rownames_to_column("Predictor")
+D_bias_anova_effects <- as.data.frame(lsr::etaSquared(D_bias_anova))
+
+D_bias_anova_out <- cbind(D_bias_anova_results, 
+                          rbind(D_bias_anova_effects, rep(NA, ncol(D_bias_anova_effects))))
+
+theta_bias_anova <- lm(`thetas` ~ rho + PREF + mu + alpha +
+                        rho*PREF + rho*mu + rho*alpha + 
+                        PREF*mu + PREF*alpha + 
+                        mu*alpha +
+                        rho*PREF*mu + rho*PREF*alpha + rho*mu*alpha + 
+                        PREF*mu*alpha +
+                        rho*PREF*mu*alpha, data = big_bias_out)
+theta_bias_anova_results <- as.data.frame(anova(theta_bias_anova)) %>% 
+  tibble::rownames_to_column("Predictor")
+theta_bias_anova_effects <- as.data.frame(lsr::etaSquared(theta_bias_anova))
+
+theta_bias_anova_out <- cbind(theta_bias_anova_results, 
+                          rbind(theta_bias_anova_effects, rep(NA, ncol(theta_bias_anova_effects))))
+
+wb <- createWorkbook()
+addWorksheet(wb, "a_bias_anova")
+writeData(wb, sheet = "a_bias_anova", a_bias_anova_out)
+addWorksheet(wb, "b_bias_anova")
+writeData(wb, sheet = "b_bias_anova", b_bias_anova_out)
+addWorksheet(wb, "D_bias_anova")
+writeData(wb, sheet = "D_bias_anova", D_bias_anova_out)
+addWorksheet(wb, "theta_bias_anova")
+writeData(wb, sheet = "theta_bias_anova", theta_bias_anova_out)
+saveWorkbook(wb, "./analysis/bias_anova_results.xlsx", overwrite = TRUE)
+
+
+
+
+a_MSE_anova <- lm(`a-params` ~ rho + PREF + mu + alpha +
+                     rho*PREF + rho*mu + rho*alpha + 
+                     PREF*mu + PREF*alpha + 
+                     mu*alpha +
+                     rho*PREF*mu + rho*PREF*alpha + rho*mu*alpha + 
+                     PREF*mu*alpha +
+                     rho*PREF*mu*alpha, data = big_MSE_out)
+a_MSE_anova_results <- as.data.frame(anova(a_MSE_anova)) %>% 
+  tibble::rownames_to_column("Predictor")
+a_MSE_anova_effects <- as.data.frame(lsr::etaSquared(a_MSE_anova))
+
+a_MSE_anova_out <- cbind(a_MSE_anova_results, 
+                          rbind(a_MSE_anova_effects, rep(NA, ncol(a_MSE_anova_effects))))
 
 b_MSE_anova <- lm(`b-params` ~ rho + PREF + mu + alpha +
-                    rho*PREF + rho*mu + rho*alpha + 
-                    PREF*mu + PREF*alpha + 
-                    mu*alpha +
-                    rho*PREF*mu + rho*PREF*alpha + rho*mu*alpha + 
-                    PREF*mu*alpha +
-                    rho*PREF*mu*alpha, data = big_MSE_out)
-anova(b_MSE_anova)
-lsr::etaSquared(b_MSE_anova)
+                     rho*PREF + rho*mu + rho*alpha + 
+                     PREF*mu + PREF*alpha + 
+                     mu*alpha +
+                     rho*PREF*mu + rho*PREF*alpha + rho*mu*alpha + 
+                     PREF*mu*alpha +
+                     rho*PREF*mu*alpha, data = big_MSE_out)
+b_MSE_anova_results <- as.data.frame(anova(b_MSE_anova)) %>% 
+  tibble::rownames_to_column("Predictor")
+b_MSE_anova_effects <- as.data.frame(lsr::etaSquared(b_MSE_anova))
+
+b_MSE_anova_out <- cbind(b_MSE_anova_results, 
+                          rbind(b_MSE_anova_effects, rep(NA, ncol(b_MSE_anova_effects))))
 
 D_MSE_anova <- lm(`D-params` ~ rho + PREF + mu + alpha +
-                    rho*PREF + rho*mu + rho*alpha + 
-                    PREF*mu + PREF*alpha + 
-                    mu*alpha +
-                    rho*PREF*mu + rho*PREF*alpha + rho*mu*alpha + 
-                    PREF*mu*alpha +
-                    rho*PREF*mu*alpha, data = big_MSE_out)
-anova(D_MSE_anova)
-lsr::etaSquared(D_MSE_anova)
+                     rho*PREF + rho*mu + rho*alpha + 
+                     PREF*mu + PREF*alpha + 
+                     mu*alpha +
+                     rho*PREF*mu + rho*PREF*alpha + rho*mu*alpha + 
+                     PREF*mu*alpha +
+                     rho*PREF*mu*alpha, data = big_MSE_out)
+D_MSE_anova_results <- as.data.frame(anova(D_MSE_anova)) %>% 
+  tibble::rownames_to_column("Predictor")
+D_MSE_anova_effects <- as.data.frame(lsr::etaSquared(D_MSE_anova))
 
+D_MSE_anova_out <- cbind(D_MSE_anova_results, 
+                          rbind(D_MSE_anova_effects, rep(NA, ncol(D_MSE_anova_effects))))
 
 theta_MSE_anova <- lm(`thetas` ~ rho + PREF + mu + alpha +
-                    rho*PREF + rho*mu + rho*alpha + 
-                    PREF*mu + PREF*alpha + 
-                    mu*alpha +
-                    rho*PREF*mu + rho*PREF*alpha + rho*mu*alpha + 
-                    PREF*mu*alpha +
-                    rho*PREF*mu*alpha, data = big_MSE_out)
-anova(theta_MSE_anova)
-lsr::etaSquared(theta_MSE_anova)
+                         rho*PREF + rho*mu + rho*alpha + 
+                         PREF*mu + PREF*alpha + 
+                         mu*alpha +
+                         rho*PREF*mu + rho*PREF*alpha + rho*mu*alpha + 
+                         PREF*mu*alpha +
+                         rho*PREF*mu*alpha, data = big_MSE_out)
+theta_MSE_anova_results <- as.data.frame(anova(theta_MSE_anova)) %>% 
+  tibble::rownames_to_column("Predictor")
+theta_MSE_anova_effects <- as.data.frame(lsr::etaSquared(theta_MSE_anova))
+
+theta_MSE_anova_out <- cbind(theta_MSE_anova_results, 
+                              rbind(theta_MSE_anova_effects, rep(NA, ncol(theta_MSE_anova_effects))))
+
+wb <- createWorkbook()
+addWorksheet(wb, "a_MSE_anova")
+writeData(wb, sheet = "a_MSE_anova", a_MSE_anova_out)
+addWorksheet(wb, "b_MSE_anova")
+writeData(wb, sheet = "b_MSE_anova", b_MSE_anova_out)
+addWorksheet(wb, "D_MSE_anova")
+writeData(wb, sheet = "D_MSE_anova", D_MSE_anova_out)
+addWorksheet(wb, "theta_MSE_anova")
+writeData(wb, sheet = "theta_MSE_anova", theta_MSE_anova_out)
+saveWorkbook(wb, "./analysis/MSE_anova_results.xlsx", overwrite = TRUE)
