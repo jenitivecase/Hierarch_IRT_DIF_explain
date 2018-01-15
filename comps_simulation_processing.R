@@ -473,7 +473,9 @@ flag_thresholds <- c(.5, .75, 1)
 for(j in 1:length(flag_thresholds)){
   flag_amt <- flag_thresholds[j]
   D_decision_scatter <- vector("list", length(conditions))
-  dec_consist_out <- createWorkbook()
+
+  dec_consist <- data.frame(matrix(NA, ncol = 7, nrow = length(conditions)))
+  names(dec_consist) <- c("rho", "PREF", "mu", "alpha", "FP_rate", "Power", "Precision")
   
   for(i in 1:length(conditions)){
     rho <- grep("rho", unlist(strsplit(conditions[i], "_")), value = TRUE)
@@ -521,14 +523,10 @@ for(j in 1:length(flag_thresholds)){
     TP_N <- nrow(filter(data, Decision_spec == "True Positive"))
     FP_N <- nrow(filter(data, Decision_spec == "False Positive"))
       
-    # dec_consist <- matrix(c(truepos, falsepos, falseneg, trueneg), nrow = 2, byrow = TRUE)
-    # colnames(dec_consist) <- c("True_DIF", "True_NoDIF")
-    # rownames(dec_consist) <- c("Est_DIF", "Est_NoDIF")
-    # 
-    # addWorksheet(dec_consist_out, conditions[[i]])
-    # writeData(dec_consist_out, sheet = i, dec_consist, rowNames = TRUE)
-    # 
-    # correct_ratio <- round((trueneg+truepos)/(trueneg+truepos+falsepos+falseneg), 3)
+    dec_consist[i, ] <- c(rho, PREF, mu, alpha, 
+                          sprintf("%.3f", FP_N/N), 
+                          sprintf("%.3f", TP_N/N), 
+                          sprintf("%.3f", TP_N/(TP_N + FP_N)))
     
     D_decision_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param, color = Decision)) +
       geom_point() +
@@ -560,8 +558,7 @@ for(j in 1:length(flag_thresholds)){
   }
   dev.off()
   
-  # saveWorkbook(dec_consist_out, paste0(flag_amt, "_decision_consistency.xlsx"), overwrite = TRUE)
+  write.xlsx(dec_consist, paste0("./analysis/", gsub("\\.", "-", flag_amt), "_decision_consistency.xlsx"))
 }
-
 
 
