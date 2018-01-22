@@ -196,7 +196,12 @@ conditions <- readRDS("conditions.rds")
 types <- readRDS("types.rds")
 
 #### D-PARAMETER DISTRIBUTION CHARTS ####
-pdf("./analysis/d-param_distributions.pdf")
+
+colors <- c(rep("darkblue", 6), rep("darkred", 6), rep("darkgreen", 6),
+            rep("darkorange", 6), rep("darkorchid", 6), rep("darkseagreen", 6))
+source("./../multiplot_fun.R")
+
+d_param_density <- vector("list", length(conditions))
 for(i in 1:length(conditions)){
   temp <- dif_params[which(dif_params$condition == conditions[i]),]
   
@@ -216,18 +221,22 @@ for(i in 1:length(conditions)){
   alpha <- gsub("alpha", "", alpha)
   alpha <- sprintf("%.2f", as.numeric(gsub("-", ".", alpha)))
   
-  plot <- ggplot(data = temp, aes(x = D_param)) +
+  d_param_density[[i]] <- ggplot(data = temp, aes(x = D_param)) +
     #geom_histogram(binwidth = 0.05) +
     geom_density(fill = "darkgray", alpha = 0.8) +
     labs(x = "D-parameter value", y = "Density",
-         subtitle = paste0("rho = ", rho, ", reference proportion = ", PREF,
-                           "\nmu = ", mu, ", alpha = ", alpha),
-         title = "Distribution of D-parameters") + 
-    theme(plot.title = element_text(hjust = 0.5),
-          plot.subtitle = element_text(hjust = 0.5)) +
+         title = paste0("rho = ", rho, ", reference proportion = ", PREF,
+                           "\nmu = ", mu, ", alpha = ", alpha)) + 
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) +
     scale_x_continuous(limits = c(-1.0, 1.5), breaks = seq(-1, 1.5, .5))
   
-  print(plot)
+}
+
+pdf("./analysis/d-param_distributions.pdf", width = 14, height = 12)
+for(i in seq(1, 36, 6)){
+  multiplot(d_param_density[[i]], d_param_density[[i+1]], d_param_density[[i+2]],
+            d_param_density[[i+3]], d_param_density[[i+4]], d_param_density[[i+5]], cols = 3,
+            plot_title = "D-parameter mixture distributions")
 }
 dev.off()
 
