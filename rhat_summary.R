@@ -148,7 +148,7 @@ pdf("./analysis/Rhat_max_histograms.pdf", width = 10, height = 10)
 for(i in seq(1, 36, 6)){
   multiplot(Rhat_max_histo[[i]], Rhat_max_histo[[i+1]], Rhat_max_histo[[i+2]],
             Rhat_max_histo[[i+3]], Rhat_max_histo[[i+4]], Rhat_max_histo[[i+5]], cols = 3,
-            plot_title = "Histogram of Maximum R-hat values")
+            plot_title = "Histogram of maximum R-hat values")
 }
 dev.off()
 
@@ -156,6 +156,6 @@ pdf("./analysis/Rhat_mean_histograms.pdf", width = 10, height = 10)
 for(i in seq(1, 36, 6)){
   multiplot(Rhat_mean_histo[[i]], Rhat_mean_histo[[i+1]], Rhat_mean_histo[[i+2]],
             Rhat_mean_histo[[i+3]], Rhat_mean_histo[[i+4]], Rhat_mean_histo[[i+5]], cols = 3,
-            plot_title = "Histogram of meanimum R-hat values")
+            plot_title = "Histogram of mean R-hat values")
 }
 dev.off()
