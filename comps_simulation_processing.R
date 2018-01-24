@@ -312,6 +312,98 @@ as.data.frame(est_param_means[["R2"]]) %>%
 ggsave("./analysis/R2_recovery_density.png", width = 10, height = 6)
 
 
+### BIAS HISTOGRAMS####
+R2_histos <- vector("list", length(conditions))
+focmean_histos <- vector("list", length(conditions))
+refmean_histos <- vector("list", length(conditions))
+
+#mean correlations
+for(i in 1:length(conditions)){
+  data <- as.data.frame(correlations_conditions[[paste0(conditions[i])]])
+  rho <- grep("rho", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  rho <- gsub("rho", "", rho)
+  rho <- sprintf("%.1f", as.numeric(gsub("-", ".", rho)))
+  
+  PREF <- grep("PREF", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  PREF <- gsub("PREF", "", PREF)
+  PREF <- sprintf("%.1f", as.numeric(gsub("-", ".", PREF)))
+  
+  mu <- grep("mu", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  mu <- gsub("mu", "", mu)
+  mu <- sprintf("%.1f", as.numeric(gsub("-", ".", mu)))
+  
+  alpha <- grep("alpha", unlist(strsplit(conditions[i], "_")), value = TRUE)
+  alpha <- gsub("alpha", "", alpha)
+  alpha <- sprintf("%.2f", as.numeric(gsub("-", ".", alpha)))
+  
+  #R2 difference
+  xscale <- scale_def(correlations_conditions, "R2_diff")
+  increment <- (xscale*2)/25
+  
+  R2_histos[[i]] <- ggplot(data, aes(x = R2_diff)) +
+    geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) +
+    scale_x_continuous(limits = c(-xscale, xscale)) +
+    labs(x = bquote("Difference in " *~R^2* ""), y = "Count",
+         title = paste0("rho = ", rho, ", reference proportion = ", PREF,
+                        "\nmu = ", mu, ", alpha = ", alpha)) +
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) +
+    geom_vline(xintercept = mean(data$R2_diff), color = "black", linetype="dotted")
+  
+  #focal mean difference
+  xscale <- scale_def(correlations_conditions, "foc_mean_diff")
+  increment <- (xscale*2)/25
+  
+  focmean_histos[[i]] <- ggplot(data, aes(x = foc_mean_diff)) +
+    geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) +
+    scale_x_continuous(limits = c(-xscale, xscale)) +
+    labs(x = "Difference in focal group mean", y = "Count",
+         title = paste0("rho = ", rho, ", reference proportion = ", PREF,
+                        "\nmu = ", mu, ", alpha = ", alpha)) +
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) +
+    geom_vline(xintercept = mean(data$foc_mean_diff), color = "black", linetype="dotted")
+  
+  #reference mean difference
+  xscale <- scale_def(correlations_conditions, "ref_mean_diff")
+  increment <- (xscale*2)/25
+  
+  refmean_histos[[i]] <- ggplot(data, aes(x = ref_mean_diff)) +
+    geom_histogram(binwidth = increment, alpha = 0.65, fill = colors[i]) +
+    scale_x_continuous(limits = c(-xscale, xscale)) +
+    labs(x = "Difference in reference group mean", y = "Count",
+         title = paste0("rho = ", rho, ", reference proportion = ", PREF,
+                        "\nmu = ", mu, ", alpha = ", alpha)) +
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) +
+    geom_vline(xintercept = mean(data$ref_mean_diff), color = "black", linetype="dotted")
+}
+
+pdf("./analysis/R2_bias_histograms.pdf", width = 14, height = 12)
+for(i in seq(1, 36, 6)){
+  multiplot(R2_histos[[i]], R2_histos[[i+1]], R2_histos[[i+2]],
+            R2_histos[[i+3]], R2_histos[[i+4]], R2_histos[[i+5]], cols = 3,
+            plot_title = bquote("" *~R^2*" recovery bias"))
+}
+dev.off()
+
+pdf("./analysis/focmean_bias_histograms.pdf", width = 14, height = 12)
+for(i in seq(1, 36, 6)){
+  multiplot(focmean_histos[[i]], focmean_histos[[i+1]], focmean_histos[[i+2]],
+            focmean_histos[[i+3]], focmean_histos[[i+4]], focmean_histos[[i+5]], cols = 3,
+            plot_title = "Focal mean recovery bias")
+}
+dev.off()
+
+
+pdf("./analysis/refmean_bias_histograms.pdf", width = 14, height = 12)
+for(i in seq(1, 36, 6)){
+  multiplot(refmean_histos[[i]], refmean_histos[[i+1]], refmean_histos[[i+2]],
+            refmean_histos[[i+3]], refmean_histos[[i+4]], refmean_histos[[i+5]], cols = 3,
+            plot_title = "Reference mean recovery bias")
+}
+dev.off()
+
+rm(R2_histos, focmean_histos, refmean_histos)
+
+
 
 ### CORRELATION SCATTERPLOTS ####
 #mean correlations
