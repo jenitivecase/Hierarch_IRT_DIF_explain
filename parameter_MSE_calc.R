@@ -65,7 +65,7 @@ for(i in 1:length(conditions)){
   data <- as.data.frame(cbind(data, true_param))
   names(data) <- c("est_param", "true_param")
   
-  data$bias <- data$true_param - data$est_param
+  data$bias <- data$est_param - data$true_param
 
   for(repl in 1:100){
     big_bias_out[indices[repl], "a-params"] <- mean(data[c((item_seq[repl]+1):(item_seq[(repl+1)])),
@@ -89,7 +89,7 @@ for(i in 1:length(conditions)){
   data <- as.data.frame(cbind(data, true_param))
   names(data) <- c("est_param", "true_param")
   
-  data$bias <- data$true_param - data$est_param
+  data$bias <- data$est_param - data$true_param
   
   for(repl in 1:100){
     big_bias_out[indices[repl], "b-params"] <- mean(data[c((item_seq[repl]+1):(item_seq[(repl+1)])),
@@ -113,7 +113,7 @@ for(i in 1:length(conditions)){
   data <- as.data.frame(cbind(data, true_param))
   names(data) <- c("est_param", "true_param")
   
-  data$bias <- data$true_param - data$est_param
+  data$bias <- data$est_param - data$true_param
 
   for(repl in 1:100){
     big_bias_out[indices[repl], "D-params"] <- mean(data[c((item_seq[repl]+1):(item_seq[(repl+1)])),
@@ -137,7 +137,7 @@ for(i in 1:length(conditions)){
   data <- as.data.frame(cbind(data, true_param))
   names(data) <- c("est_param", "true_param")
   
-  data$bias <- data$true_param - data$est_param
+  data$bias <- data$est_param - data$true_param
 
   for(repl in 1:100){
     big_bias_out[indices[repl], "thetas"] <- mean(data[c((theta_seq[repl]+1):(theta_seq[(repl+1)])),
