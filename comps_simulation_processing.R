@@ -623,6 +623,7 @@ for(j in 1:length(flag_thresholds)){
     N <- nrow(data)
     TP_N <- nrow(filter(data, Decision_spec == "True Positive"))
     FP_N <- nrow(filter(data, Decision_spec == "False Positive"))
+    FN_N <- nrow(filter(data, Decision_spec == "False Negative"))
       
     dec_consist[i, ] <- c(rho, PREF, mu, alpha, 
                           sprintf("%.3f", FP_N/N), 
@@ -636,8 +637,8 @@ for(j in 1:length(flag_thresholds)){
       labs(x = "True Parameter Value", y = "Estimated Posterior Mean",
            title = paste0("rho = ", rho, ", reference proportion = ", PREF,
                           "\nmu = ", mu, ", alpha = ", alpha),
-           caption = paste0("False Pos Rate = ", sprintf("%.3f", FP_N/N),
-                            "; Power = ", sprintf("%.3f", TP_N/N),
+           caption = paste0("False Pos Rate = ", sprintf("%.3f", FP_N/(TP_N + FP_N)),
+                            "; Power = ", sprintf("%.3f", TP_N/(TP_N + FN_N)),
                             "; Precision = ", sprintf("%.3f", TP_N/(TP_N + FP_N)))) +
       theme_bw() + 
       scale_color_manual(values = c("forestgreen", "darkred")) + 
