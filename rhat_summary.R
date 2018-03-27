@@ -121,7 +121,7 @@ for(file in 1:length(files)){
                         "\nmu = ", mu, ", alpha = ", alpha)) + 
     theme(plot.title = element_text(hjust = 0.5, size = 12)) + 
     geom_vline(xintercept = mean(Rhat_values$Rhat_max), color = "black", linetype="dotted")+
-    geom_vline(xintercept = 1.2, color = "black")
+    geom_vline(xintercept = 1.1, color = "black")
   
   Rhat_mean_histo[[file]] <- ggplot(Rhat_values, aes(x = Rhat_mean)) + 
     geom_histogram(binwidth = 0.02, alpha = 0.65, fill = colors[file]) + 
@@ -130,16 +130,16 @@ for(file in 1:length(files)){
          title = paste0("rho = ", rho, ", reference proportion = ", PREF,
                         "\nmu = ", mu, ", alpha = ", alpha)) + 
     theme(plot.title = element_text(hjust = 0.5, size = 12)) + 
-    geom_vline(xintercept = mean(Rhat_values$Rhat_mean), color = "black", linetype="dotted") +
-    geom_vline(xintercept = 1.2, color = "black")
+    # geom_vline(xintercept = mean(Rhat_values$Rhat_mean), color = "black", linetype="dotted") +
+    geom_vline(xintercept = 1.1, color = "black")
   
   rhat_props[file, c("rho", "PREF", "mu", "alpha")] <- c(rho, PREF, mu, alpha)
-  rhat_props[file, "max_rhat_prop"] <- nrow(Rhat_values[which(Rhat_values$Rhat_max <= 1.2), ])/nrow(Rhat_values)
-  rhat_props[file, "mean_rhat_prop"] <- nrow(Rhat_values[which(Rhat_values$Rhat_mean <= 1.2), ])/nrow(Rhat_values)
+  rhat_props[file, "max_rhat_prop"] <- nrow(Rhat_values[which(Rhat_values$Rhat_max <= 1.1), ])/nrow(Rhat_values)
+  rhat_props[file, "mean_rhat_prop"] <- nrow(Rhat_values[which(Rhat_values$Rhat_mean <= 1.1), ])/nrow(Rhat_values)
   
-  print(paste0(condition, " number of mean R-hat values < 1.2 ", nrow(Rhat_values[which(Rhat_values$Rhat_mean <= 1.2), ])/nrow(Rhat_values)))
+  print(paste0(condition, " number of mean R-hat values < 1.1 ", nrow(Rhat_values[which(Rhat_values$Rhat_mean <= 1.1), ])/nrow(Rhat_values)))
   
-  print(paste0(condition, " number of max R-hat values < 1.2 ", nrow(Rhat_values[which(Rhat_values$Rhat_max <= 1.2), ])/nrow(Rhat_values)))
+  print(paste0(condition, " number of max R-hat values < 1.1 ", nrow(Rhat_values[which(Rhat_values$Rhat_max <= 1.1), ])/nrow(Rhat_values)))
 }
 
 write.xlsx(rhat_props, "./analysis/Rhat_proportions.xlsx")
