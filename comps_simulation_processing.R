@@ -624,10 +624,11 @@ for(j in 1:length(flag_thresholds)){
     TP_N <- nrow(filter(data, Decision_spec == "True Positive"))
     FP_N <- nrow(filter(data, Decision_spec == "False Positive"))
     FN_N <- nrow(filter(data, Decision_spec == "False Negative"))
+    
       
     dec_consist[i, ] <- c(rho, PREF, mu, alpha, 
-                          sprintf("%.3f", FP_N/N), 
-                          sprintf("%.3f", TP_N/N), 
+                          sprintf("%.3f", FP_N/(TP_N + FP_N)), 
+                          sprintf("%.3f", TP_N/(TP_N + FN_N)), 
                           sprintf("%.3f", TP_N/(TP_N + FP_N)))
     
     D_decision_scatter[[i]] <- ggplot(data, aes(x = true_param, y = est_param, color = Decision)) +
