@@ -10,7 +10,16 @@ data {
   int<lower=0, upper=1> response[n_observations];
   int<lower=0, upper=1> group_long[n_observations];
   vector[n_people] group;
-  vector[n_items] DIFpredict;
+  vector[n_items] words;
+  vector[n_items] sentences;
+  vector[n_items] ave_word_sent;
+  vector[n_items] bigword;
+  vector[n_items] nonmath_word;
+  vector[n_items] prep;
+  vector[n_items] passive;
+  vector[n_items] confuse;
+  vector[n_items] schematic;
+  vector[n_items] confuseXschem;
 }
 
 parameters {
@@ -20,6 +29,15 @@ parameters {
   vector[n_items] D_raw;
   real beta0;
   real beta1;
+  real beta2;
+  real beta3;
+  real beta4;
+  real beta5;
+  real beta6;
+  real beta7;
+  real beta8;
+  real beta9;
+  real beta10;
   real<lower=0> sigma2;
   real foc_mean;
 //  real D[n_items];
@@ -36,7 +54,7 @@ transformed parameters {
   mu_theta = foc_mean*group;
   
   for (j in 1:n_items) {
-    mu[j] = beta0 + beta1*DIFpredict[j];
+    mu[j] = beta0 + beta1*words[j] + beta2*sentences[j] + beta3*ave_word_sent[j] + beta4*bigword[j] + beta5*nonmath_word[j] + beta6*prep[j] + beta7*passive[j] + beta8*confuse[j] + beta9*schematic[j] + beta10*confuseXschem[j];
   }
 
   D = mu + sigma2*D_raw;
@@ -60,6 +78,15 @@ model {
   foc_mean ~ normal(0, 4);
   beta0 ~ normal(0, 1);
   beta1 ~ normal(0, 1);
+  beta2 ~ normal(0, 1);
+  beta3 ~ normal(0, 1);
+  beta4 ~ normal(0, 1);
+  beta5 ~ normal(0, 1);
+  beta6 ~ normal(0, 1);
+  beta7 ~ normal(0, 1);
+  beta8 ~ normal(0, 1);
+  beta9 ~ normal(0, 1);
+  beta10 ~ normal(0, 1);
   sigma2 ~ uniform(0, 10);
 
   for(i in 1:n_observations){
