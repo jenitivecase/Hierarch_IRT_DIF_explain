@@ -65,3 +65,6 @@ precomp_model <- stan_model(stanc_ret = precomp)
 
 analysis <- sampling(precomp_model, data = b.dat_long,
                      iter = 15000, warmup = 5000, chains = 2, verbose = FALSE, cores = 2)
+
+
+saveRDS(analysis, paste0(work_dir, "realdata_analysis_object.rds"))
