@@ -7,10 +7,15 @@ date <- format.Date(Sys.Date(), "%Y%m%d")
 options(scipen = 999)
 
 needed_packages <- c("tidyr", "dplyr", "rstan", "rstudioapi", "robustbase", "portableParallelSeeds")
-for(i in 1:length(needed_packages)){
-  library(needed_packages[i], character.only = TRUE)
+
+load_packages <- function(x) {
+  if (!(x %in% rownames(installed.packages()))) {
+    install.packages(x)
+  }
+  suppressPackageStartupMessages(require(x, character.only = TRUE))
 }
 
+sapply(needed_packages, load_packages)
 
 #### DATA SETUP ####
 responses <- read.csv(paste0(work_dir, "data.csv"))
@@ -64,7 +69,7 @@ precomp_model <- stan_model(stanc_ret = precomp)
 #### DATA SAVE SETUP ####
 
 analysis <- sampling(precomp_model, data = b.dat_long,
-                     iter = 15000, warmup = 5000, chains = 2, verbose = FALSE, cores = 2)
+                     iter = 20000, warmup = 10000, chains = 2, verbose = FALSE, cores = 2)
 
 
 saveRDS(analysis, paste0(work_dir, "realdata_analysis_object.rds"))
